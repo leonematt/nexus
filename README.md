@@ -1,2 +1,2 @@
-# opencd
-Open Compute Device
+# nexus
+Nexus Device Interface
