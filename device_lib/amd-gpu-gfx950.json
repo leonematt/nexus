@@ -1,0 +1,238 @@
+{
+  "name": "MI350",
+  "vendor": "AMD",
+  "generation": 0,
+  "releaseYear": 0,
+  "fabricationProcess": {
+    "processNode": 0.0,
+    "manufacturer": "ABCDEFGHIJKL",
+    "technology": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  },
+  "computeUnits": {
+    "name": "ABCDEFGHIJKLMNOPQRS",
+    "maxPerGPU": 0,
+    "subUnits": [
+      {
+        "name": "ABCDEFGHIJKLMN",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEF"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOP",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGH"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQRSTUVWXYZA",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGHIJKLMNOPQRSTUVWXY"
+      },
+      {
+        "name": "ABCDE",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGHIJKLMNOPQRS"
+      },
+      {
+        "name": "ABCDEFGHIJKLMN",
+        "countPerComputeUnit": 0,
+        "description": "ABCDE"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQRSTUVW",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGHIJKLMNOPQRSTUV"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGHIJKLMN"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB",
+        "countPerComputeUnit": 0,
+        "description": "ABCDEFGHIJKLMNOPQ"
+      }
+    ]
+  },
+  "shaderModel": {
+    "directX": "ABCDEFGHIJKLMNOPQ",
+    "vulkan": "ABCDEFGHIJKLMNOPQ",
+    "openGL": "ABCDEFGHIJKLMNOPQRSTUV",
+    "openCL": "ABCD",
+    "metal": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  },
+  "memorySubsystem": {
+    "supportedMemoryTypes": [
+      "Other",
+      "Other",
+      "HBM2",
+      "GDDR6"
+    ],
+    "maxMemoryBandwidth": 0.0,
+    "maxMemorySize": 0,
+    "maxBusWidth": 0,
+    "cacheHierarchy": [
+      {
+        "level": "ABCDEFGHI",
+        "sizePerUnit": 0,
+        "totalSize": 0,
+        "description": "ABCDEFGH"
+      },
+      {
+        "level": "ABCDEFGHIJKLMNOPQRS",
+        "sizePerUnit": 0,
+        "totalSize": 0,
+        "description": "ABCDEFGHIJKLMNOPQRS"
+      },
+      {
+        "level": "ABCDE",
+        "sizePerUnit": 0,
+        "totalSize": 0,
+        "description": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB"
+      }
+    ]
+  },
+  "specializedHardware": {
+    "rayTracingAccelerators": {
+      "present": false,
+      "name": "ABCD",
+      "countPerComputeUnit": 0,
+      "performance": {
+        "raysPerSecond": 0.0
+      }
+    },
+    "aiAccelerators": {
+      "present": true,
+      "name": "ABCDEFGHIJKLMNO",
+      "countPerComputeUnit": 0,
+      "supportedPrecisions": [
+        "INT4"
+      ],
+      "performance": {
+        "fp16TopsPerGPU": 0.0,
+        "int8TopsPerGPU": 0.0
+      }
+    },
+    "videoCodecs": {
+      "encoders": [
+        {
+          "codec": "AV1",
+          "maxResolution": "ABCDEFGHIJKLMN",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "ABCDEFGHIJKL",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "VP9",
+          "maxResolution": "ABCDEFGHIJKLMNOPQRSTUVWX",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        }
+      ],
+      "decoders": [
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "H.264",
+          "maxResolution": "ABCDEFGHIJKLMNOP",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "ABCDEFGHIJKLMNOPQRSTUVWX",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "Other",
+          "maxResolution": "ABCDEFGHI",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "ABCDEFGHIJKLMN",
+          "maxBitrate": 0,
+          "maxFPS": 0
+        }
+      ]
+    }
+  },
+  "powerEfficiency": {
+    "maxTDP": 0,
+    "powerStates": [
+      {
+        "name": "ABCDEFGHIJKLMNOPQRSTUV",
+        "description": "ABCDEFGHI"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQRST",
+        "description": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC"
+      },
+      {
+        "name": "ABCDEFGHIJKL",
+        "description": "ABCDEFGHIJKLMNOPQRSTUVWXYZAB"
+      },
+      {
+        "name": "ABCDEFGHIJKLMNOPQR",
+        "description": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC"
+      }
+    ],
+    "clockGating": false,
+    "dynamicVoltageFrequencyScaling": false
+  },
+  "displayOutputs": {
+    "maxDisplays": 0,
+    "maxResolution": "ABCDEFGHIJKLMN",
+    "maxRefreshRate": 0,
+    "interfaces": [
+      "Other",
+      "DVI",
+      "USB-C/DP",
+      "DVI",
+      "USB-C/DP"
+    ],
+    "hdr": true
+  },
+  "pciExpress": {
+    "version": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "lanes": 0,
+    "bandwidth": 0.0
+  },
+  "multiGpuSupport": {
+    "technologies": [
+      "Other",
+      "Other",
+      "NVLink",
+      "Infinity Fabric"
+    ],
+    "maxGpus": 0,
+    "interconnectBandwidth": 0.0
+  },
+  "softwareFeatures": {
+    "upscalingTechnologies": [
+      "XeSS",
+      "XeSS",
+      "FSR"
+    ],
+    "meshShading": true,
+    "variableRateShading": true,
+    "samplerFeedback": false
+  }
+}

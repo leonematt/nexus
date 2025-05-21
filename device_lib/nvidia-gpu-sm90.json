@@ -1,0 +1,274 @@
+{
+  "name": "Hopper",
+  "vendor": "NVIDIA",
+  "generation": 9,
+  "releaseYear": 2022,
+  "fabricationProcess": {
+    "processNode": 4,
+    "manufacturer": "TSMC",
+    "technology": "N4"
+  },
+  "computeUnits": {
+    "name": "Streaming Multiprocessor (SM)",
+    "maxPerGPU": 144,
+    "subUnits": [
+      {
+        "name": "CUDA Core",
+        "countPerComputeUnit": 128,
+        "description": "FP32 and INT32 processing core"
+      },
+      {
+        "name": "Tensor Core (4th gen)",
+        "countPerComputeUnit": 4,
+        "description": "Specialized core for matrix operations and AI acceleration"
+      },
+      {
+        "name": "Special Function Unit (SFU)",
+        "countPerComputeUnit": 4,
+        "description": "Units handling transcendental instructions like sine, cosine, etc."
+      }
+    ]
+  },
+  "shaderModel": {
+    "directX": "12 Ultimate",
+    "vulkan": "1.3",
+    "openGL": "4.6",
+    "openCL": "3.0",
+    "metal": "N/A"
+  },
+  "memorySubsystem": {
+    "supportedMemoryTypes": ["HBM3"],
+    "maxMemoryBandwidth": 3350,
+    "maxMemorySize": 80,
+    "maxBusWidth": 5120,
+    "cacheHierarchy": [
+      {
+        "level": "L1 Cache",
+        "sizePerUnit": 256,
+        "totalSize": 36864,
+        "description": "L1 cache per SM with shared memory"
+      },
+      {
+        "level": "L2 Cache",
+        "sizePerUnit": 0,
+        "totalSize": 51200,
+        "description": "Shared L2 cache across all SMs"
+      }
+    ]
+  },
+  "specializedHardware": {
+    "rayTracingAccelerators": {
+      "present": true,
+      "name": "RT Core (3rd gen)",
+      "countPerComputeUnit": 1,
+      "performance": {
+        "raysPerSecond": 200
+      }
+    },
+    "aiAccelerators": {
+      "present": true,
+      "name": "Tensor Core (4th gen)",
+      "countPerComputeUnit": 4,
+      "supportedPrecisions": ["FP32", "FP16", "BF16", "TF32", "FP8", "INT8", "INT4"],
+      "performance": {
+        "fp16TopsPerGPU": 1979,
+        "int8TopsPerGPU": 3958
+      }
+    },
+    "videoCodecs": {
+      "encoders": [
+        {
+          "codec": "H.264",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        },
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        }
+      ],
+      "decoders": [
+        {
+          "codec": "H.264",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        },
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        },
+        {
+          "codec": "VP9",
+          "maxResolution": "8K",
+          "maxBitrate": 600,
+          "maxFPS": 240
+        }
+      ]
+    }
+  },
+  "powerEfficiency": {
+    "maxTDP": 700,
+    "powerStates": [
+      {
+        "name": "Maximum Performance",
+        "description": "Full power mode for compute-intensive workloads"
+      },
+      {
+        "name": "Balanced",
+        "description": "Balance between performance and power consumption"
+      },
+      {
+        "name": "Energy Efficient",
+        "description": "Optimized for energy efficiency"
+      }
+    ],
+    "clockGating": true,
+    "dynamicVoltageFrequencyScaling": true
+  },
+  "displayOutputs": {
+    "maxDisplays": 0,
+    "maxResolution": "N/A",
+    "maxRefreshRate": 0,
+    "interfaces": [],
+    "hdr": false
+  },
+  "pciExpress": {
+    "version": "5.0",
+    "lanes": 16,
+    "bandwidth": 128
+  },
+  "multiGpuSupport": {
+    "technologies": ["NVLink 4.0"],
+    "maxGpus": 8,
+    "interconnectBandwidth": 900
+  },
+  "softwareFeatures": {
+    "upscalingTechnologies": [],
+    "meshShading": true,
+    "variableRateShading": true,
+    "samplerFeedback": true
+  },
+  "additionalFeatures": {
+    "transformerEngine": {
+      "present": true,
+      "description": "Specialized acceleration for transformer models with FP8 precision"
+    },
+    "confidentialComputing": {
+      "present": true,
+      "description": "Supports encrypted computation for sensitive data"
+    },
+    "dynamicProgrammingAccelerator": {
+      "present": true,
+      "description": "Hardware accelerator for dynamic programming algorithms"
+    },
+    "mig": {
+      "present": true,
+      "description": "Multi-Instance GPU technology for workload isolation",
+      "maxInstances": 7
+    },
+    "nvdec": {
+      "present": true,
+      "description": "Hardware video decoder"
+    },
+    "nvenc": {
+      "present": true,
+      "description": "Hardware video encoder"
+    },
+    "cudaCores": 18432,
+    "tensorCores": 576,
+    "clockSpeeds": {
+      "baseClockMHz": 1365,
+      "boostClockMHz": 1815
+    },
+    "fp64Performance": {
+      "peakTeraflops": 34,
+      "ratioToFP32": 0.5
+    },
+    "asynchronousCopyEngine": true,
+    "ecc": true,
+    "virtualization": {
+      "present": true,
+      "technologies": ["vGPU", "MIG"]
+    }
+  },
+  "variants": [
+    {
+      "name": "H100 SXM5",
+      "formFactor": "SXM5",
+      "tdp": 700,
+      "memorySize": 80,
+      "nvlinkPorts": 18
+    },
+    {
+      "name": "H100 PCIe",
+      "formFactor": "PCIe",
+      "tdp": 350,
+      "memorySize": 80,
+      "nvlinkPorts": 0
+    },
+    {
+      "name": "H100 NVL",
+      "formFactor": "PCIe",
+      "tdp": 350,
+      "memorySize": 94,
+      "nvlinkPorts": 8
+    }
+  ],
+  "software": {
+    "drivers": ["NVIDIA Data Center Driver"],
+    "sdks": ["CUDA", "cuDNN", "DALI", "TensorRT"],
+    "frameworks": [
+      "TensorFlow",
+      "PyTorch",
+      "JAX",
+      "MXNet",
+      "RAPIDS",
+      "Triton Inference Server"
+    ],
+    "compilers": ["NVCC", "LLVM/Clang", "OpenACC"]
+  },
+  "inferencePerformance": {
+    "resnet50ImagesPerSecond": 294000,
+    "bert": {
+      "throughput": 49262,
+      "unit": "queries/second"
+    },
+    "dlrm": {
+      "throughput": 54000,
+      "unit": "samples/second"
+    },
+    "recommendationSystems": {
+      "throughput": 92000,
+      "unit": "samples/second"
+    }
+  },
+  "trainingPerformance": {
+    "resnet50ImagesPerSecond": 43518,
+    "bert": {
+      "throughput": 14584,
+      "unit": "samples/second"
+    },
+    "dlrm": {
+      "throughput": 14900,
+      "unit": "samples/second"
+    }
+  }
+}

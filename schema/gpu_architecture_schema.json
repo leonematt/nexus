@@ -1,0 +1,424 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GPU Architecture Schema",
+  "description": "Schema for describing GPU architecture properties and capabilities",
+  "type": "object",
+  "required": ["name", "vendor", "generation", "releaseYear"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Architecture name (e.g., RDNA 3, Ampere, Ada Lovelace)"
+    },
+    "vendor": {
+      "type": "string",
+      "description": "GPU manufacturer",
+      "enum": ["AMD", "NVIDIA", "Intel", "ARM", "Qualcomm", "Apple", "Other"]
+    },
+    "generation": {
+      "type": "integer",
+      "description": "Generation number of the architecture",
+      "minimum": 1
+    },
+    "releaseYear": {
+      "type": "integer",
+      "description": "Year the architecture was first released",
+      "minimum": 1990
+    },
+    "fabricationProcess": {
+      "type": "object",
+      "description": "Details about the fabrication process",
+      "required": ["processNode"],
+      "properties": {
+        "processNode": {
+          "type": "number",
+          "description": "Manufacturing process node size in nanometers"
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "Semiconductor foundry (e.g., TSMC, Samsung, GlobalFoundries)"
+        },
+        "technology": {
+          "type": "string",
+          "description": "Process technology name (e.g., N5, 7LPP)"
+        }
+      }
+    },
+    "coreSubsystem": {
+      "type": "object",
+      "description": "Information about the basic compute units",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Vendor-specific name for compute units (e.g., CU, SM, Xe-core)"
+        },
+        "maxPerUnit": {
+          "type": "integer",
+          "description": "Maximum number of compute units supported by the architecture"
+        },
+        "subUnits": {
+          "type": "array",
+          "description": "Subunits within each compute unit",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Name of the subunit (e.g., SIMD, Tensor Core)"
+              },
+              "countPerUnit": {
+                "type": "integer",
+                "description": "Number of these subunits per compute unit"
+              },
+              "size": {
+                "type": "integer",
+                "description": "Number of subunits inside this unit (e.g. threads)"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the subunit's function"
+              }
+            }
+          }
+        }
+      }
+    },
+    "shaderModel": {
+      "type": "object",
+      "description": "Information about supported shader models",
+      "properties": {
+        "directX": {
+          "type": "string",
+          "description": "DirectX shader model version (e.g., 6.6, 6.7)"
+        },
+        "vulkan": {
+          "type": "string",
+          "description": "Vulkan version support (e.g., 1.3)"
+        },
+        "openGL": {
+          "type": "string",
+          "description": "OpenGL version support (e.g., 4.6)"
+        },
+        "openCL": {
+          "type": "string",
+          "description": "OpenCL version support (e.g., 3.0)"
+        },
+        "metal": {
+          "type": "string",
+          "description": "Metal version support (e.g., 2.4)"
+        }
+      }
+    },
+    "memorySubsystem": {
+      "type": "object",
+      "description": "Memory architecture details",
+      "properties": {
+        "supportedMemoryTypes": {
+          "type": "array",
+          "description": "Types of memory supported",
+          "items": {
+            "type": "string",
+            "enum": ["GDDR6", "GDDR6X", "HBM2", "HBM2e", "HBM3", "DDR4", "DDR5", "LPDDR5", "Other"]
+          }
+        },
+        "maxMemoryBandwidth": {
+          "type": "number",
+          "description": "Maximum theoretical memory bandwidth in GB/s"
+        },
+        "maxMemorySize": {
+          "type": "integer",
+          "description": "Maximum supported memory size in GB"
+        },
+        "maxBusWidth": {
+          "type": "integer",
+          "description": "Maximum memory bus width in bits"
+        },
+        "cacheHierarchy": {
+          "type": "array",
+          "description": "Details about the cache levels",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string",
+                "description": "Cache level name (e.g., L1, L2, Infinity Cache)"
+              },
+              "sizePerUnit": {
+                "type": "integer",
+                "description": "Size per unit in KB"
+              },
+              "totalSize": {
+                "type": "integer",
+                "description": "Maximum total size in KB"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the cache's function"
+              }
+            }
+          }
+        }
+      }
+    },
+    "specializedHardware": {
+      "type": "object",
+      "description": "Specialized processing units",
+      "properties": {
+        "rayTracingAccelerators": {
+          "type": "object",
+          "description": "Ray tracing hardware details",
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "Whether the architecture has dedicated ray tracing hardware"
+            },
+            "name": {
+              "type": "string",
+              "description": "Vendor-specific name for the RT units"
+            },
+            "countPerComputeUnit": {
+              "type": "integer",
+              "description": "Number of RT units per compute unit"
+            },
+            "performance": {
+              "type": "object",
+              "description": "Performance metrics",
+              "properties": {
+                "raysPerSecond": {
+                  "type": "number",
+                  "description": "Ray throughput in giga-rays per second"
+                }
+              }
+            }
+          }
+        },
+        "aiAccelerators": {
+          "type": "object",
+          "description": "AI/ML acceleration hardware",
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "Whether the architecture has dedicated AI hardware"
+            },
+            "name": {
+              "type": "string",
+              "description": "Vendor-specific name for AI units (e.g., Tensor Core, Matrix Engine)"
+            },
+            "countPerComputeUnit": {
+              "type": "integer",
+              "description": "Number of AI units per compute unit"
+            },
+            "supportedPrecisions": {
+              "type": "array",
+              "description": "Supported numerical precisions",
+              "items": {
+                "type": "string",
+                "enum": ["FP32", "FP16", "BF16", "INT8", "INT4", "Other"]
+              }
+            },
+            "performance": {
+              "type": "object",
+              "description": "Performance metrics",
+              "properties": {
+                "fp16TopsPerGPU": {
+                  "type": "number",
+                  "description": "Maximum FP16 operations per second in teraops"
+                },
+                "int8TopsPerGPU": {
+                  "type": "number",
+                  "description": "Maximum INT8 operations per second in teraops"
+                }
+              }
+            }
+          }
+        },
+        "videoCodecs": {
+          "type": "object",
+          "description": "Video encode/decode capabilities",
+          "properties": {
+            "encoders": {
+              "type": "array",
+              "description": "Supported video encoding formats",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "codec": {
+                    "type": "string",
+                    "enum": ["H.264", "H.265/HEVC", "AV1", "VP9", "Other"]
+                  },
+                  "maxResolution": {
+                    "type": "string",
+                    "description": "Maximum supported resolution (e.g., 4K, 8K)"
+                  },
+                  "maxBitrate": {
+                    "type": "integer",
+                    "description": "Maximum bitrate in Mbps"
+                  },
+                  "maxFPS": {
+                    "type": "integer",
+                    "description": "Maximum frames per second"
+                  }
+                }
+              }
+            },
+            "decoders": {
+              "type": "array",
+              "description": "Supported video decoding formats",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "codec": {
+                    "type": "string",
+                    "enum": ["H.264", "H.265/HEVC", "AV1", "VP9", "Other"]
+                  },
+                  "maxResolution": {
+                    "type": "string",
+                    "description": "Maximum supported resolution (e.g., 4K, 8K)"
+                  },
+                  "maxBitrate": {
+                    "type": "integer",
+                    "description": "Maximum bitrate in Mbps"
+                  },
+                  "maxFPS": {
+                    "type": "integer",
+                    "description": "Maximum frames per second"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "powerEfficiency": {
+      "type": "object",
+      "description": "Power efficiency characteristics",
+      "properties": {
+        "maxTDP": {
+          "type": "integer",
+          "description": "Maximum thermal design power in watts"
+        },
+        "powerStates": {
+          "type": "array",
+          "description": "Supported power states",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the power state"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the power state"
+              }
+            }
+          }
+        },
+        "clockGating": {
+          "type": "boolean",
+          "description": "Support for clock gating techniques"
+        },
+        "dynamicVoltageFrequencyScaling": {
+          "type": "boolean",
+          "description": "Support for DVFS"
+        }
+      }
+    },
+    "displayOutputs": {
+      "type": "object",
+      "description": "Display output capabilities",
+      "properties": {
+        "maxDisplays": {
+          "type": "integer",
+          "description": "Maximum number of concurrent displays"
+        },
+        "maxResolution": {
+          "type": "string",
+          "description": "Maximum resolution per display"
+        },
+        "maxRefreshRate": {
+          "type": "integer",
+          "description": "Maximum refresh rate in Hz"
+        },
+        "interfaces": {
+          "type": "array",
+          "description": "Supported display interfaces",
+          "items": {
+            "type": "string",
+            "enum": ["HDMI", "DisplayPort", "USB-C/DP", "DVI", "Other"]
+          }
+        },
+        "hdr": {
+          "type": "boolean",
+          "description": "HDR support"
+        }
+      }
+    },
+    "pciExpress": {
+      "type": "object",
+      "description": "PCIe connectivity details",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "PCIe version (e.g., 4.0, 5.0)"
+        },
+        "lanes": {
+          "type": "integer",
+          "description": "Maximum PCIe lanes"
+        },
+        "bandwidth": {
+          "type": "number",
+          "description": "Maximum bidirectional bandwidth in GB/s"
+        }
+      }
+    },
+    "multiGpuSupport": {
+      "type": "object",
+      "description": "Multi-GPU capabilities",
+      "properties": {
+        "technologies": {
+          "type": "array",
+          "description": "Supported multi-GPU technologies",
+          "items": {
+            "type": "string",
+            "enum": ["CrossFire", "SLI", "NVLink", "Infinity Fabric", "None", "Other"]
+          }
+        },
+        "maxGpus": {
+          "type": "integer",
+          "description": "Maximum number of supported GPUs in a multi-GPU configuration"
+        },
+        "interconnectBandwidth": {
+          "type": "number",
+          "description": "GPU-to-GPU interconnect bandwidth in GB/s"
+        }
+      }
+    },
+    "softwareFeatures": {
+      "type": "object",
+      "description": "Software-level features",
+      "properties": {
+        "upscalingTechnologies": {
+          "type": "array",
+          "description": "Supported upscaling technologies",
+          "items": {
+            "type": "string",
+            "enum": ["FSR", "RSR", "DLSS", "XeSS", "Other"]
+          }
+        },
+        "meshShading": {
+          "type": "boolean",
+          "description": "Support for mesh shaders"
+        },
+        "variableRateShading": {
+          "type": "boolean",
+          "description": "Support for variable rate shading"
+        },
+        "samplerFeedback": {
+          "type": "boolean",
+          "description": "Support for sampler feedback"
+        }
+      }
+    }
+  }
+}

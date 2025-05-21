@@ -1,0 +1,198 @@
+{
+  "name": "CDNA 3",
+  "vendor": "AMD",
+  "generation": 3,
+  "releaseYear": 2023,
+  "fabricationProcess": {
+    "processNode": 5,
+    "manufacturer": "TSMC",
+    "technology": "N5"
+  },
+  "coreSubsystem": {
+    "name": "Compute Unit (CU)",
+    "maxPerUnit": 304,
+    "subUnits": [
+      {
+        "type": "SIMDCore",
+        "countPerUnit": 4,
+        "size": 64,
+        "description": "64-wide SIMD vector processor"
+      },
+      {
+        "type": "MatrixCore",
+        "countPerUnit": 4,
+        "size": 32,
+        "description": "Dedicated matrix multiplication unit for AI acceleration"
+      }
+    ]
+  },
+  "shaderModel": {
+    "directX": "N/A",
+    "vulkan": "N/A",
+    "openGL": "N/A",
+    "openCL": "3.0",
+    "metal": "N/A"
+  },
+  "memorySubsystem": {
+    "supportedMemoryTypes": ["HBM3"],
+    "maxMemoryBandwidth": 5300,
+    "maxMemorySize": 192,
+    "maxBusWidth": 8192,
+    "cacheHierarchy": [
+      {
+        "level": "L1 Vector Cache",
+        "sizePerUnit": 16,
+        "totalSize": 3648,
+        "description": "L1 cache for vector operations per CU"
+      },
+      {
+        "level": "L1 Scalar Cache",
+        "sizePerUnit": 16,
+        "totalSize": 3648,
+        "description": "L1 cache for scalar operations per CU"
+      },
+      {
+        "level": "L2 Cache",
+        "sizePerUnit": 4096,
+        "totalSize": 98304,
+        "description": "Shared L2 cache across multiple CUs"
+      },
+      {
+        "level": "L3 Cache",
+        "sizePerUnit": 0,
+        "totalSize": 131072,
+        "description": "Shared last-level cache"
+      }
+    ]
+  },
+  "specializedHardware": {
+    "rayTracingAccelerators": {
+      "present": false,
+      "name": null,
+      "countPerComputeUnit": 0,
+      "performance": {
+        "raysPerSecond": 0
+      }
+    },
+    "aiAccelerators": {
+      "present": true,
+      "name": "Matrix Core",
+      "countPerComputeUnit": 4,
+      "supportedPrecisions": ["FP32", "FP16", "BF16", "INT8", "INT4"],
+      "performance": {
+        "fp16TopsPerGPU": 1638,
+        "int8TopsPerGPU": 3276
+      }
+    },
+    "videoCodecs": {
+      "encoders": [],
+      "decoders": []
+    }
+  },
+  "powerEfficiency": {
+    "maxTDP": 750,
+    "powerStates": [
+      {
+        "name": "Performance Mode",
+        "description": "Maximum performance for compute-intensive workloads"
+      },
+      {
+        "name": "Balanced Mode",
+        "description": "Optimized balance between performance and power consumption"
+      },
+      {
+        "name": "Power Saving Mode",
+        "description": "Reduced performance for power-constrained environments"
+      }
+    ],
+    "clockGating": true,
+    "dynamicVoltageFrequencyScaling": true
+  },
+  "displayOutputs": {
+    "maxDisplays": 0,
+    "maxResolution": "N/A",
+    "maxRefreshRate": 0,
+    "interfaces": [],
+    "hdr": false
+  },
+  "pciExpress": {
+    "version": "5.0",
+    "lanes": 128,
+    "bandwidth": 256
+  },
+  "multiGpuSupport": {
+    "technologies": ["Infinity Fabric"],
+    "maxGpus": 8,
+    "interconnectBandwidth": 800
+  },
+  "softwareFeatures": {
+    "upscalingTechnologies": [],
+    "meshShading": false,
+    "variableRateShading": false,
+    "samplerFeedback": false
+  },
+  "additionalFeatures": {
+    "chipletDesign": true,
+    "xgmiLinks": 12,
+    "cpuIntegration": {
+      "present": true,
+      "description": "Integrated with Zen 4 CPU cores in APU design"
+    },
+    "memoryCoherence": true,
+    "ecc": true,
+    "secureBoot": true,
+    "isa": "gfx942",
+    "instructionExtensions": ["MFMA", "WMMA", "DPAS"],
+    "roiAccelerators": true,
+    "virtualization": {
+      "present": true,
+      "technologies": ["SR-IOV", "MxGPU"]
+    },
+    "fp64Performance": {
+      "peakTeraflops": 102.4,
+      "ratiotoFP32": 0.5
+    }
+  },
+  "marketSegments": ["HPC", "AI Training", "AI Inference", "Data Centers"],
+  "variants": [
+    {
+      "name": "MI300A",
+      "type": "APU",
+      "gpuCUs": 228,
+      "cpuCores": 24,
+      "memorySize": 128,
+      "description": "Combined CPU+GPU design with unified memory"
+    },
+    {
+      "name": "MI300X",
+      "type": "GPU-only",
+      "gpuCUs": 228,
+      "cpuCores": 0,
+      "memorySize": 192,
+      "description": "GPU-only variant with expanded HBM3 memory capacity"
+    }
+  ],
+  "software": {
+    "drivers": ["AMDGPU-PRO", "ROCm"],
+    "sdks": ["ROCm SDK", "HIP", "OpenMP"],
+    "frameworks": [
+      "TensorFlow",
+      "PyTorch",
+      "ONNX Runtime",
+      "MXNet",
+      "OpenVINO"
+    ],
+    "compilers": ["LLVM/Clang", "HIP Clang", "OpenMP"]
+  },
+  "inferencePerformance": {
+    "resnet50ImagesPerSecond": 200000,
+    "bert": {
+      "throughput": 30000,
+      "unit": "samples/second"
+    },
+    "dlrm": {
+      "throughput": 50000,
+      "unit": "samples/second"
+    }
+  }
+}
