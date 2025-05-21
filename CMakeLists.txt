@@ -18,10 +18,8 @@ project(nexus CXX C)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Options
-#option(TRITON_BUILD_PYTHON_MODULE "Build Python Triton bindings" OFF)
-#option(TRITON_BUILD_PROTON "Build the Triton Proton profiler" ON)
-#option(TRITON_BUILD_UT "Build C++ Triton Unit Tests" ON)
-#option(TRITON_BUILD_WITH_CCACHE "Build with ccache (if available)" ON)
+option(NEXUS_BUILD_PYTHON_MODULE "Build Python Nexus bindings" OFF)
+option(NEXUS_ENABLE_LOGGING "Enable Nexus Logging" ON)
 #set(TRITON_CODEGEN_BACKENDS "" CACHE STRING "Enable different codegen backends")
 
 # Ensure Python3 vars are set correctly
@@ -74,15 +72,15 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4624 /wd4715 /wd4530")
 endif()
 
+if(NEXUS_ENABLE_LOGGING)
+  add_compile_definitions(NEXUS_LOGGING)
+endif()
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
 # link_directories(${LLVM_LIBRARY_DIR})
 #add_subdirectory(include)
-#add_subdirectory(src)
-
-add_executable(nexus src/main.cpp src/database.cpp)
-target_link_libraries(nexus nlohmann_json::nlohmann_json)
 
 # TODO: Figure out which target is sufficient to fix errors; triton is
 # apparently not enough. Currently set linking libstdc++fs for all targets
@@ -171,7 +169,7 @@ if (UNIX AND NOT APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,ALL")
 endif()
 
-if(TRITON_BUILD_PYTHON_MODULE AND NOT WIN32)
+if(NEXUS_BUILD_PYTHON_MODULE AND NOT WIN32)
   set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 
   # Check if the platform is MacOS
@@ -179,7 +177,7 @@ if(TRITON_BUILD_PYTHON_MODULE AND NOT WIN32)
     set(PYTHON_LDFLAGS "-undefined dynamic_lookup")
   endif()
 
-  target_link_options(triton PRIVATE ${PYTHON_LDFLAGS})
+  target_link_options(nexus PRIVATE ${PYTHON_LDFLAGS})
 endif()
 
 #find_package(Threads REQUIRED)
