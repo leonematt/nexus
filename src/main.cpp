@@ -6,6 +6,11 @@ std::vector<std::string_view> nexusArgs;
 
 int main() {
 
+  auto sys = nexus::getSystem();
+  auto rt = sys.getRuntime(0);
+
+  std::cout << "RUNTIME: " << rt->getName() << std::endl;
+
   auto dev = nexus::lookupDevice("amd-gpu-gfx942");
   if (dev) {
     {

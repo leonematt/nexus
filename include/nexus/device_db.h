@@ -1,5 +1,5 @@
-#ifndef NEXUS_DATABASE_H
-#define NEXUS_DATABASE_H
+#ifndef NEXUS_DEVICE_DB_H
+#define NEXUS_DEVICE_DB_H
 
 #include <nexus/device.h>
 
@@ -15,4 +15,4 @@ namespace nexus {
 
 }
 
-#endif // NEXUS_DATABASE_H
+#endif // NEXUS_DEVICE_DB_H

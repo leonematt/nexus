@@ -20,6 +20,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Options
 option(NEXUS_BUILD_PYTHON_MODULE "Build Python Nexus bindings" OFF)
 option(NEXUS_ENABLE_LOGGING "Enable Nexus Logging" ON)
+option(NEXUS_BUILD_PLUGINS "Build the runtime plugins" ON)
 #set(TRITON_CODEGEN_BACKENDS "" CACHE STRING "Enable different codegen backends")
 
 # Ensure Python3 vars are set correctly
@@ -41,8 +42,8 @@ endif()
 
 # Default build type
 if(NOT CMAKE_BUILD_TYPE)
-  message(STATUS "Default build type: Release")
-  set(CMAKE_BUILD_TYPE "Release")
+  message(STATUS "Default build type: Debug")
+  set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 if(NOT WIN32)
@@ -186,6 +187,10 @@ add_subdirectory(third_party/json json)
 #@@@ include_directories(third_party/json/include)
 add_subdirectory(src)
 #add_subdirectory(test)
+
+if(NEXUS_BUILD_PLUGINS)
+  add_subdirectory(plugins)
+endif()
 
 #if(TRITON_BUILD_UT)
 #  add_subdirectory(unittest)
