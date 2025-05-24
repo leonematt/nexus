@@ -7,9 +7,13 @@ std::vector<std::string_view> nexusArgs;
 int main() {
 
   auto sys = nexus::getSystem();
-  auto rt = sys.getRuntime(0);
+  auto rt = sys.getRuntime(1);
 
-  std::cout << "RUNTIME: " << rt->getName() << std::endl;
+  std::cout << "RUNTIME: " << rt->getStrProperty(NP_Name) << " - " << rt->getDeviceCount() << std::endl;
+
+  for (int i = 0; i < rt->getDeviceCount(); ++i) {
+    std::cout << "  Device: " << rt->getStrProperty(i, NP_Name) << " - " << rt->getStrProperty(i, NP_Architecture) << std::endl;
+  }
 
   auto dev = nexus::lookupDevice("amd-gpu-gfx942");
   if (dev) {

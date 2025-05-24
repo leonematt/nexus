@@ -1,55 +1,78 @@
 /*
- * Copyright (c) 2023 The Khronos Group Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * OpenCL is a trademark of Apple Inc. used under license by Khronos.
  */
 
-#ifndef NEXUS_API_NXS_FUNCTION_TYPES_H_
-#define NEXUS_API_NXS_FUNCTION_TYPES_H_
+#if defined(NEXUS_API_GENERATE_FUNC_DECL)
+/************************************************************************
+ * Generate the Function declarations
+ ***********************************************************************/
+// Generate the Function extern
+#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+    extern NXS_API_ENTRY RETURN_TYPE NXS_API_CALL nxs##NAME(__VA_ARGS__);
 
-#include <nexus-api/nxs.h>
+#else
+#if defined(NEXUS_API_GENERATE_FUNC_ENUM)
+/************************************************************************
+ * Generate the Function Enum
+ ***********************************************************************/
+// Generate the Enum name
+#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+        FN_nxs##NAME,
+    
+// Declare the Enumeration
+enum NXSAPI_FunctionEnum {
+
+#else
+#if defined(NEXUS_API_GENERATE_FUNC_TYPE)
+/************************************************************************
+ * Generate the Function typedefs
+ ***********************************************************************/
+        
+// Generate the Function typedefs
+#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+    typedef RETURN_TYPE NXS_API_CALL NXS_CONCAT(nxs##NAME, _t)(__VA_ARGS__); \
+    typedef NXS_CONCAT(nxs##NAME, _t) * NXS_CONCAT(nxs##NAME, _fn);
+
+#endif
+#endif
+#endif
 
 
-typedef nxs_int NXS_API_CALL nxsGetRuntimeProperty_t(
+/************************************************************************
+ * Define API Functions
+ ***********************************************************************/
+
+/************************************************************************
+ * @def GetRuntimeProperty
+ * @brief Lookup 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, GetRuntimeProperty,
     nxs_uint runtime_property_id,
     void *property_value,
     size_t* property_value_size
-);
+)
 
-typedef nxsGetRuntimeProperty_t *
-    nxsGetRuntimeProperty_fn NXS_API_SUFFIX__VERSION_1_0;
-    
+/************************************************************************
+ * @def GetRuntimeProperty
+ * @brief Lookup 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, GetDeviceCount,
+    nxs_device_type device_type,
+    nxs_uint* num_devices
+)
+
+/************************************************************************
+ * @def GetDeviceProperty
+ * @brief Lookup 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, GetDeviceProperty,
+    nxs_uint device_id,
+    nxs_uint property_id,
+    void *property_value,
+    size_t* property_value_size
+  )
+
 
 #if 0
-typedef nxs_int NXS_API_CALL nxsGetPlatformIDs_t(
-    nxs_uint num_entries,
-    nxs_platform_id* platforms,
-    nxs_uint* num_platforms);
-
-typedef nxsGetPlatformIDs_t *
-nxsGetPlatformIDs_fn NXS_API_SUFFIX__VERSION_1_0;
-
-typedef nxs_int NXS_API_CALL nxsGetPlatformInfo_t(
-    nxs_platform_id platform,
-    nxs_platform_info param_name,
-    size_t param_value_size,
-    void* param_value,
-    size_t* param_value_size_ret);
-
-typedef nxsGetPlatformInfo_t *
-nxsGetPlatformInfo_fn NXS_API_SUFFIX__VERSION_1_0;
 
 typedef nxs_int NXS_API_CALL nxsGetDeviceIDs_t(
     nxs_platform_id platform,
@@ -1194,4 +1217,20 @@ nxsCreateImageWithProperties_fn NXS_API_SUFFIX__VERSION_3_0;
 #endif /* NXS_VERSION_3_0 */
 #endif /* diabled */
 
-#endif /* NEXUSAPI_NXS_FUNCTION_TYPES_H_ */
+#ifdef NEXUS_API_GENERATE_FUNC_ENUM
+    NXSAPI_FUNCTION_COUNT,
+    NXSAPI_FUNCTION_PREFIX_LEN = 3
+}; /* close NXSAPI_FunctionEnum */
+
+const char *nxsGetFuncName(enum NXSAPI_FunctionEnum funcEnum);
+
+enum NXSAPI_FunctionEnum nxsGetFuncEnum(const char *funcName);
+
+#endif
+
+
+#undef NEXUS_API_GENERATE_FUNC_DECL
+#undef NEXUS_API_GENERATE_FUNC_ENUM
+#undef NEXUS_API_GENERATE_FUNC_TYPE
+
+#undef NEXUS_API_FUNC

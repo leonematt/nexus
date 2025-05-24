@@ -78,7 +78,7 @@ if(NEXUS_ENABLE_LOGGING)
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/third_party)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/magic_enum/include)
 
 # link_directories(${LLVM_LIBRARY_DIR})
 #add_subdirectory(include)

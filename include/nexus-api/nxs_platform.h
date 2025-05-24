@@ -19,10 +19,6 @@
 
 #include <nexus-api/nxs_version.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(_WIN32)
     #if !defined(NXS_API_ENTRY)
         #define NXS_API_ENTRY
@@ -1396,9 +1392,8 @@ typedef union
 #define  _NXS_STRINGIFY( _x )                __NXS_STRINGIFY( _x )
 #define  NXS_PROGRAM_STRING_DEBUG_INFO       "#line "  _NXS_STRINGIFY(__LINE__) " \"" __FILE__ "\" \n\n"
 
-#ifdef __cplusplus
-}
-#endif
+#define _NXS_CONCAT(x,y) x ## y
+#define NXS_CONCAT(x,y) _NXS_CONCAT(x,y)
 
 #if defined(_WIN32) && defined(_MSC_VER) && __NXS_HAS_ANON_STRUCT__
     #pragma warning( pop )

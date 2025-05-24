@@ -19,7 +19,7 @@
 
 /* Detect which version to target */
 #if !defined(NXS_TARGET_NEXUSAPI_VERSION)
-#pragma message("nxs_version.h: NXS_TARGET_NEXUSAPI_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)")
+/* #pragma message("nxs_version.h: NXS_TARGET_NEXUSAPI_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)") */
 #define NXS_TARGET_NEXUSAPI_VERSION 300
 #endif
 #if NXS_TARGET_NEXUSAPI_VERSION != 100 && \
