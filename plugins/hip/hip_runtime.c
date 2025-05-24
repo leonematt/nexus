@@ -25,7 +25,7 @@
 #include <string.h>
 //#include "pocl_cl.h"
 
-#include <nexus-api/nxs_plugin.h>
+#include <nexus-api.h>
 
 /*
  * Get the number of supported platforms on this system. 
@@ -46,7 +46,7 @@ nxsGetRuntimeProperty(
   case NXS_RUNTIME_NAME:
     // hipDeviceGetName()
     if (property_value != NULL) {
-      strncpy(property_value, "HIP", 4);
+      strncpy(property_value, "hip", 4);
     } else if (property_value_size != NULL) {
       *property_value_size = 4;
     }
@@ -64,11 +64,13 @@ nxsGetRuntimeProperty(
 #pragma GCC visibility push(hidden)
 #endif
 
-
+#if 0
 struct _nxs_plugin_table hip_runtime_plugin = {
   &nxsGetRuntimeProperty,
 
 };
+
+#endif
 
 #ifdef __GNUC__
 #pragma GCC visibility pop
