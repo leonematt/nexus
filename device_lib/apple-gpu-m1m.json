@@ -1,0 +1,164 @@
+{
+    "Name": "Apple GPU (M1 Max)",
+    "Vendor": "Apple",
+    "Architecture": "Apple GPU Gen 1 Max",
+    "ReleaseYear": 2021,
+    "FabricationProcess": {
+      "ProcessNode": 5,
+      "Manufacturer": "TSMC",
+      "Technology": "N5P"
+    },
+    "CoreSubsystem": {
+      "Name": "GPU Core",
+      "subUnits": [
+        {
+          "Type": "Execution Unit",
+          "Count": 32,
+          "Size": 128,
+          "Description": "Unified shader processors with 128 ALUs per core",
+          "Memory": ["L1", "L2"],
+          "SubunitType": "SIMD"
+        },
+        {
+          "Type": "Tile Memory",
+          "Count": 32,
+          "Size": 32,
+          "Description": "On-chip tile memory for efficient rendering",
+          "Memory": ["Tile"],
+          "SubunitType": "Memory"
+        }
+      ]
+    },
+    "MemorySubsystem": {
+      "SupportedMemoryTypes": ["LPDDR5"],
+      "MemoryTypes": [
+        {
+          "Type": "L1",
+          "Size": 64,
+          "BankCount": 32,
+          "MaxMemoryBandwidth": 400,
+          "maxBusWidth": 512,
+          "description": "L1 cache per GPU core"
+        },
+        {
+          "Type": "L2",
+          "Size": 16384,
+          "BankCount": 1,
+          "MaxMemoryBandwidth": 400,
+          "maxBusWidth": 512,
+          "description": "Shared L2 cache"
+        },
+        {
+          "Type": "Unified Memory",
+          "Size": 67108864,
+          "BankCount": 16,
+          "MaxMemoryBandwidth": 400,
+          "maxBusWidth": 512,
+          "description": "Unified memory shared with CPU"
+        }
+      ]
+    },
+    "KernelModel": {
+      "SubUnits": [
+        {
+          "Type": "Metal",
+          "Version": "2.4"
+        },
+        {
+          "Type": "OpenGL ES",
+          "Version": "3.0"
+        },
+        {
+          "Type": "Vulkan",
+          "Version": "1.2"
+        }
+      ]
+    },
+    "SpecializedHardware": {
+      "RayTracingAccelerators": {
+        "Present": false,
+        "Name": null,
+        "Count": 0,
+        "Performance": {
+          "RaysPerSecond": 0
+        }
+      },
+      "AiAccelerators": {
+        "Present": false,
+        "Name": null,
+        "Count": 0,
+        "SupportedPrecisions": [],
+        "Performance": {
+          "fp16TopsPerGPU": 0,
+          "int8TopsPerGPU": 0
+        }
+      },
+      "videoCodecs": {
+        "encoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "4K",
+            "maxBitrate": 240,
+            "maxFPS": 60
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "4K",
+            "maxBitrate": 240,
+            "maxFPS": 60
+          }
+        ],
+        "decoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "8K",
+            "maxBitrate": 480,
+            "maxFPS": 30
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "8K",
+            "maxBitrate": 480,
+            "maxFPS": 30
+          },
+          {
+            "codec": "VP9",
+            "maxResolution": "4K",
+            "maxBitrate": 240,
+            "maxFPS": 60
+          }
+        ]
+      }
+    },
+    "PowerEfficiency": {
+      "BaseClock": 1000,
+      "BoostClock": 1296,
+      "MaxTDP": 60,
+      "PowerStates": [
+        {
+          "Name": "Performance",
+          "Description": "Maximum performance for demanding workloads"
+        },
+        {
+          "Name": "Balanced",
+          "Description": "Balance between performance and power efficiency"
+        },
+        {
+          "Name": "Power Saving",
+          "Description": "Optimized for battery life"
+        }
+      ],
+      "ClockGating": true,
+      "DynamicVoltageFrequencyScaling": true
+    },
+    "PciExpress": {
+      "Version": "N/A",
+      "Lanes": 0,
+      "Bandwidth": 0
+    },
+    "MultiGpuSupport": {
+      "Technologies": ["None"],
+      "MaxGpus": 1,
+      "InterconnectBandwidth": 0
+    }
+  }

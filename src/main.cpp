@@ -9,11 +9,14 @@ int main() {
   auto sys = nexus::getSystem();
   auto rt = sys.getRuntime(1);
 
-  std::cout << "RUNTIME: " << rt->getStrProperty(NP_Name) << " - " << rt->getDeviceCount() << std::endl;
+  std::cout << "RUNTIME: " << rt->getProperty<std::string>(NP_Name) << " - " << rt->getDeviceCount() << std::endl;
 
   for (int i = 0; i < rt->getDeviceCount(); ++i) {
-    std::cout << "  Device: " << rt->getStrProperty(i, NP_Name) << " - " << rt->getStrProperty(i, NP_Architecture) << std::endl;
+    std::cout << "  Device: " << rt->getProperty<std::string>(i, NP_Name) << " - " << rt->getProperty<std::string>(i, NP_Architecture) << std::endl;
   }
+  auto *dev0 = rt->getDevice(0);
+  auto bufId = dev0->createBuffer(100);
+  std::cout << "    Buffer: " << bufId << std::endl;
 
   auto dev = nexus::lookupDevice("amd-gpu-gfx942");
   if (dev) {

@@ -35,10 +35,12 @@ namespace nexus {
         template <typename... Args>
         Device(Args... args) : deviceProps(std::make_shared<DeviceProperties>(args...)) {}
 
+        Device() = default;
+
         // Query Device Properties
         //   from name
         template <typename T>
-        std::optional<const T> getProperty(const std::string &propName) {
+        std::optional<const T> getProperty(const std::string &propName) const {
             auto props = deviceProps->getProperties();
             try {
                 return props.at(propName).get<T>();

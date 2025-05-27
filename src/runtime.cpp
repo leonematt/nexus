@@ -1,3 +1,4 @@
+#include <nexus/device_db.h>
 #include <nexus/runtime.h>
 #include <nexus/log.h>
 
@@ -8,7 +9,33 @@ using namespace nexus;
 #define NEXUS_LOG_MODULE "runtime"
 
 
-/// @brief Construct a Platform for the current system
+Runtime::RTDevice::RTDevice(Runtime &rt, nxs_uint _id)
+: runtime(rt), id(_id) {
+  auto vendor = runtime.getProperty<std::string>(id, NP_Vendor);
+  auto type = runtime.getProperty<std::string>(id, NP_Type);
+  auto arch = runtime.getProperty<std::string>(id, NP_Architecture);
+  auto devTag = vendor + "-" + type + "-" + arch;
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
+  if (auto props = nexus::lookupDevice(devTag))
+    deviceProps = *props;
+  else
+    NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
+}
+
+nxs_int Runtime::RTDevice::createBuffer(size_t size, void *host_data) {
+  if (auto fn = (nxsCreateBuffer_fn)runtime.getRuntimeFunc(FN_nxsCreateBuffer)) {
+    nxs_int retVal;
+    nxs_int bufId = (*fn)(id, size, 0, host_data, &retVal);
+    if (retVal == NXS_SUCCESS) {
+      buffers.push_back(bufId);
+      return bufId;
+    }
+  }
+  return NXS_INVALID_CONTEXT;
+}
+
+
+/// @brief Construct a Runtime for the current system
 Runtime::Runtime(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
   loadPlugin();
 }
@@ -46,74 +73,23 @@ void Runtime::loadPlugin() {
   loadFn(FN_nxsGetDeviceCount);
   loadFn(FN_nxsGetDeviceProperty);
 
+  loadFn(FN_nxsCreateBuffer);
+
+  if (!runtimeFns[FN_nxsGetRuntimeProperty] || !runtimeFns[FN_nxsGetDeviceCount] ||
+      !runtimeFns[FN_nxsGetDeviceProperty])
+      return;
+
+  // Load device properties
+
   // Lazy load Device properties
-}
-
-std::string Runtime::getStrProperty(NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetRuntimeProperty_fn)runtimeFns[FN_nxsGetRuntimeProperty];
-  if (!fn)
-    return "";
-  size_t size = 256;
-  char name[size];
-  (*fn)(pn, name, &size);
-  return name;
-}
-
-const nxs_uint Runtime::getIntProperty(NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetRuntimeProperty_fn)runtimeFns[FN_nxsGetRuntimeProperty];
-  if (!fn)
-    return 0;
-  size_t size = sizeof(nxs_uint);
-  nxs_uint value;
-  (*fn)(pn, &value, &size);
-  return value;
-}
-
-const nxs_double Runtime::getFloatProperty(NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetRuntimeProperty_fn)runtimeFns[FN_nxsGetRuntimeProperty];
-  if (!fn)
-    return 0;
-  size_t size = sizeof(nxs_double);
-  nxs_double value;
-  (*fn)(pn, &value, &size);
-  return value;
-}
-
-int Runtime::getDeviceCount() const {
   nxs_uint count = 0;
   auto fn = (nxsGetDeviceCount_fn)runtimeFns[FN_nxsGetDeviceCount];
-  if (fn)
-    (*fn)(NXS_DEVICE_TYPE_GPU, &count);
-  return count;
+  (*fn)(&count);
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
+  for (int i = 0; i < count; ++i) {
+    localDevices.emplace_back(*this, i);
+  }
 }
 
-std::string Runtime::getStrProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetDeviceProperty_fn)runtimeFns[FN_nxsGetDeviceProperty];
-  if (!fn)
-    return "";
-  size_t size = 256;
-  char name[size];
-  (*fn)(deviceId, pn, name, &size);
-  return name;
-}
 
-const nxs_uint Runtime::getIntProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetDeviceProperty_fn)runtimeFns[FN_nxsGetDeviceProperty];
-  if (!fn)
-    return 0;
-  size_t size = sizeof(nxs_uint);
-  nxs_uint value;
-  (*fn)(deviceId, pn, &value, &size);
-  return value;
-}
-
-const nxs_double Runtime::getFloatProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
-  auto fn = (nxsGetDeviceProperty_fn)runtimeFns[FN_nxsGetDeviceProperty];
-  if (!fn)
-    return 0;
-  size_t size = sizeof(nxs_double);
-  nxs_double value;
-  (*fn)(deviceId, pn, &value, &size);
-  return value;
-}
 

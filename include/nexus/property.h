@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+/// @brief  NOT USED, see json in Device or nexus-api
 namespace nexus {
 
   using Prop = std::variant<int64_t, double, std::string>; // , std::vector<Property>>;

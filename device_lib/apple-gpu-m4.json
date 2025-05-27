@@ -1,0 +1,205 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "Name": "Apple M4 GPU",
+    "Vendor": "Apple",
+    "Architecture": "Apple GPU",
+    "ReleaseYear": 2024,
+    "FabricationProcess": {
+      "ProcessNode": 3,
+      "Manufacturer": "TSMC",
+      "Technology": "N3E"
+    },
+    "CoreSubsystem": {
+      "Name": "GPU Core",
+      "subUnits": [
+        {
+          "Type": "Execution Unit",
+          "Count": 10,
+          "Size": 128,
+          "Description": "SIMD execution units for parallel shader processing with 128 ALUs per unit",
+          "Memory": ["L1", "vector register file", "shared memory"],
+          "SubunitType": "SIMD"
+        },
+        {
+          "Type": "Texture Unit",
+          "Count": 10,
+          "Size": 4,
+          "Description": "Texture sampling and filtering units",
+          "Memory": ["L1"],
+          "SubunitType": "Texture"
+        }
+      ]
+    },
+    "MemorySubsystem": {
+      "SupportedMemoryTypes": ["LPDDR5"],
+      "MemoryTypes": [
+        {
+          "Type": "vector register file",
+          "Size": 8,
+          "BankCount": 32,
+          "MaxMemoryBandwidth": 2048,
+          "maxBusWidth": 512,
+          "description": "High-speed vector register file for shader operations"
+        },
+        {
+          "Type": "shared memory",
+          "Size": 32,
+          "BankCount": 16,
+          "MaxMemoryBandwidth": 1024,
+          "maxBusWidth": 256,
+          "description": "Shared memory for threadgroup communication and data sharing"
+        },
+        {
+          "Type": "L1",
+          "Size": 64,
+          "BankCount": 8,
+          "MaxMemoryBandwidth": 512,
+          "maxBusWidth": 128,
+          "description": "L1 cache for immediate GPU operations and texture data"
+        },
+        {
+          "Type": "L2",
+          "Size": 16384,
+          "BankCount": 16,
+          "MaxMemoryBandwidth": 256,
+          "maxBusWidth": 256,
+          "description": "L2 cache shared across GPU cores for larger data sets"
+        },
+        {
+          "Type": "Unified Memory",
+          "Size": 16777216,
+          "BankCount": 8,
+          "MaxMemoryBandwidth": 120,
+          "maxBusWidth": 256,
+          "description": "Shared system memory accessible by CPU and GPU with zero-copy access"
+        }
+      ]
+    },
+    "KernelModel": {
+      "SubUnits": [
+        {
+          "Type": "metal",
+          "Version": "3.1"
+        },
+        {
+          "Type": "opencl",
+          "Version": "1.2"
+        },
+        {
+          "Type": "vulkan",
+          "Version": "1.3"
+        },
+        {
+          "Type": "compute",
+          "Version": "6.0"
+        }
+      ]
+    },
+    "SpecializedHardware": {
+      "RayTracingAccelerators": {
+        "Present": true,
+        "Name": "RT Unit",
+        "Count": 1,
+        "Performance": {
+          "RaysPerSecond": 2.5
+        }
+      },
+      "AiAccelerators": {
+        "Present": true,
+        "Name": "Neural Engine",
+        "Count": 1,
+        "SupportedPrecisions": ["FP32", "FP16", "BF16", "INT8"],
+        "Performance": {
+          "fp16TopsPerGPU": 38,
+          "int8TopsPerGPU": 76
+        }
+      },
+      "videoCodecs": {
+        "encoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "4K",
+            "maxBitrate": 100,
+            "maxFPS": 60
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "4K",
+            "maxBitrate": 100,
+            "maxFPS": 60
+          },
+          {
+            "codec": "AV1",
+            "maxResolution": "4K",
+            "maxBitrate": 100,
+            "maxFPS": 60
+          }
+        ],
+        "decoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "8K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "8K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "AV1",
+            "maxResolution": "8K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "VP9",
+            "maxResolution": "4K",
+            "maxBitrate": 150,
+            "maxFPS": 60
+          }
+        ]
+      }
+    },
+    "PowerEfficiency": {
+      "BaseClock": 1398,
+      "BoostClock": 1598,
+      "MaxTDP": 22,
+      "PowerStates": [
+        {
+          "Name": "P0",
+          "Description": "Maximum performance state for demanding GPU workloads"
+        },
+        {
+          "Name": "P1",
+          "Description": "High performance state with slight power reduction"
+        },
+        {
+          "Name": "P2",
+          "Description": "Balanced performance and power state"
+        },
+        {
+          "Name": "P3",
+          "Description": "Low power state for light GPU tasks"
+        },
+        {
+          "Name": "P4",
+          "Description": "Idle state with minimal power consumption"
+        }
+      ],
+      "ClockGating": true,
+      "DynamicVoltageFrequencyScaling": true
+    },
+    "PciExpress": {
+      "Version": "N/A",
+      "Lanes": 0,
+      "Bandwidth": 0
+    },
+    "MultiGpuSupport": {
+      "Technologies": ["None"],
+      "MaxGpus": 1,
+      "InterconnectBandwidth": 0
+    }
+  }

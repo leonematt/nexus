@@ -1,0 +1,230 @@
+{
+  "Name": "Apple GPU G16S",
+  "Vendor": "Apple",
+  "Architecture": "applegpu_g16s",
+  "ReleaseYear": 2024,
+  "FabricationProcess": {
+    "ProcessNode": 3,
+    "Manufacturer": "TSMC",
+    "Technology": "N3E"
+  },
+  "CoreSubsystem": {
+    "Name": "GPU Core",
+    "SubUnits": [
+      {
+        "Type": "Chip",
+        "Count": 1,
+        "Size": 10,
+        "Description": "Chip containing multiple Clusters",
+        "Memory": ["L2 Cache"],
+        "SubunitType": "GPU Cluster"
+      },
+      {
+        "Type": "GPU Cluster",
+        "Count": 10,
+        "Size": 2,
+        "Description": "High-level GPU cluster containing multiple cores",
+        "SubunitType": "GPU Core"
+      },
+      {
+        "Type": "GPU Core",
+        "Count": 2,
+        "Size": 4,
+        "Description": "Individual GPU compute core with 128 ALUs",
+        "Memory": ["L1 Cache", "Tile Memory", "Vector Register File", "Scalar Register File", "Shared Memory"],
+        "SubunitType": "SIMD"
+      },
+      {
+        "Type": "SIMD",
+        "Count": 4,
+        "Size": 32,
+        "Description": "SIMD with Warp Size"
+      },
+      {
+        "Type": "Neural Engine Core",
+        "Count": 16,
+        "Size": 1,
+        "Description": "Dedicated neural processing unit for AI/ML workloads"
+      }
+    ]
+  },
+  "MemorySubsystem": {
+    "SupportedMemoryTypes": ["LPDDR5"],
+    "MemoryTypes": [
+      {
+        "Type": "Vector Register File",
+        "Size": 256,
+        "BankCount": 4,
+        "description": "Vector register file for SIMD operations per GPU core"
+      },
+      {
+        "Type": "Scalar Register File",
+        "Size": 16,
+        "BankCount": 2,
+        "description": "Scalar register file for control flow and addressing per GPU core"
+      },
+      {
+        "Type": "Shared Memory",
+        "Size": 32,
+        "BankCount": 32,
+        "description": "Threadgroup shared memory for inter-thread communication within a GPU core"
+      },
+      {
+        "Type": "L1 Cache",
+        "Size": 16,
+        "BankCount": 4,
+        "description": "Per-core L1 cache for fast data access"
+      },
+      {
+        "Type": "L2 Cache",
+        "Size": 4096,
+        "BankCount": 8,
+        "description": "Shared L2 cache across GPU cores"
+      },
+      {
+        "Type": "Tile Memory",
+        "Size": 32,
+        "BankCount": 1,
+        "description": "On-chip tile memory for efficient rendering"
+      },
+      {
+        "Type": "System Memory",
+        "Size": 0,
+        "MaxMemoryBandwidth": 273,
+        "maxBusWidth": 256,
+        "description": "Unified memory architecture shared with CPU"
+      }
+    ]
+  },
+  "KernelModel": {
+    "LLVMTarget": "aarch64-apple-ios",
+    "LLVMTriple": "aarch64-apple-ios17.0",
+    "LLVMFeatures": [
+      {
+        "Name": "apple-gpu",
+        "Description": "Apple GPU specific optimizations"
+      },
+      {
+        "Name": "neon",
+        "Description": "Advanced SIMD (NEON) support"
+      },
+      {
+        "Name": "fp16",
+        "Description": "Half-precision floating-point support"
+      }
+    ],
+    "SubUnits": [
+      {
+        "Type": "metal",
+        "Version": "3.2"
+      },
+      {
+        "Type": "opencl",
+        "Version": "3.0"
+      }
+    ]
+  },
+  "SpecializedHardware": {
+    "RayTracingAccelerators": {
+      "Present": true,
+      "Name": "Ray Tracing Cores",
+      "Count": 1,
+      "Performance": {
+        "RaysPerSecond": 2.5
+      }
+    },
+    "AiAccelerators": {
+      "Present": true,
+      "Name": "Neural Engine",
+      "Count": 16,
+      "SupportedPrecisions": ["FP32", "FP16", "INT8"],
+      "Performance": {
+        "fp16TopsPerGPU": 35.0,
+        "int8TopsPerGPU": 70.0
+      }
+    },
+    "videoCodecs": {
+      "encoders": [
+        {
+          "codec": "H.264",
+          "maxResolution": "8K",
+          "maxBitrate": 1000,
+          "maxFPS": 60
+        },
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "8K",
+          "maxBitrate": 1000,
+          "maxFPS": 60
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "4K",
+          "maxBitrate": 500,
+          "maxFPS": 60
+        }
+      ],
+      "decoders": [
+        {
+          "codec": "H.264",
+          "maxResolution": "8K",
+          "maxBitrate": 1000,
+          "maxFPS": 120
+        },
+        {
+          "codec": "H.265/HEVC",
+          "maxResolution": "8K",
+          "maxBitrate": 1000,
+          "maxFPS": 120
+        },
+        {
+          "codec": "AV1",
+          "maxResolution": "8K",
+          "maxBitrate": 800,
+          "maxFPS": 60
+        },
+        {
+          "codec": "VP9",
+          "maxResolution": "8K",
+          "maxBitrate": 800,
+          "maxFPS": 60
+        }
+      ]
+    }
+  },
+  "PowerEfficiency": {
+    "BaseClock": 1300,
+    "BoostClock": 1580,
+    "MaxTDP": 40,
+    "PowerStates": [
+      {
+        "Name": "Active",
+        "Description": "Full performance mode"
+      },
+      {
+        "Name": "Automatic",
+        "Description": "Dynamic performance scaling based on workload"
+      },
+      {
+        "Name": "Low Power",
+        "Description": "Reduced performance for battery efficiency"
+      },
+      {
+        "Name": "Idle",
+        "Description": "Minimal power consumption when not in use"
+      }
+    ],
+    "ClockGating": true,
+    "DynamicVoltageFrequencyScaling": true
+  },
+  "PciExpress": {
+    "Version": "4.0",
+    "Lanes": 16,
+    "Bandwidth": 32
+  },
+  "MultiGpuSupport": {
+    "Technologies": ["None"],
+    "MaxGpus": 1,
+    "InterconnectBandwidth": 0
+  }
+}

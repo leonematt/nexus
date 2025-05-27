@@ -56,7 +56,6 @@ NEXUS_API_FUNC(nxs_int, GetRuntimeProperty,
  * @brief Lookup 
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_int, GetDeviceCount,
-    nxs_device_type device_type,
     nxs_uint* num_devices
 )
 
@@ -69,7 +68,31 @@ NEXUS_API_FUNC(nxs_int, GetDeviceProperty,
     nxs_uint property_id,
     void *property_value,
     size_t* property_value_size
-  )
+)
+
+/************************************************************************
+ * @def GetDevicePropertyFromPath
+ * @brief Lookup 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, GetDevicePropertyFromPath,
+    nxs_uint device_id,
+    nxs_uint property_path_count,
+    nxs_uint *property_id,
+    void *property_value,
+    size_t* property_value_size
+)
+
+/************************************************************************
+ * @def CreateBuffer
+ * @brief Create buffer in the context
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_uint, CreateBuffer,
+    nxs_uint device_id,
+    size_t size,
+    nxs_mem_flags flags,
+    void* host_ptr,
+    nxs_int* errcode_ret
+)
 
 
 #if 0
@@ -965,130 +988,6 @@ typedef nxs_command_queue NXS_API_CALL nxsCreateCommandQueueWithProperties_t(
 typedef nxsCreateCommandQueueWithProperties_t *
 nxsCreateCommandQueueWithProperties_fn NXS_API_SUFFIX__VERSION_2_0;
 
-typedef nxs_mem NXS_API_CALL nxsCreatePipe_t(
-    nxs_context context,
-    nxs_mem_flags flags,
-    nxs_uint pipe_packet_size,
-    nxs_uint pipe_max_packets,
-    const nxs_pipe_properties* properties,
-    nxs_int* errcode_ret);
-
-typedef nxsCreatePipe_t *
-nxsCreatePipe_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsGetPipeInfo_t(
-    nxs_mem pipe,
-    nxs_pipe_info param_name,
-    size_t param_value_size,
-    void* param_value,
-    size_t* param_value_size_ret);
-
-typedef nxsGetPipeInfo_t *
-nxsGetPipeInfo_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef void* NXS_API_CALL nxsSVMAlloc_t(
-    nxs_context context,
-    nxs_svm_mem_flags flags,
-    size_t size,
-    nxs_uint alignment);
-
-typedef nxsSVMAlloc_t *
-nxsSVMAlloc_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef void NXS_API_CALL nxsSVMFree_t(
-    nxs_context context,
-    void* svm_pointer);
-
-typedef nxsSVMFree_t *
-nxsSVMFree_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_sampler NXS_API_CALL nxsCreateSamplerWithProperties_t(
-    nxs_context context,
-    const nxs_sampler_properties* sampler_properties,
-    nxs_int* errcode_ret);
-
-typedef nxsCreateSamplerWithProperties_t *
-nxsCreateSamplerWithProperties_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsSetKernelArgSVMPointer_t(
-    nxs_kernel kernel,
-    nxs_uint arg_index,
-    const void* arg_value);
-
-typedef nxsSetKernelArgSVMPointer_t *
-nxsSetKernelArgSVMPointer_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsSetKernelExecInfo_t(
-    nxs_kernel kernel,
-    nxs_kernel_exec_info param_name,
-    size_t param_value_size,
-    const void* param_value);
-
-typedef nxsSetKernelExecInfo_t *
-nxsSetKernelExecInfo_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsEnqueueSVMFree_t(
-    nxs_command_queue command_queue,
-    nxs_uint num_svm_pointers,
-    void* svm_pointers[],
-    void (NXS_CALLBACK* pfn_free_func)(nxs_command_queue queue, nxs_uint num_svm_pointers, void* svm_pointers[], void* user_data),
-    void* user_data,
-    nxs_uint num_events_in_wait_list,
-    const nxs_event* event_wait_list,
-    nxs_event* event);
-
-typedef nxsEnqueueSVMFree_t *
-nxsEnqueueSVMFree_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsEnqueueSVMMemcpy_t(
-    nxs_command_queue command_queue,
-    nxs_bool blocking_copy,
-    void* dst_ptr,
-    const void* src_ptr,
-    size_t size,
-    nxs_uint num_events_in_wait_list,
-    const nxs_event* event_wait_list,
-    nxs_event* event);
-
-typedef nxsEnqueueSVMMemcpy_t *
-nxsEnqueueSVMMemcpy_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsEnqueueSVMMemFill_t(
-    nxs_command_queue command_queue,
-    void* svm_ptr,
-    const void* pattern,
-    size_t pattern_size,
-    size_t size,
-    nxs_uint num_events_in_wait_list,
-    const nxs_event* event_wait_list,
-    nxs_event* event);
-
-typedef nxsEnqueueSVMMemFill_t *
-nxsEnqueueSVMMemFill_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsEnqueueSVMMap_t(
-    nxs_command_queue command_queue,
-    nxs_bool blocking_map,
-    nxs_map_flags flags,
-    void* svm_ptr,
-    size_t size,
-    nxs_uint num_events_in_wait_list,
-    const nxs_event* event_wait_list,
-    nxs_event* event);
-
-typedef nxsEnqueueSVMMap_t *
-nxsEnqueueSVMMap_fn NXS_API_SUFFIX__VERSION_2_0;
-
-typedef nxs_int NXS_API_CALL nxsEnqueueSVMUnmap_t(
-    nxs_command_queue command_queue,
-    void* svm_ptr,
-    nxs_uint num_events_in_wait_list,
-    const nxs_event* event_wait_list,
-    nxs_event* event);
-
-typedef nxsEnqueueSVMUnmap_t *
-nxsEnqueueSVMUnmap_fn NXS_API_SUFFIX__VERSION_2_0;
-
 #endif /* NXS_VERSION_2_0 */
 
 #ifdef NXS_VERSION_2_1
@@ -1160,36 +1059,7 @@ nxsEnqueueSVMMigrateMem_fn NXS_API_SUFFIX__VERSION_2_1;
 
 #endif /* NXS_VERSION_2_1 */
 
-#ifdef NXS_VERSION_2_2
-
-typedef nxs_int NXS_API_CALL nxsSetProgramSpecializationConstant_t(
-    nxs_program program,
-    nxs_uint spec_id,
-    size_t spec_size,
-    const void* spec_value);
-
-typedef nxsSetProgramSpecializationConstant_t *
-nxsSetProgramSpecializationConstant_fn NXS_API_SUFFIX__VERSION_2_2;
-
-typedef nxs_int NXS_API_CALL nxsSetProgramReleaseCallback_t(
-    nxs_program program,
-    void (NXS_CALLBACK* pfn_notify)(nxs_program program, void* user_data),
-    void* user_data);
-
-typedef nxsSetProgramReleaseCallback_t *
-nxsSetProgramReleaseCallback_fn NXS_API_SUFFIX__VERSION_2_2_DEPRECATED;
-
-#endif /* NXS_VERSION_2_2 */
-
 #ifdef NXS_VERSION_3_0
-
-typedef nxs_int NXS_API_CALL nxsSetContextDestructorCallback_t(
-    nxs_context context,
-    void (NXS_CALLBACK* pfn_notify)(nxs_context context, void* user_data),
-    void* user_data);
-
-typedef nxsSetContextDestructorCallback_t *
-nxsSetContextDestructorCallback_fn NXS_API_SUFFIX__VERSION_3_0;
 
 typedef nxs_mem NXS_API_CALL nxsCreateBufferWithProperties_t(
     nxs_context context,
