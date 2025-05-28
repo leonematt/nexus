@@ -9,21 +9,21 @@ using namespace nexus;
 #define NEXUS_LOG_MODULE "runtime"
 
 
-Runtime::RTDevice::RTDevice(Runtime &rt, nxs_uint _id)
+detail::DeviceImpl::DeviceImpl(detail::RuntimeImpl *rt, nxs_uint _id)
 : runtime(rt), id(_id) {
-  auto vendor = runtime.getProperty<std::string>(id, NP_Vendor);
-  auto type = runtime.getProperty<std::string>(id, NP_Type);
-  auto arch = runtime.getProperty<std::string>(id, NP_Architecture);
+  auto vendor = runtime->getProperty<std::string>(id, NP_Vendor);
+  auto type = runtime->getProperty<std::string>(id, NP_Type);
+  auto arch = runtime->getProperty<std::string>(id, NP_Architecture);
   auto devTag = vendor + "-" + type + "-" + arch;
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
   if (auto props = nexus::lookupDevice(devTag))
     deviceProps = *props;
-  else
+  else // load defaults
     NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
 }
 
-nxs_int Runtime::RTDevice::createBuffer(size_t size, void *host_data) {
-  if (auto fn = (nxsCreateBuffer_fn)runtime.getRuntimeFunc(FN_nxsCreateBuffer)) {
+nxs_int detail::DeviceImpl::createBuffer(size_t size, void *host_data) {
+  if (auto fn = runtime->getFunction<nxsCreateBuffer_fn>(FN_nxsCreateBuffer)) {
     nxs_int bufId = (*fn)(id, size, 0, host_data);
     if (bufId > -1)
       buffers.push_back(bufId);
@@ -32,8 +32,8 @@ nxs_int Runtime::RTDevice::createBuffer(size_t size, void *host_data) {
   return NXS_InvalidDevice;
 }
 
-nxs_int Runtime::RTDevice::createCommandList() {
-  if (auto fn = (nxsCreateCommandList_fn)runtime.getRuntimeFunc(FN_nxsCreateCommandList)) {
+nxs_int detail::DeviceImpl::createCommandList() {
+  if (auto fn = runtime->getFunction<nxsCreateCommandList_fn>(FN_nxsCreateCommandList)) {
     nxs_int bufId = (*fn)(id, 0);
     if (bufId > -1)
       queues.push_back(bufId);
@@ -53,17 +53,17 @@ nxs_int Runtime::RTDevice::runKernel() {
 #endif
 
 /// @brief Construct a Runtime for the current system
-Runtime::Runtime(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
+detail::RuntimeImpl::RuntimeImpl(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
   loadPlugin();
 }
 
-Runtime::~Runtime() {
+detail::RuntimeImpl::~RuntimeImpl() {
   if (library != nullptr)
     dlclose(library);
 }
 
 
-void Runtime::loadPlugin() {
+void detail::RuntimeImpl::loadPlugin() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "Loading Runtime plugin: " << pluginLibraryPath);
   library = dlopen(pluginLibraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
   char *dlError = dlerror();
@@ -105,7 +105,7 @@ void Runtime::loadPlugin() {
   nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
-    localDevices.emplace_back(*this, i);
+    localDevices.emplace_back(this, i);
   }
 }
 

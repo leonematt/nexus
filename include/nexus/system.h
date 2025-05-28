@@ -8,23 +8,39 @@
 #include <memory>
 
 namespace nexus {
+    class System;
 
-    // Platform class
+    namespace detail {
+
+        class SystemImpl {
+        public:
+            SystemImpl();
+    
+            Runtime getRuntime(int idx) const {
+                return runtimes[idx];
+            }
+        private:
+            // set of runtimes
+            std::vector<Runtime> runtimes;
+            //std::vector<Buffer> buffers;
+        };
+    }
+
+    // System class
     class System {
         // set of runtimes
-        typedef std::shared_ptr<Runtime> RuntimePtr;
-        std::vector<RuntimePtr> runtimes;
+        typedef detail::SystemImpl Impl;
+        std::shared_ptr<Impl> impl;
     
     public:
-        System();
+        System() : impl(std::make_shared<Impl>()) {}
 
-        RuntimePtr getRuntime(int idx) const {
-            return runtimes[idx];
+        Runtime getRuntime(int idx) const {
+            return impl->getRuntime(idx);
         }
-    private:
     };
 
-    System &getSystem();
+    extern System getSystem();
 }
 
 #endif // NEXUS_SYSTEM_H

@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <string.h>
 #include <vector>
+#include <iostream>
 
 #include <nexus-api.h>
 
@@ -173,7 +174,7 @@ nxsGetDeviceProperty(
   switch (property_id) {
     case NP_Name: {
       std::string name = device->name()->cString(NS::StringEncoding::ASCIIStringEncoding);
-      return getStr(name.c_str(), name.size());
+      return getStr(name.c_str(), name.size()+1);
     }
     case NP_Vendor:
       return getStr("apple", 6);
@@ -182,7 +183,7 @@ nxsGetDeviceProperty(
     case NP_Architecture: {
       auto arch = device->architecture();
       std::string name = arch->name()->cString(NS::StringEncoding::ASCIIStringEncoding);
-      return getStr(name.c_str(), name.size());
+      return getStr(name.c_str(), name.size()+1);
     }
 
     default:
