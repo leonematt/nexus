@@ -8,7 +8,7 @@ using namespace nexus;
 #define NEXUS_LOG_MODULE "system"
 
 /// @brief Construct a Platform for the current system
-detail::SystemImpl::SystemImpl() {
+detail::SystemImpl::SystemImpl(int) {
   iterateEnvPaths("NEXUS_RUNTIME_PATH", "./runtime_libs", [&](const std::string &path, const std::string &name) {
     runtimes.emplace_back(path);
   });
@@ -17,7 +17,7 @@ detail::SystemImpl::SystemImpl() {
 /// @brief Get the System Platform
 /// @return 
 nexus::System nexus::getSystem() {
-  static System s_system;
+  static System s_system(0);
   return s_system;
 }
 

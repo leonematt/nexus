@@ -8,7 +8,7 @@ using namespace nexus;
 
 #define NEXUS_LOG_MODULE "device"
 
-void PropertyCache::loadProperties() {
+void detail::PropertiesImpl::loadProperties() {
   // Load json from file
   try {
     std::ifstream f(propertyFilePath);

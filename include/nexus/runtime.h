@@ -83,26 +83,22 @@ namespace nexus {
     }
 
     // Runtime class
-    class Runtime {
-        // set of runtimes
-        typedef detail::RuntimeImpl Impl;
-        std::shared_ptr<Impl> impl;
-    
+    class Runtime : Object<detail::RuntimeImpl> {
     public:
-        Runtime(const std::string &path) : impl(std::make_shared<Impl>(path)) {}
+        using Object::Object;
 
-        int getDeviceCount() const { return impl->getDeviceCount(); }
-        Device getDevice(nxs_uint deviceId) { return impl->getDevice(deviceId); }
+        int getDeviceCount() const { return get()->getDeviceCount(); }
+        Device getDevice(nxs_uint deviceId) { return get()->getDevice(deviceId); }
 
         // Get Runtime Property Value
         template <typename T>
         const T getProperty(NXSAPI_PropertyEnum pn) const {
-            return impl->getProperty<T>(pn);
+            return get()->getProperty<T>(pn);
         }
         // Get Device Property Value
         template <typename T>
         const T getProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
-            return impl->getProperty<T>(deviceId, pn);
+            return get()->getProperty<T>(deviceId, pn);
         }
     };
     

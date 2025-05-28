@@ -14,7 +14,7 @@ namespace nexus {
 
         class SystemImpl {
         public:
-            SystemImpl();
+            SystemImpl(int);
     
             Runtime getRuntime(int idx) const {
                 return runtimes[idx];
@@ -27,16 +27,12 @@ namespace nexus {
     }
 
     // System class
-    class System {
-        // set of runtimes
-        typedef detail::SystemImpl Impl;
-        std::shared_ptr<Impl> impl;
-    
+    class System : Object<detail::SystemImpl> {
     public:
-        System() : impl(std::make_shared<Impl>()) {}
-
+        using Object::Object;
+    
         Runtime getRuntime(int idx) const {
-            return impl->getRuntime(idx);
+            return get()->getRuntime(idx);
         }
     };
 
