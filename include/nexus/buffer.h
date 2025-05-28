@@ -6,16 +6,19 @@
 #include <vector>
 
 namespace nexus {
-    class Buffer;
 
     namespace detail {
+        class SystemImpl;
 
         class BufferImpl {
         public:
-            BufferImpl();
+            BufferImpl(SystemImpl *_sys, size_t _size);
     
         private:
+            SystemImpl *system;
+
             // set of runtimes
+            size_t size;
             void *data;
             Runtime runtime;
         };
@@ -23,13 +26,8 @@ namespace nexus {
     }
 
     // System class
-    class Buffer {
-        // set of runtimes
-        typedef detail::BufferImpl Impl;
-        std::shared_ptr<Impl> impl;
-    
+    class Buffer : Object<detail::BufferImpl> {
     public:
-        Buffer() : impl(std::make_shared<Impl>()) {}
 
     };
 }

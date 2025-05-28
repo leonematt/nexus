@@ -1,6 +1,7 @@
 #include <nexus.h>
 
 #include <iostream>
+#include <numeric>
 
 std::vector<std::string_view> nexusArgs;
 

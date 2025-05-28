@@ -4,13 +4,11 @@
 #include <nexus/object.h>
 #include <nexus-api.h>
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
 #include <optional>
 #include <string>
+#include <vector>
 #include <mutex>
-#include <memory>
+#include <algorithm>
 
 namespace nexus {
 
@@ -18,15 +16,16 @@ namespace nexus {
         class PropertiesImpl {
             std::string propertyFilePath;
             std::once_flag loaded;
-            json propertyMap;
+            struct PropMap;
+            PropMap *propertyMap;
         public:
-            PropertiesImpl(const std::string &filepath)
-                : propertyFilePath(filepath) {}
-            
-            const json &getProperties() {
-                std::call_once(loaded, [&]() { loadProperties(); });
-                return propertyMap;
-            }
+            PropertiesImpl(const std::string &filepath);
+
+            template <typename T>
+            std::optional<T> getProperty(const std::string &propName);
+
+            template <typename T>
+            std::optional<T> getProperty(const std::vector<std::string> &propPath);
 
         private:
             void loadProperties();
@@ -40,57 +39,29 @@ namespace nexus {
         // Query Device Properties
         //   from name
         template <typename T>
-        std::optional<const T> getProperty(const std::string &propName) const {
-            auto props = get()->getProperties();
-            try {
-                return props.at(propName).get<T>();
-            } catch (...) {}
-            return std::nullopt;
+        std::optional<T> getProperty(const std::string &propName) const {
+            return get()->getProperty<T>(propName);
         }
 
         //   from path
         template <typename T>
         std::optional<T> getProperty(const std::vector<std::string> &propPath) const {
-            auto loc = get()->getProperties();
-            for (auto &key : propPath) {
-                try {
-                    loc = loc.at(key);
-                } catch (...) {
-                    return std::nullopt;
-                }
-            }
-            try {
-                return loc.get<T>();
-            } catch (...) {}
-            return std::nullopt;
+            return get()->getProperty<T>(propPath);
         }
+
         //   from name
         template <typename T>
-        std::optional<const T> getProperty(NXSAPI_PropertyEnum prop) const {
-            auto props = get()->getProperties();
-            const char *propName = nxsGetPropName(prop);
-            try {
-                return props.at(propName).get<T>();
-            } catch (...) {}
-            return std::nullopt;
+        std::optional<T> getProperty(NXSAPI_PropertyEnum prop) const {
+            return getProperty<T>(nxsGetPropName(prop));
         }
 
         //   from path
         template <typename T>
         std::optional<T> getProperty(const std::vector<NXSAPI_PropertyEnum> &propPath) const {
-            auto loc = get()->getProperties();
-            for (auto key : propPath) {
-                const char *keyStr = nxsGetPropName(key);
-                try {
-                    loc = loc.at(keyStr);
-                } catch (...) {
-                    return std::nullopt;
-                }
-            }
-            try {
-                return loc.get<T>();
-            } catch (...) {}
-            return std::nullopt;
+            std::vector<std::string> propNames;
+            std::for_each(propPath.begin(), propPath.end(),
+                 [&](NXSAPI_PropertyEnum pn) { propNames.push_back(nxsGetPropName(pn)); });
+            return getProperty<T>(propNames);
         }
     };
 

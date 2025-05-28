@@ -2,6 +2,7 @@
 #define NEXUS_SYSTEM_H
 
 #include <nexus/runtime.h>
+#include <nexus/buffer.h>
 
 #include <vector>
 #include <optional>
@@ -22,7 +23,7 @@ namespace nexus {
         private:
             // set of runtimes
             std::vector<Runtime> runtimes;
-            //std::vector<Buffer> buffers;
+            std::vector<Buffer> buffers;
         };
     }
 

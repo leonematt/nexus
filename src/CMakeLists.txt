@@ -1,9 +1,10 @@
-project(nexus-test)
+project(nexus-api)
 
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 
 add_library(nexus-api SHARED
     properties.cpp
+    device.cpp
     device_db.cpp
     utility.cpp
     system.cpp
@@ -13,9 +14,3 @@ add_library(nexus-api SHARED
 )
 
 target_link_libraries(nexus-api PRIVATE nlohmann_json::nlohmann_json)
-
-add_executable(nexus-test 
-    main.cpp
-)
-
-target_link_libraries(nexus-test PRIVATE nexus-api nlohmann_json::nlohmann_json)

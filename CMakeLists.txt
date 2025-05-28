@@ -186,7 +186,7 @@ endif()
 add_subdirectory(third_party/json json)
 #@@@ include_directories(third_party/json/include)
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(test)
 
 if(NEXUS_BUILD_PLUGINS)
   add_subdirectory(plugins)
