@@ -28,3 +28,11 @@ const char *nxsGetPropName(NXSAPI_PropertyEnum propEnum) {
 NXSAPI_PropertyEnum nxsGetPropEnum(const char *propName) {
     return *magic_enum::enum_cast<NXSAPI_PropertyEnum>(propName);
 }
+
+const char *nxsGetStatusName(NXSAPI_StatusEnum statusEnum) {
+    return magic_enum::enum_name(statusEnum).data();
+}
+
+enum NXSAPI_StatusEnum nxsGetStatusEnum(const char *statusName) {
+    return *magic_enum::enum_cast<NXSAPI_StatusEnum>(statusName);
+}

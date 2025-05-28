@@ -193,83 +193,68 @@ typedef struct _nxs_name_version {
 /******************************************************************************/
 
 /* Error Codes */
-#define NXS_SUCCESS                                  0
-#define NXS_DEVICE_NOT_FOUND                         -1
-#define NXS_DEVICE_NOT_AVAILABLE                     -2
-#define NXS_COMPILER_NOT_AVAILABLE                   -3
-#define NXS_MEM_OBJECT_ALLOCATION_FAILURE            -4
-#define NXS_OUT_OF_RESOURCES                         -5
-#define NXS_OUT_OF_HOST_MEMORY                       -6
-#define NXS_PROFILING_INFO_NOT_AVAILABLE             -7
-#define NXS_MEM_COPY_OVERLAP                         -8
-#define NXS_IMAGE_FORMAT_MISMATCH                    -9
-#define NXS_IMAGE_FORMAT_NOT_SUPPORTED               -10
-#define NXS_BUILD_PROGRAM_FAILURE                    -11
-#define NXS_MAP_FAILURE                              -12
-#ifdef NXS_VERSION_1_1
-#define NXS_MISALIGNED_SUB_BUFFER_OFFSET             -13
-#define NXS_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST -14
-#endif
-#ifdef NXS_VERSION_1_2
-#define NXS_COMPILE_PROGRAM_FAILURE                  -15
-#define NXS_LINKER_NOT_AVAILABLE                     -16
-#define NXS_LINK_PROGRAM_FAILURE                     -17
-#define NXS_DEVICE_PARTITION_FAILED                  -18
-#define NXS_KERNEL_ARG_INFO_NOT_AVAILABLE            -19
-#endif
-
-#define NXS_INVALID_VALUE                            -30
-#define NXS_INVALID_DEVICE_TYPE                      -31
-#define NXS_INVALID_RUNTIME                         -32
-#define NXS_INVALID_DEVICE                           -33
-#define NXS_INVALID_CONTEXT                          -34
-#define NXS_INVALID_QUEUE_PROPERTIES                 -35
-#define NXS_INVALID_COMMAND_QUEUE                    -36
-#define NXS_INVALID_HOST_PTR                         -37
-#define NXS_INVALID_MEM_OBJECT                       -38
-#define NXS_INVALID_IMAGE_FORMAT_DESCRIPTOR          -39
-#define NXS_INVALID_IMAGE_SIZE                       -40
-#define NXS_INVALID_SAMPLER                          -41
-#define NXS_INVALID_BINARY                           -42
-#define NXS_INVALID_BUILD_OPTIONS                    -43
-#define NXS_INVALID_PROGRAM                          -44
-#define NXS_INVALID_PROGRAM_EXECUTABLE               -45
-#define NXS_INVALID_KERNEL_NAME                      -46
-#define NXS_INVALID_KERNEL_DEFINITION                -47
-#define NXS_INVALID_KERNEL                           -48
-#define NXS_INVALID_ARG_INDEX                        -49
-#define NXS_INVALID_ARG_VALUE                        -50
-#define NXS_INVALID_ARG_SIZE                         -51
-#define NXS_INVALID_KERNEL_ARGS                      -52
-#define NXS_INVALID_WORK_DIMENSION                   -53
-#define NXS_INVALID_WORK_GROUP_SIZE                  -54
-#define NXS_INVALID_WORK_ITEM_SIZE                   -55
-#define NXS_INVALID_GLOBAL_OFFSET                    -56
-#define NXS_INVALID_EVENT_WAIT_LIST                  -57
-#define NXS_INVALID_EVENT                            -58
-#define NXS_INVALID_OPERATION                        -59
-#define NXS_INVALID_GL_OBJECT                        -60
-#define NXS_INVALID_BUFFER_SIZE                      -61
-#define NXS_INVALID_MIP_LEVEL                        -62
-#define NXS_INVALID_GLOBAL_WORK_SIZE                 -63
-#ifdef NXS_VERSION_1_1
-#define NXS_INVALID_PROPERTY                         -64
-#endif
-#ifdef NXS_VERSION_1_2
-#define NXS_INVALID_IMAGE_DESCRIPTOR                 -65
-#define NXS_INVALID_COMPILER_OPTIONS                 -66
-#define NXS_INVALID_LINKER_OPTIONS                   -67
-#define NXS_INVALID_DEVICE_PARTITION_COUNT           -68
-#endif
-#ifdef NXS_VERSION_2_0
-#define NXS_INVALID_PIPE_SIZE                        -69
-#define NXS_INVALID_DEVICE_QUEUE                     -70
-#endif
-#ifdef NXS_VERSION_2_2
-#define NXS_INVALID_SPEC_ID                          -71
-#define NXS_MAX_SIZE_RESTRICTION_EXCEEDED            -72
-#endif
-
+enum NXSAPI_StatusEnum {
+    NXS_Success                              = 0,
+    NXS_DeviceNotFound                       = -1,
+    NXS_DeviceNotAvailable                   = -2,
+    NXS_CompilerNotAvailable                 = -3,
+    NXS_MemObjectAllocationFailure           = -4,
+    NXS_OutOfResources                       = -5,
+    NXS_OutOfHostMemory                      = -6,
+    NXS_ProfilingInfoNotAvailable            = -7,
+    NXS_MemCopyOverlap                       = -8,
+    NXS_ImageFormatMismatch                  = -9,
+    NXS_ImageFormatNotSupported              = -10,
+    NXS_BuildProgramFailure                  = -11,
+    NXS_MapFailure                           = -12,
+    NXS_MisalignedSubBufferOffset            = -13,
+    NXS_ExecStatusErrorForEventsInWaitList   = -14,
+    NXS_CompileProgramFailure                = -15,
+    NXS_LinkerNotAvailable                   = -16,
+    NXS_LinkProgramFailure                   = -17,
+    NXS_DevicePartitionFailed                = -18,
+    NXS_KernelArgInfoNotAvailable            = -19,
+    NXS_InvalidValue                         = -30,
+    NXS_InvalidDeviceType                    = -31,
+    NXS_InvalidRuntime                       = -32,
+    NXS_InvalidDevice                        = -33,
+    NXS_InvalidContext                       = -34,
+    NXS_InvalidQueueProperties               = -35,
+    NXS_InvalidCommandQueue                  = -36,
+    NXS_InvalidHostPtr                       = -37,
+    NXS_InvalidMemObject                     = -38,
+    NXS_InvalidImageFormatDescriptor         = -39,
+    NXS_InvalidImageSize                     = -40,
+    NXS_InvalidSampler                       = -41,
+    NXS_InvalidBinary                        = -42,
+    NXS_InvalidBuildOptions                  = -43,
+    NXS_InvalidProgram                       = -44,
+    NXS_InvalidProgramExecutable             = -45,
+    NXS_InvalidKernelName                    = -46,
+    NXS_InvalidKernelDefinition              = -47,
+    NXS_InvalidKernel                        = -48,
+    NXS_InvalidArgIndex                      = -49,
+    NXS_InvalidArgValue                      = -50,
+    NXS_InvalidArgSize                       = -51,
+    NXS_InvalidKernelArgs                    = -52,
+    NXS_InvalidWorkDimension                 = -53,
+    NXS_InvalidWorkGroupSize                 = -54,
+    NXS_InvalidWorkItemSize                  = -55,
+    NXS_InvalidGlobalOffset                  = -56,
+    NXS_InvalidEventWaitList                 = -57,
+    NXS_InvalidEvent                         = -58,
+    NXS_InvalidOperation                     = -59,
+    NXS_InvalidGlObject                      = -60,
+    NXS_InvalidBufferSize                    = -61,
+    NXS_InvalidMipLevel                      = -62,
+    NXS_InvalidGlobalWorkSize                = -63,
+    NXS_InvalidProperty                      = -64,
+    NXS_InvalidImageDescriptor               = -65,
+    NXS_InvalidCompilerOptions               = -66,
+    NXS_InvalidDeviceQueue                   = -70,
+    NXS_InvalidSpecId                        = -71,
+    NXS_MaxSizeRestrictionExceeded           = -72
+};
 
 /* nxs_bool */
 #define NXS_FALSE                                    0

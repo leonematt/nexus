@@ -35,7 +35,7 @@ void nexus::iterateEnvPaths(const char *envVar, const char *envDefault, const ne
     for (auto const& dir_entry : std::filesystem::directory_iterator{directory}) {
       if (dir_entry.is_regular_file()) {
         auto filepath = dir_entry.path();
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Reading file: " << filepath);
+        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Adding file: " << filepath);
 
         func(filepath, filepath.filename());
       }

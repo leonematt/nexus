@@ -2,7 +2,7 @@ project(nexus-test)
 
 add_executable(nexus-test 
     main.cpp
-    device.cpp
+    properties.cpp
     device_db.cpp
     utility.cpp
     system.cpp

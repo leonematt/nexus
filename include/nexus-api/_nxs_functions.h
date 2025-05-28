@@ -45,7 +45,7 @@ enum NXSAPI_FunctionEnum {
  * @def GetRuntimeProperty
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, GetRuntimeProperty,
+NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetRuntimeProperty,
     nxs_uint runtime_property_id,
     void *property_value,
     size_t* property_value_size
@@ -55,15 +55,13 @@ NEXUS_API_FUNC(nxs_int, GetRuntimeProperty,
  * @def GetRuntimeProperty
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, GetDeviceCount,
-    nxs_uint* num_devices
-)
+NEXUS_API_FUNC(nxs_int, GetDeviceCount)
 
 /************************************************************************
  * @def GetDeviceProperty
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, GetDeviceProperty,
+NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetDeviceProperty,
     nxs_uint device_id,
     nxs_uint property_id,
     void *property_value,
@@ -74,7 +72,7 @@ NEXUS_API_FUNC(nxs_int, GetDeviceProperty,
  * @def GetDevicePropertyFromPath
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, GetDevicePropertyFromPath,
+NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetDevicePropertyFromPath,
     nxs_uint device_id,
     nxs_uint property_path_count,
     nxs_uint *property_id,
@@ -84,14 +82,26 @@ NEXUS_API_FUNC(nxs_int, GetDevicePropertyFromPath,
 
 /************************************************************************
  * @def CreateBuffer
- * @brief Create buffer in the context
- ***********************************************************************/
-NEXUS_API_FUNC(nxs_uint, CreateBuffer,
+ * @brief Create buffer on the device
+  * @return Negative value is an error status.
+  *         Non-negative is the bufferId.
+***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateBuffer,
     nxs_uint device_id,
     size_t size,
     nxs_mem_flags flags,
-    void* host_ptr,
-    nxs_int* errcode_ret
+    void* host_ptr
+)
+
+/************************************************************************
+ * @def CreateCommandBuffer
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateCommandList,
+    nxs_uint device_id,
+    nxs_command_queue_properties properties
 )
 
 

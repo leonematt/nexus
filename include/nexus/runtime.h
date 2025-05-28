@@ -1,7 +1,7 @@
 #ifndef NEXUS_RUNTIME_H
 #define NEXUS_RUNTIME_H
 
-#include <nexus/device.h>
+#include <nexus/properties.h>
 #include <nexus-api.h>
 
 #include <optional>
@@ -20,16 +20,17 @@ namespace nexus {
         class RTDevice {
             Runtime &runtime;
             nxs_uint id;
-            Device deviceProps;
+            Properties deviceProps;
             std::vector<nxs_uint> buffers;
             std::vector<nxs_uint> queues;
         public:
             RTDevice(Runtime &rt, nxs_uint id);
 
-            Device getProperties() const { return deviceProps; }
+            Properties getProperties() const { return deviceProps; }
 
             // Runtime functions
             nxs_int createBuffer(size_t size, void *host_data = nullptr);
+            nxs_int createCommandList();
 
         };
     private:

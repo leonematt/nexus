@@ -18,6 +18,9 @@ int main() {
   auto bufId = dev0->createBuffer(100);
   std::cout << "    Buffer: " << bufId << std::endl;
 
+  auto queId = dev0->createCommandList();
+  std::cout << "    CList: " << queId << std::endl;
+
   auto dev = nexus::lookupDevice("amd-gpu-gfx942");
   if (dev) {
     {
@@ -34,6 +37,7 @@ int main() {
       std::vector<std::string> prop_path = {"coreSubsystem", "maxPerUnit"};
       auto pval = dev->getProperty<int64_t>(prop_path);
 
+      // make slash path
       std::string path = std::accumulate(std::begin(prop_path), std::end(prop_path), std::string(),
                                 [](std::string &ss, std::string &s)
                                 {
@@ -46,6 +50,9 @@ int main() {
         std::cout << "NOT FOUND";
       std::cout << std::endl;
     }
+
+    std::vector<NXSAPI_PropertyEnum> prop_epath = {NP_CoreSubsystem, NP_Count};
+    auto eval = dev->getProperty<int64_t>(prop_epath);
   }
   return 0;
 }

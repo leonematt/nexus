@@ -23,7 +23,9 @@
 
 #include <assert.h>
 #include <string.h>
-//#include "pocl_cl.h"
+#include <sys/utsname.h>
+
+int uname(struct utsname *buf);
 
 #include <nexus-api.h>
 
@@ -31,12 +33,12 @@
  * Get the number of supported platforms on this system. 
  * On POCL, this trivially reduces to 1 - POCL itself.
  */ 
-NXS_API_ENTRY enum NXSAPI_StatusEnum NXS_API_CALL
+NXS_API_ENTRY nxs_int NXS_API_CALL
 nxsGetRuntimeProperty(
   nxs_uint runtime_property_id,
   void *property_value,
   size_t* property_value_size
-)
+) NXS_API_SUFFIX__VERSION_1_0
 {
 
   /* lookup HIP equivalent */
@@ -55,7 +57,7 @@ nxsGetRuntimeProperty(
   default:
     break;
   }
-  return NXS_Success;
+  return NXS_SUCCESS;
 }
 /* POsym(clGetPlatformIDs) */
 

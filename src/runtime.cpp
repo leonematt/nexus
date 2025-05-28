@@ -24,16 +24,33 @@ Runtime::RTDevice::RTDevice(Runtime &rt, nxs_uint _id)
 
 nxs_int Runtime::RTDevice::createBuffer(size_t size, void *host_data) {
   if (auto fn = (nxsCreateBuffer_fn)runtime.getRuntimeFunc(FN_nxsCreateBuffer)) {
-    nxs_int retVal;
-    nxs_int bufId = (*fn)(id, size, 0, host_data, &retVal);
-    if (retVal == NXS_SUCCESS) {
+    nxs_int bufId = (*fn)(id, size, 0, host_data);
+    if (bufId > -1)
       buffers.push_back(bufId);
-      return bufId;
-    }
+    return bufId;
   }
-  return NXS_INVALID_CONTEXT;
+  return NXS_InvalidDevice;
 }
 
+nxs_int Runtime::RTDevice::createCommandList() {
+  if (auto fn = (nxsCreateCommandList_fn)runtime.getRuntimeFunc(FN_nxsCreateCommandList)) {
+    nxs_int bufId = (*fn)(id, 0);
+    if (bufId > -1)
+      queues.push_back(bufId);
+    return bufId;
+  }
+  return NXS_InvalidDevice;
+}
+
+#if 0
+nxs_int Runtime::RTDevice::loadKernel() {
+  
+}
+
+nxs_int Runtime::RTDevice::runKernel() {
+  
+}
+#endif
 
 /// @brief Construct a Runtime for the current system
 Runtime::Runtime(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
@@ -74,6 +91,8 @@ void Runtime::loadPlugin() {
   loadFn(FN_nxsGetDeviceProperty);
 
   loadFn(FN_nxsCreateBuffer);
+  loadFn(FN_nxsCreateCommandList);
+  
 
   if (!runtimeFns[FN_nxsGetRuntimeProperty] || !runtimeFns[FN_nxsGetDeviceCount] ||
       !runtimeFns[FN_nxsGetDeviceProperty])
@@ -82,9 +101,8 @@ void Runtime::loadPlugin() {
   // Load device properties
 
   // Lazy load Device properties
-  nxs_uint count = 0;
   auto fn = (nxsGetDeviceCount_fn)runtimeFns[FN_nxsGetDeviceCount];
-  (*fn)(&count);
+  nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
     localDevices.emplace_back(*this, i);

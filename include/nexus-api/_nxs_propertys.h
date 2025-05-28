@@ -75,6 +75,9 @@ NEXUS_API_PROP(MaxPower,        nxs_double,  "Max Power")
 const char *nxsGetPropName(enum NXSAPI_PropertyEnum propEnum);
 enum NXSAPI_PropertyEnum nxsGetPropEnum(const char *propName);
 
+const char *nxsGetStatusName(enum NXSAPI_StatusEnum statusEnum);
+enum NXSAPI_StatusEnum nxsGetStatusEnum(const char *statusName);
+
 #endif
 
 #undef NEXUS_API_GENERATE_PROP_ENUM
