@@ -106,7 +106,7 @@ const MetalRuntime *getRuntime() {
 /*
  * Get the Runtime properties
  */ 
-extern "C" NXSAPI_StatusEnum NXS_API_CALL
+extern "C" nxs_status NXS_API_CALL
 nxsGetRuntimeProperty(
   nxs_uint runtime_property_id,
   void *property_value,
@@ -145,7 +145,7 @@ nxsGetDeviceCount()
  * Get the number of supported platforms on this system. 
  * On POCL, this trivially reduces to 1 - POCL itself.
  */ 
-extern "C" NXSAPI_StatusEnum NXS_API_CALL
+extern "C" nxs_status NXS_API_CALL
 nxsGetDeviceProperty(
   nxs_uint device_id,
   nxs_uint property_id,
@@ -196,7 +196,7 @@ nxsGetDeviceProperty(
  * Get the number of supported platforms on this system. 
  * On POCL, this trivially reduces to 1 - POCL itself.
  */ 
-extern "C" NXSAPI_StatusEnum NXS_API_CALL
+extern "C" nxs_status NXS_API_CALL
 nxsGetDevicePropertyFromPath(
     nxs_uint device_id,
     nxs_uint property_path_count,

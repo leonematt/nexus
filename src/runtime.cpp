@@ -7,22 +7,58 @@
 #include <dlfcn.h>
 
 using namespace nexus;
+using namespace nexus::detail;
 
 #define NEXUS_LOG_MODULE "runtime"
 
 
 /// @brief Construct a Runtime for the current system
-detail::RuntimeImpl::RuntimeImpl(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
+RuntimeImpl::RuntimeImpl(const std::string &path) : pluginLibraryPath(path), library(nullptr) {
   loadPlugin();
 }
 
-detail::RuntimeImpl::~RuntimeImpl() {
+RuntimeImpl::~RuntimeImpl() {
   if (library != nullptr)
     dlclose(library);
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Runtime: " << pluginLibraryPath);  
+}
+
+int RuntimeImpl::getDeviceCount() const {
+  return localDevices.size();
+}
+
+Device RuntimeImpl::getDevice(nxs_int deviceId) {
+  if (deviceId < 0 || deviceId >= localDevices.size())
+      return Device();
+  return localDevices[deviceId];
 }
 
 
-void detail::RuntimeImpl::loadPlugin() {
+template <>
+const std::string RuntimeImpl::getProperty<std::string>(nxs_property pn) const {
+  if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(FN_nxsGetRuntimeProperty)) {
+      size_t size = 256;
+      char name[size];
+      (*fn)(pn, name, &size);
+      return name;
+  }
+  return std::string();
+}
+
+template <>
+const std::string RuntimeImpl::getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const {
+  if (auto fn = getFunction<nxsGetDeviceProperty_fn>(FN_nxsGetDeviceProperty)) {
+      size_t size = 256;
+      char name[size];
+      (*fn)(deviceId, pn, name, &size);
+      return name;
+  }
+  return std::string();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void RuntimeImpl::loadPlugin() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "Loading Runtime plugin: " << pluginLibraryPath);
   library = dlopen(pluginLibraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
   char *dlError = dlerror();
@@ -34,9 +70,9 @@ void detail::RuntimeImpl::loadPlugin() {
     assert(0);
   }
 
-  auto loadFn = [&](NXSAPI_FunctionEnum fn) {
+  auto loadFn = [&](nxs_function fn) {
     auto *fName = nxsGetFuncName(fn);
-    runtimeFns[fn] = dlsym(library, fName+3);
+    runtimeFns[fn] = dlsym(library, fName);
     dlError = dlerror();
     if (dlError) {
       NEXUS_LOG(NEXUS_STATUS_WARN, "  Failed to load symbol '" << fName << "': " << dlError);
@@ -67,6 +103,3 @@ void detail::RuntimeImpl::loadPlugin() {
     localDevices.emplace_back(this, i);
   }
 }
-
-
-

@@ -9,32 +9,18 @@
 #include <memory>
 
 namespace nexus {
-    class System;
-
     namespace detail {
-
-        class SystemImpl {
-        public:
-            SystemImpl(int);
-    
-            Runtime getRuntime(int idx) const {
-                return runtimes[idx];
-            }
-        private:
-            // set of runtimes
-            std::vector<Runtime> runtimes;
-            std::vector<Buffer> buffers;
-        };
+        class SystemImpl;
     }
 
     // System class
     class System : Object<detail::SystemImpl> {
     public:
+        System(int);
         using Object::Object;
     
-        Runtime getRuntime(int idx) const {
-            return get()->getRuntime(idx);
-        }
+        Runtime getRuntime(int idx) const;
+        Buffer createBuffer(size_t sz, void *hostData = nullptr);
     };
 
     extern System getSystem();

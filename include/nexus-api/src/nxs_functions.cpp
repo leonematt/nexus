@@ -21,10 +21,10 @@
 #include <magic_enum/magic_enum.hpp>
 
 
-const char *nxsGetFuncName(NXSAPI_FunctionEnum funcEnum) {
-    return magic_enum::enum_name(funcEnum).data();
+const char *nxsGetFuncName(nxs_function funcEnum) {
+    return magic_enum::enum_name(funcEnum).data() + NXSAPI_FUNCTION_PREFIX_LEN;
 }
 
-NXSAPI_FunctionEnum nxsGetFuncEnum(const char *funcName) {
-    return *magic_enum::enum_cast<NXSAPI_FunctionEnum>(funcName);
+nxs_function nxsGetFuncEnum(const char *funcName) {
+    return *magic_enum::enum_cast<nxs_function>(funcName);
 }

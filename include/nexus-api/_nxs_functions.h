@@ -19,7 +19,7 @@
         FN_nxs##NAME,
     
 // Declare the Enumeration
-enum NXSAPI_FunctionEnum {
+enum _nxs_function {
 
 #else
 #if defined(NEXUS_API_GENERATE_FUNC_TYPE)
@@ -45,7 +45,7 @@ enum NXSAPI_FunctionEnum {
  * @def GetRuntimeProperty
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetRuntimeProperty,
+NEXUS_API_FUNC(nxs_status, GetRuntimeProperty,
     nxs_uint runtime_property_id,
     void *property_value,
     size_t* property_value_size
@@ -61,7 +61,7 @@ NEXUS_API_FUNC(nxs_int, GetDeviceCount)
  * @def GetDeviceProperty
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetDeviceProperty,
+NEXUS_API_FUNC(nxs_status, GetDeviceProperty,
     nxs_uint device_id,
     nxs_uint property_id,
     void *property_value,
@@ -72,7 +72,7 @@ NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetDeviceProperty,
  * @def GetDevicePropertyFromPath
  * @brief Lookup 
  ***********************************************************************/
-NEXUS_API_FUNC(enum NXSAPI_StatusEnum, GetDevicePropertyFromPath,
+NEXUS_API_FUNC(nxs_status, GetDevicePropertyFromPath,
     nxs_uint device_id,
     nxs_uint property_path_count,
     nxs_uint *property_id,
@@ -1100,11 +1100,13 @@ nxsCreateImageWithProperties_fn NXS_API_SUFFIX__VERSION_3_0;
 #ifdef NEXUS_API_GENERATE_FUNC_ENUM
     NXSAPI_FUNCTION_COUNT,
     NXSAPI_FUNCTION_PREFIX_LEN = 3
-}; /* close NXSAPI_FunctionEnum */
+}; /* close _nxs_function */
 
-const char *nxsGetFuncName(enum NXSAPI_FunctionEnum funcEnum);
+typedef enum _nxs_function nxs_function;
 
-enum NXSAPI_FunctionEnum nxsGetFuncEnum(const char *funcName);
+const char *nxsGetFuncName(nxs_function funcEnum);
+
+nxs_function nxsGetFuncEnum(const char *funcName);
 
 #endif
 

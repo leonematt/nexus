@@ -193,7 +193,7 @@ typedef struct _nxs_name_version {
 /******************************************************************************/
 
 /* Error Codes */
-enum NXSAPI_StatusEnum {
+enum _nxs_status {
     NXS_Success                              = 0,
     NXS_DeviceNotFound                       = -1,
     NXS_DeviceNotAvailable                   = -2,
@@ -255,6 +255,8 @@ enum NXSAPI_StatusEnum {
     NXS_InvalidSpecId                        = -71,
     NXS_MaxSizeRestrictionExceeded           = -72
 };
+
+typedef enum _nxs_status nxs_status;
 
 /* nxs_bool */
 #define NXS_FALSE                                    0

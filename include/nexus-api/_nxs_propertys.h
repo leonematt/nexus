@@ -11,7 +11,7 @@
 #define NEXUS_API_PROP(NAME, TYPE, DESC) \
     NP_##NAME,
 
-enum NXSAPI_PropertyEnum {
+enum _nxs_property {
 
 #else
 #if defined(NEXUS_API_GENERATE_PROP_TYPE)
@@ -69,14 +69,16 @@ NEXUS_API_PROP(MaxPower,        nxs_double,  "Max Power")
 #ifdef NEXUS_API_GENERATE_PROP_ENUM
     NP_PROPERTY_COUNT,
     NP_PROPERTY_PREFIX_SIZE = 3
-}; /* close RuntimeFuncEnum */
+}; /* close _nxs_property */
+
+typedef enum _nxs_property nxs_property;
 
 /* Translation functions */
-const char *nxsGetPropName(enum NXSAPI_PropertyEnum propEnum);
-enum NXSAPI_PropertyEnum nxsGetPropEnum(const char *propName);
+const char *nxsGetPropName(nxs_property propEnum);
+nxs_property nxsGetPropEnum(const char *propName);
 
-const char *nxsGetStatusName(enum NXSAPI_StatusEnum statusEnum);
-enum NXSAPI_StatusEnum nxsGetStatusEnum(const char *statusName);
+const char *nxsGetStatusName(nxs_status statusEnum);
+nxs_status nxsGetStatusEnum(const char *statusName);
 
 #endif
 

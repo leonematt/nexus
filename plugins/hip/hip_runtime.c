@@ -31,7 +31,7 @@
  * Get the number of supported platforms on this system. 
  * On POCL, this trivially reduces to 1 - POCL itself.
  */ 
-NXS_API_ENTRY enum NXSAPI_StatusEnum NXS_API_CALL
+NXS_API_ENTRY nxs_status NXS_API_CALL
 nxsGetRuntimeProperty(
   nxs_uint runtime_property_id,
   void *property_value,

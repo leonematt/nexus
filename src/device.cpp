@@ -4,7 +4,35 @@
 
 #define NEXUS_LOG_MODULE "device"
 
+using namespace nexus;
 using namespace nexus::detail;
+
+namespace nexus {
+namespace detail {
+// RTDevice - wrapper for Device properties and Runtime actions
+class DeviceImpl {
+    RuntimeImpl *runtime;
+    nxs_uint id;
+    Properties deviceProps;
+    std::vector<nxs_uint> buffers;
+    std::vector<nxs_uint> queues;
+public:
+    DeviceImpl(RuntimeImpl *rt, nxs_uint id);
+    ~DeviceImpl() {
+      NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Device: " << id);
+    }
+
+    Properties getProperties() const { return deviceProps; }
+
+    // Runtime functions
+    nxs_int createBuffer(size_t size, void *hostData = nullptr);
+    nxs_int createCommandList();
+
+};
+
+}
+}
+
 
 DeviceImpl::DeviceImpl(detail::RuntimeImpl *rt, nxs_uint _id)
 : runtime(rt), id(_id) {
@@ -48,3 +76,20 @@ nxs_int Runtime::RTDevice::runKernel() {
   
 }
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+/// @return 
+///////////////////////////////////////////////////////////////////////////////
+Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
+
+Device::Device() : Object() {}
+
+Properties Device::getProperties() const { return get()->getProperties(); }
+
+// Runtime functions
+nxs_int Device::createBuffer(size_t size, void *hostData) {
+    return get()->createBuffer(size, hostData);
+}
+nxs_int Device::createCommandList() {
+    return get()->createCommandList();
+}

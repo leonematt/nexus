@@ -9,7 +9,6 @@
 #include <memory>
 
 namespace nexus {
-    class Runtime;
 
     namespace detail {
         class RuntimeImpl {
@@ -17,22 +16,16 @@ namespace nexus {
             RuntimeImpl(const std::string &path);
             ~RuntimeImpl();
 
-            int getDeviceCount() const {
-                return localDevices.size();
-            }
+            int getDeviceCount() const;
 
-            Device getDevice(nxs_int deviceId) {
-                if (deviceId < 0 || deviceId >= localDevices.size())
-                    return Device();
-                return localDevices[deviceId];
-            }
+            Device getDevice(nxs_int deviceId);
 
             template <typename T>
-            T getFunction(NXSAPI_FunctionEnum fn) const { return (T)runtimeFns[fn]; }
+            T getFunction(nxs_function fn) const { return (T)runtimeFns[fn]; }
 
             // Get Runtime Property Value
             template <typename T>
-            const T getProperty(NXSAPI_PropertyEnum pn) const {
+            const T getProperty(nxs_property pn) const {
                 size_t size = sizeof(T);
                 T val = 0;
                 //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
@@ -41,18 +34,11 @@ namespace nexus {
                 return val;
             }
             template <>
-            const std::string getProperty<std::string>(NXSAPI_PropertyEnum pn) const {
-                if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(FN_nxsGetRuntimeProperty)) {
-                    size_t size = 256;
-                    char name[size];
-                    (*fn)(pn, name, &size);
-                    return name;
-                }
-                return std::string();
-            }
+            const std::string getProperty<std::string>(nxs_property pn) const;
+
             // Get Device Property Value
             template <typename T>
-            const T getProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
+            const T getProperty(nxs_uint deviceId, nxs_property pn) const {
                 size_t size = sizeof(T);
                 T val = 0;
                 //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
@@ -61,15 +47,7 @@ namespace nexus {
                 return val;
             }
             template <>
-            const std::string getProperty<std::string>(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
-                if (auto fn = getFunction<nxsGetDeviceProperty_fn>(FN_nxsGetDeviceProperty)) {
-                    size_t size = 256;
-                    char name[size];
-                    (*fn)(deviceId, pn, name, &size);
-                    return name;
-                }
-                return std::string();
-            }
+            const std::string getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const;
 
         private:
             void loadPlugin();
@@ -92,12 +70,12 @@ namespace nexus {
 
         // Get Runtime Property Value
         template <typename T>
-        const T getProperty(NXSAPI_PropertyEnum pn) const {
+        const T getProperty(nxs_property pn) const {
             return get()->getProperty<T>(pn);
         }
         // Get Device Property Value
         template <typename T>
-        const T getProperty(nxs_uint deviceId, NXSAPI_PropertyEnum pn) const {
+        const T getProperty(nxs_uint deviceId, nxs_property pn) const {
             return get()->getProperty<T>(deviceId, pn);
         }
     };

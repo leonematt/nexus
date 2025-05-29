@@ -21,18 +21,18 @@
 #include <magic_enum/magic_enum.hpp>
 
 
-const char *nxsGetPropName(NXSAPI_PropertyEnum propEnum) {
+const char *nxsGetPropName(nxs_property propEnum) {
     return magic_enum::enum_name(propEnum).data();
 }
 
-NXSAPI_PropertyEnum nxsGetPropEnum(const char *propName) {
-    return *magic_enum::enum_cast<NXSAPI_PropertyEnum>(propName);
+nxs_property nxsGetPropEnum(const char *propName) {
+    return *magic_enum::enum_cast<nxs_property>(propName);
 }
 
-const char *nxsGetStatusName(NXSAPI_StatusEnum statusEnum) {
+const char *nxsGetStatusName(nxs_status statusEnum) {
     return magic_enum::enum_name(statusEnum).data();
 }
 
-enum NXSAPI_StatusEnum nxsGetStatusEnum(const char *statusName) {
-    return *magic_enum::enum_cast<NXSAPI_StatusEnum>(statusName);
+nxs_status nxsGetStatusEnum(const char *statusName) {
+    return *magic_enum::enum_cast<nxs_status>(statusName);
 }
