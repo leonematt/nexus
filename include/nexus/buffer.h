@@ -16,11 +16,18 @@ namespace nexus {
 
     // System class
     class Buffer : Object<detail::BufferImpl> {
+        friend detail::SystemImpl;
     public:
         Buffer(detail::SystemImpl *_sys, nxs_uint _id, size_t _sz, void *_hostData = nullptr);
         using Object::Object;
 
-        nxs_int copyToDevice(Device _dev);
+        void release() const;
+        
+        size_t getSize() const;
+        void *getHostData() const;
+
+    protected:
+        void _addDevice(Device _dev);
     };
 }
 

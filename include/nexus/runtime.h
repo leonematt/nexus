@@ -16,6 +16,8 @@ namespace nexus {
             RuntimeImpl(const std::string &path);
             ~RuntimeImpl();
 
+            void release();
+
             int getDeviceCount() const;
 
             Device getDevice(nxs_int deviceId);
@@ -56,7 +58,7 @@ namespace nexus {
             void * library;
             void * runtimeFns[NXSAPI_FUNCTION_COUNT];
 
-            std::vector<Device> localDevices;
+            std::vector<Device> devices;
         };
     }
 
@@ -64,6 +66,8 @@ namespace nexus {
     class Runtime : Object<detail::RuntimeImpl> {
     public:
         using Object::Object;
+
+        void release() { return get()->release(); }
 
         int getDeviceCount() const { return get()->getDeviceCount(); }
         Device getDevice(nxs_uint deviceId) { return get()->getDevice(deviceId); }

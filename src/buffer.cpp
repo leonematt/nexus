@@ -22,9 +22,16 @@ namespace detail {
     ~BufferImpl() {
       NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Buffer: " << id);
     }
-    nxs_int copyToDevice(Device _dev) {
+
+    void release() {
+      devices.clear();
+    }
+
+    size_t getSize() const { return size; }
+    void *getHostData() const { return data; }
+
+    void _addDevice(Device _dev) {
       devices.push_back(_dev);
-      return NXS_Success;
     }
   private:
     SystemImpl *system;
@@ -41,6 +48,17 @@ namespace detail {
 Buffer::Buffer(detail::SystemImpl *_sys, nxs_uint _id, size_t _sz, void *_hostData)
   : Object(_sys, _id, _sz, _hostData) {}
 
-nxs_int Buffer::copyToDevice(Device _dev) {
-  return get()->copyToDevice(_dev);
+void Buffer::release() const {
+  get()->release();
+}
+
+size_t Buffer::getSize() const {
+  return get()->getSize();
+}
+void *Buffer::getHostData() const {
+  return get()->getHostData();
+}
+
+void Buffer::_addDevice(Device _dev) {
+  get()->_addDevice(_dev);
 }

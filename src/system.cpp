@@ -32,23 +32,31 @@ namespace detail {
 
 /// @brief Construct a Platform for the current system
 SystemImpl::SystemImpl(int) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR");
   iterateEnvPaths("NEXUS_RUNTIME_PATH", "./runtime_libs", [&](const std::string &path, const std::string &name) {
     runtimes.emplace_back(path);
   });
 }
 
 SystemImpl::~SystemImpl() {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "~System: ");
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "DTOR");
+  for (auto rt : runtimes)
+    rt.release();
+  for (auto buf : buffers)
+    buf.release();
 }
 
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
   buffers.emplace_back(this, id, sz, hostData);
   return buffers.back();
 }
 
 nxs_status SystemImpl::copyBuffer(Buffer buf, Device dev) {
-  //dev->_copyBuffer(buf);
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "copyBuffer " << buf.getSize());
+  buf._addDevice(dev);
+  dev._copyBuffer(buf);
   return NXS_Success;
 }
 
@@ -62,6 +70,10 @@ Runtime System::getRuntime(int idx) const {
 
 Buffer System::createBuffer(size_t sz, void *hostData) {
   return get()->createBuffer(sz, hostData);
+}
+
+nxs_status System::copyBuffer(Buffer buf, Device dev) {
+  return get()->copyBuffer(buf, dev);
 }
 
 

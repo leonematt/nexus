@@ -15,4 +15,6 @@ extern "C" {
 }
 #endif
 
+#include <nexus-api/nxs_log.h>
+
 #endif /* NEXUS_API_H */
