@@ -2,6 +2,8 @@
 #include <nexus/runtime.h>
 #include <nexus/log.h>
 
+#include "_runtime_impl.h"
+
 #include <assert.h>
 
 #include <dlfcn.h>
@@ -97,6 +99,7 @@ void RuntimeImpl::loadPlugin() {
   loadFn(FN_nxsReleaseBuffer);
 
   loadFn(FN_nxsCreateLibrary);
+  loadFn(FN_nxsCreateLibraryFromFile);
   loadFn(FN_nxsReleaseLibrary);
 
   loadFn(FN_nxsCreateCommandList);
@@ -119,4 +122,46 @@ void RuntimeImpl::loadPlugin() {
   for (int i = 0; i < count; ++i) {
     devices.emplace_back(this, i);
   }
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+Runtime::Runtime(const std::string &libraryPath) : Object(libraryPath) {
+  
+}
+void Runtime::release() { return get()->release(); }
+
+int Runtime::getDeviceCount() const { return get()->getDeviceCount(); }
+Device Runtime::getDevice(nxs_uint deviceId) {
+  return get()->getDevice(deviceId);
+}
+
+// Get Runtime Property Value
+template <>
+const std::string Runtime::getProperty<std::string>(nxs_property pn) const {
+  return get()->getProperty<std::string>(pn);
+}
+template <>
+const int64_t Runtime::getProperty<int64_t>(nxs_property pn) const {
+  return get()->getProperty<int64_t>(pn);
+}
+template <>
+const double Runtime::getProperty<double>(nxs_property pn) const {
+  return get()->getProperty<double>(pn);
+}
+
+// Get Device Property Value
+template <>
+const std::string Runtime::getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const {
+    return get()->getProperty<std::string>(deviceId, pn);
+}
+template <>
+const int64_t Runtime::getProperty<int64_t>(nxs_uint deviceId, nxs_property pn) const {
+    return get()->getProperty<int64_t>(deviceId, pn);
+}
+template <>
+const double Runtime::getProperty<double>(nxs_uint deviceId, nxs_property pn) const {
+    return get()->getProperty<double>(deviceId, pn);
 }

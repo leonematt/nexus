@@ -29,7 +29,10 @@ namespace nexus {
 
         // Runtime functions
         nxs_int createCommandList();
-        
+
+        nxs_int createLibrary(void *libraryData, size_t librarySize);
+        nxs_int createLibrary(const std::string &libraryPath);
+
     protected:
         nxs_status _copyBuffer(Buffer buf);
     };

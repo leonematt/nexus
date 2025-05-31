@@ -44,6 +44,7 @@ class MetalDevice {
   MTL::Device *device;
   MTL::CommandQueue *queue;
   std::vector<MTL::Buffer *> buffers;
+  std::vector<MTL::Library *> librarys;
   std::vector<MTL::CommandBuffer *> cmdLists;
   std::vector<MTL::ComputeCommandEncoder *> commands;
   public:
@@ -55,6 +56,8 @@ class MetalDevice {
     ~MetalDevice() {
       for (int cid = 0; cid < cmdLists.size(); ++cid)
         releaseCommandBuffer(cid);
+      for (int lid = 0; lid < librarys.size(); ++lid)
+        releaseLibrary(lid);
       for (int bid = 0; bid < buffers.size(); ++bid)
         releaseBuffer(bid);
       device->release();
@@ -92,6 +95,11 @@ class MetalDevice {
       return cmdLists.size() - 1;
     }
 
+    nxs_status runCommandBuffer(nxs_int id) {
+      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "runCommandBuffer -- NOT IMPLEMENTED");
+      return NXS_Success;
+    }
+
     nxs_status releaseCommandBuffer(nxs_int id) {
       if (id < 0 || id >= cmdLists.size() || cmdLists[id] == nullptr)
         return NXS_InvalidCommandQueue; // invalid buffer
@@ -109,6 +117,49 @@ class MetalDevice {
 
       commands.push_back(command);
       return commands.size() - 1;
+    }
+
+    nxs_int createLibrary(const char *filepath) {
+      NS::Error *pError = nullptr;
+      MTL::Library *pLibrary = device->newLibrary(
+        NS::String::string(filepath, NS::UTF8StringEncoding), &pError
+      );
+      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createLibrary " << (int64_t)pError << " - " << (int64_t)pLibrary);
+      if (pError) {
+        NXSAPI_LOG(NXSAPI_STATUS_ERR, "createLibrary " << pError->localizedDescription()->utf8String());
+        return NXS_InvalidProgram;
+      }
+      librarys.push_back(pLibrary);
+      return librarys.size() - 1;
+    }
+
+    nxs_int createLibrary(void *binary, size_t size) {
+      // NS::Array *binArr = NS::Array::alloc();
+      // MTL::StitchedLibraryDescriptor *libDesc = MTL::StitchedLibraryDescriptor::alloc();
+      // libDesc->init(); // IS THIS NECESSARY?
+      // libDesc->setBinaryArchives(binArr);
+      dispatch_data_t data = (dispatch_data_t)binary;
+      NS::Error *pError = nullptr;
+      // MTL::Library *pLibrary = device->newLibrary(data, &pError);
+      MTL::Library *pLibrary = device->newLibrary(
+        NS::String::string("kernel.so", NS::UTF8StringEncoding), &pError
+      );
+      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createLibrary " << (int64_t)pError << " - " << (int64_t)pLibrary);
+      if (pError) {
+        NXSAPI_LOG(NXSAPI_STATUS_ERR, "createLibrary " << pError->localizedDescription()->utf8String());
+        return NXS_InvalidProgram;
+      }
+      librarys.push_back(pLibrary);
+      return librarys.size() - 1;
+    }
+
+    nxs_status releaseLibrary(nxs_int id) {
+      if (id < 0 || id >= librarys.size() || librarys[id] == nullptr)
+        return NXS_InvalidProgram; // invalid buffer
+      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "releaseLibrary " << id);
+      librarys[id]->release();
+      librarys[id] = nullptr;
+      return NXS_Success;
     }
 
     const MTL::Device *get() const { return device; }
@@ -298,11 +349,13 @@ nxsReleaseBuffer(
 }
 
 
-/*
- * Allocate a buffer on the device.
- */ 
-extern "C" nxs_int NXS_API_CALL
-nxsCreateCommandList(
+ /************************************************************************
+ * @def CreateCommandBuffer
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+extern "C" nxs_int nxsCreateCommandList(
   nxs_int device_id,
   nxs_command_queue_properties properties
 )
@@ -310,8 +363,27 @@ nxsCreateCommandList(
   auto dev = getRuntime()->getDevice(device_id);
   if (!dev)
     return NXS_InvalidDevice;
+
   return (*dev)->createCommandBuffer();
 }
+
+/************************************************************************
+* @def ReleaseCommandList
+* @brief Release the buffer on the device
+* @return Error status or Succes.
+***********************************************************************/
+extern "C" nxs_status nxsRunCommandList(
+  nxs_int device_id,
+  nxs_int command_list_id
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+
+  return (*dev)->runCommandBuffer(command_list_id);
+}
+
 
 /*
  * Allocate a buffer on the device.
@@ -326,4 +398,20 @@ nxsReleaseCommandList(
   if (!dev)
     return NXS_InvalidDevice;
   return (*dev)->releaseCommandBuffer(command_list_id);
+}
+
+/*
+ * Allocate a buffer on the device.
+ */ 
+extern "C" nxs_int NXS_API_CALL
+nxsCreateLibrary(
+  nxs_int device_id,
+  void *library_data,
+  nxs_uint data_size
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+  return (*dev)->createLibrary(library_data, data_size);
 }

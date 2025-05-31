@@ -111,7 +111,17 @@ NEXUS_API_FUNC(nxs_status, ReleaseBuffer,
 NEXUS_API_FUNC(nxs_int, CreateLibrary,
     nxs_int device_id,
     void *library_data,
-    nxs_command_queue_properties properties
+    nxs_uint data_size
+)
+/************************************************************************
+ * @def CreateLibrary
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateLibraryFromFile,
+    nxs_int device_id,
+    const char *library_data
 )
 /************************************************************************
  * @def ReleaseLibrary

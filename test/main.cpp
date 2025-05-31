@@ -1,6 +1,7 @@
 #include <nexus.h>
 
 #include <iostream>
+#include <fstream>
 #include <numeric>
 
 std::vector<std::string_view> nexusArgs;
@@ -17,9 +18,20 @@ int main() {
   for (int i = 0; i < count; ++i) {
     std::cout << "  Device: " << rt.getProperty<std::string>(i, NP_Name) << " - " << rt.getProperty<std::string>(i, NP_Architecture) << std::endl;
   }
+  std::vector<char> data(1024, 1);
+
   auto dev0 = rt.getDevice(0);
-  auto bufId = dev0.createBuffer(100);
-  std::cout << "    Buffer: " << bufId << std::endl;
+
+  std::ifstream f("kernel.so", std::ios::binary);
+  std::vector<char> soData;
+  soData.insert(soData.begin(), std::istream_iterator<char>(f), std::istream_iterator<char>());
+  
+  auto nlib = dev0.createLibrary(soData.data(), soData.size());
+
+  auto buf = sys.createBuffer(data.size(), data.data());
+
+  auto cpv = sys.copyBuffer(buf, dev0);
+  std::cout << "    CopyBuffer: " << cpv << std::endl;
 
   auto queId = dev0.createCommandList();
   std::cout << "    CList: " << queId << std::endl;
@@ -54,7 +66,7 @@ int main() {
       std::cout << std::endl;
     }
 
-    std::vector<NXSAPI_PropertyEnum> prop_epath = {NP_CoreSubsystem, NP_Count};
+    std::vector<nxs_property> prop_epath = {NP_CoreSubsystem, NP_Count};
     auto eval = dev->getProperty<int64_t>(prop_epath);
   }
   return 0;
