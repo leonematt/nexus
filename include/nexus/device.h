@@ -2,6 +2,7 @@
 #define NEXUS_DEVICE_H
 
 #include <nexus/buffer.h>
+#include <nexus/library.h>
 #include <nexus/properties.h>
 #include <nexus-api.h>
 
@@ -11,8 +12,7 @@
 namespace nexus {
 
     namespace detail {
-        class SystemImpl;
-        class RuntimeImpl;
+        class RuntimeImpl; // owner
         class DeviceImpl;
     }
 
@@ -20,7 +20,7 @@ namespace nexus {
     class Device : Object<detail::DeviceImpl> {
         friend detail::SystemImpl;
     public:
-        Device(detail::RuntimeImpl *rt, nxs_uint id);
+        Device(detail::OwnerRef<detail::RuntimeImpl> base);
         Device();
         
         void release() const;
@@ -30,8 +30,8 @@ namespace nexus {
         // Runtime functions
         nxs_int createCommandList();
 
-        nxs_int createLibrary(void *libraryData, size_t librarySize);
-        nxs_int createLibrary(const std::string &libraryPath);
+        Library createLibrary(void *libraryData, size_t librarySize);
+        Library createLibrary(const std::string &libraryPath);
 
     protected:
         nxs_status _copyBuffer(Buffer buf);

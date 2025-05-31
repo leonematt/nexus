@@ -14,7 +14,7 @@ namespace detail {
   public:
     //BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
     /// @brief Construct a Platform for the current system
-    BufferImpl(SystemImpl *_sys, nxs_uint _id, size_t _sz, void *_hostData)
+    BufferImpl(SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData)
       : system(_sys), id(_id), size(_sz), data(_hostData) {
         NEXUS_LOG(NEXUS_STATUS_NOTE, "  Buffer: " << id << " - " << size);
       }
@@ -45,7 +45,7 @@ namespace detail {
 }
 }
 
-Buffer::Buffer(detail::SystemImpl *_sys, nxs_uint _id, size_t _sz, void *_hostData)
+Buffer::Buffer(detail::SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData)
   : Object(_sys, _id, _sz, _hostData) {}
 
 void Buffer::release() const {

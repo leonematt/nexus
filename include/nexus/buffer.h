@@ -18,8 +18,8 @@ namespace nexus {
     class Buffer : Object<detail::BufferImpl> {
         friend detail::SystemImpl;
     public:
-        Buffer(detail::SystemImpl *_sys, nxs_uint _id, size_t _sz, void *_hostData = nullptr);
-        using Object::Object;
+        Buffer(detail::SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData = nullptr);
+        //using Object::Object;
 
         void release() const;
         

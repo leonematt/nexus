@@ -26,7 +26,7 @@ int main() {
   std::vector<char> soData;
   soData.insert(soData.begin(), std::istream_iterator<char>(f), std::istream_iterator<char>());
   
-  auto nlib = dev0.createLibrary(soData.data(), soData.size());
+  auto nlib = dev0.createLibrary("kernel.so");
 
   auto buf = sys.createBuffer(data.size(), data.data());
 

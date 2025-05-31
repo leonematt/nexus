@@ -12,7 +12,7 @@ using namespace nexus::detail;
 
 #define APICALL(FUNC, ...) \
   nxs_int apiResult = NXS_InvalidDevice; \
-  if (auto fn = runtime->getFunction<FUNC##_fn>(FN_##FUNC)) { \
+  if (auto fn = getOwner()->getFunction<FUNC##_fn>(FN_##FUNC)) { \
     apiResult = (*fn)(__VA_ARGS__); \
     NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(FN_##FUNC) << ": " << apiResult); \
   } else { \
@@ -20,8 +20,10 @@ using namespace nexus::detail;
   }
 
 
-DeviceImpl::DeviceImpl(detail::RuntimeImpl *rt, nxs_uint _id)
-: runtime(rt), id(_id) {
+DeviceImpl::DeviceImpl(OwnerRef<RuntimeImpl> base)
+: OwnerRef(base) {
+  auto *runtime = getOwner();
+  auto id = getId();
   auto vendor = runtime->getProperty<std::string>(id, NP_Vendor);
   auto type = runtime->getProperty<std::string>(id, NP_Type);
   auto arch = runtime->getProperty<std::string>(id, NP_Architecture);
@@ -34,56 +36,64 @@ DeviceImpl::DeviceImpl(detail::RuntimeImpl *rt, nxs_uint _id)
 }
 
 DeviceImpl::~DeviceImpl() {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Device: " << id);
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Device: " << getId());
+  release();
 }
 
 void DeviceImpl::release() {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "    release: " << id);
-  for (auto buf : buffers) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "    release: " << getId());
+  for (auto &buf : buffers) {
     // release from device
+    //buf.buf.release(id); // not owned
   }
   buffers.clear();
+
+  libraries.clear();
   queues.clear();
 }
 
-
-nxs_int DeviceImpl::createBuffer(size_t size, void *host_data) {
-  APICALL(nxsCreateBuffer, id, size, 0, host_data);
-  return apiResult;
-}
-
 nxs_int DeviceImpl::createCommandList() {
-  APICALL(nxsCreateCommandList, id, 0);
+  APICALL(nxsCreateCommandList, getId(), 0);
   if (apiResult >= 0) // success
     queues.push_back(apiResult);
   return apiResult;
 }
 
-nxs_int DeviceImpl::createLibrary(void *data, size_t size) {
-  APICALL(nxsCreateLibrary, id, data, size);
-  return apiResult;
+Library DeviceImpl::createLibrary(void *data, size_t size) {
+  APICALL(nxsCreateLibrary, getId(), data, size);
+  Library lib(this, libraries.size());
+  libraries.emplace_back(lib, apiResult);
+  return lib;
 }
 
-nxs_int DeviceImpl::createLibrary(const std::string &path) {
-  APICALL(nxsCreateLibraryFromFile, id, path.c_str());
-  return apiResult;
+Library DeviceImpl::createLibrary(const std::string &path) {
+  APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
+  Library lib(this, libraries.size());
+  libraries.emplace_back(lib, apiResult);
+  return lib;
 }
 
 nxs_status DeviceImpl::_copyBuffer(Buffer buf) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  copyBuffer");
-  auto bufId = createBuffer(buf.getSize(), buf.getHostData());
-  if (bufId > -1) {
-    buffers.emplace_back(buf, bufId);
-    return NXS_Success;
-  }
-  return (nxs_status)bufId;
+  APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
+  buffers.emplace_back(buf, apiResult);
+  return (nxs_status)(apiResult < 0 ? apiResult : NXS_Success);
+}
+
+nxs_status DeviceImpl::releaseLibrary(nxs_int lid) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  releaseLibrary" << lid);
+  auto devId = libraries[lid].devId;
+  APICALL(nxsReleaseLibrary, getId(), devId);
+  libraries[lid].lib = Library();
+  return (nxs_status)apiResult;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @return 
 ///////////////////////////////////////////////////////////////////////////////
-Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
+//Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
+Device::Device(OwnerRef<RuntimeImpl> base) : Object(base) {}
 
 Device::Device() : Object() {}
 
@@ -102,10 +112,10 @@ nxs_status Device::_copyBuffer(Buffer buf) {
   return get()->_copyBuffer(buf);
 }
 
-nxs_int Device::createLibrary(void *libraryData, size_t librarySize) {
+Library Device::createLibrary(void *libraryData, size_t librarySize) {
   return get()->createLibrary(libraryData, librarySize);
 }
 
-nxs_int Device::createLibrary(const std::string &libraryPath) {
+Library Device::createLibrary(const std::string &libraryPath) {
   return get()->createLibrary(libraryPath);
 }

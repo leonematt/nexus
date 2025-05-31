@@ -11,7 +11,7 @@
 
 #define NXSAPI_LOG(STATUS, s)  {\
     const char *_log_prefix = "[NEXUS-API][" NXSAPI_LOG_MODULE "]" STATUS ": "; \
-    std::cerr << std::left << std::setw(30) << _log_prefix << s << std::endl; }
+    std::cerr << std::left << std::setw(50) << _log_prefix << s << std::endl; }
 
 #else
 #define NXSAPI_LOG(x, s)

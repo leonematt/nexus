@@ -415,3 +415,33 @@ nxsCreateLibrary(
     return NXS_InvalidDevice;
   return (*dev)->createLibrary(library_data, data_size);
 }
+
+/*
+ * Allocate a buffer on the device.
+ */ 
+extern "C" nxs_int NXS_API_CALL
+nxsCreateLibraryFromFile(
+  nxs_int device_id,
+  const char *library_path
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+  return (*dev)->createLibrary(library_path);
+}
+
+/*
+ * Allocate a buffer on the device.
+ */ 
+extern "C" nxs_status NXS_API_CALL
+nxsReleaseLibrary(
+  nxs_int device_id,
+  nxs_int library_id
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+  return (*dev)->releaseLibrary(library_id);
+}

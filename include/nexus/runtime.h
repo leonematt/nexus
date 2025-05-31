@@ -4,9 +4,7 @@
 #include <nexus/device.h>
 #include <nexus-api.h>
 
-#include <optional>
 #include <string>
-#include <memory>
 
 namespace nexus {
 

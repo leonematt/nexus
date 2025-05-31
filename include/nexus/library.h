@@ -9,7 +9,7 @@
 namespace nexus {
     
     namespace detail {
-        class DeviceImpl;
+        class DeviceImpl; // owner
         class LibraryImpl;
     }
 
@@ -17,17 +17,14 @@ namespace nexus {
     class Library : Object<detail::LibraryImpl> {
         friend detail::DeviceImpl;
     public:
-    Library(detail::DeviceImpl *_dev, void *_hostData);
-    Library(detail::DeviceImpl *_dev, const std::string &_filePath);
-    using Object::Object;
+        Library(detail::DeviceImpl *_dev, nxs_int id);
+        Library();
+        //using Object::Object;
 
         void release() const;
         
         size_t getSize() const;
         void *getHostData() const;
-
-    protected:
-        void _addDevice(Device _dev);
     };
 }
 

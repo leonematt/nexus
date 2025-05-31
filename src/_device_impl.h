@@ -3,6 +3,7 @@
 
 #include <nexus/properties.h>
 #include <nexus/buffer.h>
+#include <nexus/library.h>
 #include <nexus/runtime.h>
 
 #include "_runtime_impl.h"
@@ -10,21 +11,25 @@
 namespace nexus {
 namespace detail {
 
-  struct DeviceBuf {
+  struct DevBuffer {
     Buffer buf;
-    nxs_uint devId;
-    DeviceBuf(Buffer _b, nxs_uint _id) : buf(_b), devId(_id) {}
+    nxs_int devId; // from runtime
+    DevBuffer(Buffer _b, nxs_int _id) : buf(_b), devId(_id) {}
+  };
+  struct DevLibrary {
+    Library lib;
+    nxs_int devId; // from runtime
+    DevLibrary(Library _l, nxs_int _id) : lib(_l), devId(_id) {}
   };
 
   /// @class DesignImpl
-  class DeviceImpl {
-    RuntimeImpl *runtime;
-    nxs_uint id;
+  class DeviceImpl : OwnerRef<RuntimeImpl> {
     Properties deviceProps;
-    std::vector<DeviceBuf> buffers;
+    std::vector<DevBuffer> buffers;
     std::vector<nxs_uint> queues;
+    std::vector<DevLibrary> libraries;
   public:
-    DeviceImpl(RuntimeImpl *rt, nxs_uint id);
+    DeviceImpl(OwnerRef base);
     ~DeviceImpl();
 
     void release();
@@ -32,13 +37,13 @@ namespace detail {
     Properties getProperties() const { return deviceProps; }
 
     // Runtime functions
-    nxs_int createBuffer(size_t size, void *hostData = nullptr);
     nxs_int createCommandList();
-    nxs_int createLibrary(void *data, size_t size);
-    nxs_int createLibrary(const std::string &path);
+
+    Library createLibrary(const std::string &path);
+    Library createLibrary(void *libraryData, size_t size);
+    nxs_status releaseLibrary(nxs_int lid);
 
     nxs_status _copyBuffer(Buffer buf);
-
   };
 
 } // namespace detail

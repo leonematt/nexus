@@ -120,7 +120,7 @@ void RuntimeImpl::loadPlugin() {
   nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
-    devices.emplace_back(this, i);
+    devices.emplace_back(OwnerRef(this, i));
   }
 }
 
