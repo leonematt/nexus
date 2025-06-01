@@ -28,46 +28,18 @@ int main() {
   
   auto nlib = dev0.createLibrary("kernel.so");
 
+  auto kern = nlib.getKernel("add_vectors");
+  std::cout << "   Kernel: " << kern.getId() << std::endl;
+
   auto buf = sys.createBuffer(data.size(), data.data());
 
   auto cpv = sys.copyBuffer(buf, dev0);
   std::cout << "    CopyBuffer: " << cpv << std::endl;
 
-  auto queId = dev0.createCommandList();
-  std::cout << "    CList: " << queId << std::endl;
+  auto sched = dev0.createSchedule();
+  std::cout << "    CList: " << sched.getId() << std::endl;
 
-  auto dev = nexus::lookupDevice("amd-gpu-gfx942");
-  if (dev) {
-    {
-      const char *key = "name";
-      auto pval = dev->getProperty<std::string>(key);
-      std::cout << "PROP(" << key << "): ";
-      if (pval)
-        std::cout << *pval;
-      else
-        std::cout << "NOT FOUND";
-      std::cout << std::endl;
-    }
-    {
-      std::vector<std::string> prop_path = {"coreSubsystem", "maxPerUnit"};
-      auto pval = dev->getProperty<int64_t>(prop_path);
+  auto cmd = sched.createCommand(kern);
 
-      // make slash path
-      std::string path = std::accumulate(std::begin(prop_path), std::end(prop_path), std::string(),
-                                [](std::string &ss, std::string &s)
-                                {
-                                    return ss.empty() ? s : ss + "/" + s;
-                                });
-      std::cout << "PROP(" << path << "): ";
-      if (pval)
-        std::cout << *pval;
-      else
-        std::cout << "NOT FOUND";
-      std::cout << std::endl;
-    }
-
-    std::vector<nxs_property> prop_epath = {NP_CoreSubsystem, NP_Count};
-    auto eval = dev->getProperty<int64_t>(prop_epath);
-  }
   return 0;
 }
