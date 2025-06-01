@@ -1,5 +1,5 @@
-#ifndef NEXUS_LIBRARY_H
-#define NEXUS_LIBRARY_H
+#ifndef NEXUS_COMMAND_H
+#define NEXUS_COMMAND_H
 
 #include <nexus/object.h>
 #include <nexus/kernel.h>
@@ -10,23 +10,21 @@
 namespace nexus {
     
     namespace detail {
-        class DeviceImpl; // owner
-        class LibraryImpl;
+        class ScheduleImpl; // owner
+        class CommandImpl;
     }
 
     // System class
-    class Library : public Object<detail::LibraryImpl, detail::DeviceImpl> {
+    class Command : public Object<detail::CommandImpl, detail::ScheduleImpl> {
         friend OwnerTy;
     public:
-        Library(OwnerRef owner);
+        Command(OwnerRef owner, Kernel kern);
         using Object::Object;
 
         void release() const;
 
         nxs_int getId() const override;
-
-        Kernel getKernel(const std::string &kernelName);
     };
 }
 
-#endif // NEXUS_LIBRARY_H
+#endif // NEXUS_COMMAND_H

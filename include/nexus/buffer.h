@@ -15,14 +15,16 @@ namespace nexus {
     }
 
     // System class
-    class Buffer : Object<detail::BufferImpl> {
-        friend detail::SystemImpl;
+    class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
+        friend OwnerTy;
     public:
-        Buffer(detail::SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData = nullptr);
-        //using Object::Object;
+        Buffer(OwnerRef base, size_t _sz, void *_hostData = nullptr);
+        using Object::Object;
 
         void release() const;
         
+        nxs_int getId() const override;
+
         size_t getSize() const;
         void *getHostData() const;
 

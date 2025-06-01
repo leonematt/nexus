@@ -49,26 +49,35 @@ void DeviceImpl::release() {
   buffers.clear();
 
   libraries.clear();
-  queues.clear();
+  schedules.clear();
 }
 
-nxs_int DeviceImpl::createCommandList() {
-  APICALL(nxsCreateCommandList, getId(), 0);
-  if (apiResult >= 0) // success
-    queues.push_back(apiResult);
+Schedule DeviceImpl::createSchedule() {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createSchedule");
+  APICALL(nxsCreateSchedule, getId(), 0);
+  Schedule sched(Schedule::OwnerRef(this, schedules.size()));
+  schedules.emplace_back(sched, apiResult);
+  return sched;
+}
+
+
+nxs_int DeviceImpl::createCommand(nxs_int sid, nxs_int kid) {
+  APICALL(nxsCreateCommand, getId(), sid, kid);
   return apiResult;
 }
 
 Library DeviceImpl::createLibrary(void *data, size_t size) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibrary, getId(), data, size);
-  Library lib(this, libraries.size());
+  Library lib(Library::OwnerRef(this, libraries.size()));
   libraries.emplace_back(lib, apiResult);
   return lib;
 }
 
 Library DeviceImpl::createLibrary(const std::string &path) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
-  Library lib(this, libraries.size());
+  Library lib(Library::OwnerRef(this, libraries.size()));
   libraries.emplace_back(lib, apiResult);
   return lib;
 }
@@ -82,30 +91,36 @@ nxs_status DeviceImpl::_copyBuffer(Buffer buf) {
 
 nxs_status DeviceImpl::releaseLibrary(nxs_int lid) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  releaseLibrary" << lid);
-  auto devId = libraries[lid].devId;
+  auto devId = libraries[lid].id;
   APICALL(nxsReleaseLibrary, getId(), devId);
-  libraries[lid].lib = Library();
+  libraries[lid].obj = Library();
   return (nxs_status)apiResult;
 }
 
+nxs_int DeviceImpl::getKernel(nxs_int lid, const std::string &kernelName) {
+  APICALL(nxsGetKernel, getId(), lid, kernelName.c_str());
+  return apiResult;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @return 
 ///////////////////////////////////////////////////////////////////////////////
 //Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
-Device::Device(OwnerRef<RuntimeImpl> base) : Object(base) {}
-
-Device::Device() : Object() {}
+Device::Device(OwnerRef base) : Object(base) {}
 
 void Device::release() const {
   get()->release();
 }
 
+nxs_int Device::getId() const {
+  return get()->getId();
+}
+
 Properties Device::getProperties() const { return get()->getProperties(); }
 
 // Runtime functions
-nxs_int Device::createCommandList() {
-    return get()->createCommandList();
+Schedule Device::createSchedule() {
+    return get()->createSchedule();
 }
 
 nxs_status Device::_copyBuffer(Buffer buf) {

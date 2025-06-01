@@ -134,12 +134,24 @@ NEXUS_API_FUNC(nxs_status, ReleaseLibrary,
 )
 
 /************************************************************************
+ * @def CreateLibrary
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, GetKernel,
+    nxs_int device_id,
+    nxs_int library_id,
+    const char *kernel_name
+)
+
+/************************************************************************
  * @def CreateCommandBuffer
  * @brief Create command buffer on the device
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, CreateCommandList,
+NEXUS_API_FUNC(nxs_int, CreateSchedule,
     nxs_int device_id,
     nxs_command_queue_properties properties
 )
@@ -148,18 +160,18 @@ NEXUS_API_FUNC(nxs_int, CreateCommandList,
  * @brief Release the buffer on the device
   * @return Error status or Succes.
 ***********************************************************************/
-NEXUS_API_FUNC(nxs_status, RunCommandList,
+NEXUS_API_FUNC(nxs_status, RunSchedule,
     nxs_int device_id,
-    nxs_int command_list_id
+    nxs_int schedule_id
 )
 /************************************************************************
  * @def ReleaseCommandList
  * @brief Release the buffer on the device
   * @return Error status or Succes.
 ***********************************************************************/
-NEXUS_API_FUNC(nxs_status, ReleaseCommandList,
+NEXUS_API_FUNC(nxs_status, ReleaseSchedule,
     nxs_int device_id,
-    nxs_int command_list_id
+    nxs_int schedule_id
 )
 
 /************************************************************************
@@ -170,9 +182,8 @@ NEXUS_API_FUNC(nxs_status, ReleaseCommandList,
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_int, CreateCommand,
     nxs_int device_id,
-    nxs_int command_list_id,
-    char *kernel_name,
-    nxs_command_queue_properties properties
+    nxs_int schedule_id,
+    nxs_int kernel_id
 )
 
 /************************************************************************

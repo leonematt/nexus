@@ -4,6 +4,7 @@
 #include <nexus/properties.h>
 #include <nexus/buffer.h>
 #include <nexus/library.h>
+#include <nexus/schedule.h>
 #include <nexus/runtime.h>
 
 #include "_runtime_impl.h"
@@ -11,23 +12,23 @@
 namespace nexus {
 namespace detail {
 
-  struct DevBuffer {
-    Buffer buf;
-    nxs_int devId; // from runtime
-    DevBuffer(Buffer _b, nxs_int _id) : buf(_b), devId(_id) {}
-  };
-  struct DevLibrary {
-    Library lib;
-    nxs_int devId; // from runtime
-    DevLibrary(Library _l, nxs_int _id) : lib(_l), devId(_id) {}
+  template <typename T>
+  struct DevObject {
+    T obj;
+    nxs_int id;
+    DevObject(T _obj, nxs_int _id) : obj(_obj), id(_id) {}
   };
 
+  typedef DevObject<Buffer> DevBuffer;
+  typedef DevObject<Library> DevLibrary;
+  typedef DevObject<Schedule> DevSchedule;
+  
   /// @class DesignImpl
-  class DeviceImpl : OwnerRef<RuntimeImpl> {
+  class DeviceImpl : public OwnerRef<RuntimeImpl> {
     Properties deviceProps;
     std::vector<DevBuffer> buffers;
-    std::vector<nxs_uint> queues;
     std::vector<DevLibrary> libraries;
+    std::vector<DevSchedule> schedules;
   public:
     DeviceImpl(OwnerRef base);
     ~DeviceImpl();
@@ -37,11 +38,15 @@ namespace detail {
     Properties getProperties() const { return deviceProps; }
 
     // Runtime functions
-    nxs_int createCommandList();
+    Schedule createSchedule();
 
     Library createLibrary(const std::string &path);
     Library createLibrary(void *libraryData, size_t size);
     nxs_status releaseLibrary(nxs_int lid);
+
+    nxs_int getKernel(nxs_int lid, const std::string &kernelName);
+
+    nxs_int createCommand(nxs_int sid, nxs_int kid);
 
     nxs_status _copyBuffer(Buffer buf);
   };

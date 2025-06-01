@@ -45,6 +45,7 @@ class MetalDevice {
   MTL::CommandQueue *queue;
   std::vector<MTL::Buffer *> buffers;
   std::vector<MTL::Library *> librarys;
+  std::vector<MTL::Function *> kernels;
   std::vector<MTL::CommandBuffer *> cmdLists;
   std::vector<MTL::ComputeCommandEncoder *> commands;
   public:
@@ -88,9 +89,6 @@ class MetalDevice {
     nxs_int createCommandBuffer() {
       NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createCommandBuffer");
       MTL::CommandBuffer *cmdBuf = queue->commandBuffer();
-      MTL::ComputeCommandEncoder *pComputeEncoder =
-         cmdBuf->computeCommandEncoder();
-
       cmdLists.push_back(cmdBuf);
       return cmdLists.size() - 1;
     }
@@ -109,13 +107,21 @@ class MetalDevice {
       return NXS_Success;
     }
 
-    nxs_int createCommand(nxs_int id = 0) {
-      if (id < 0 || id >= cmdLists.size() || commands[id] == nullptr)
+    nxs_int createCommand(nxs_int id = 0, nxs_int kernId = -1) {
+      if (id < 0 || id >= cmdLists.size() || cmdLists[id] == nullptr)
         return NXS_InvalidCommandQueue; // invalid buffer OR CREATE ONE???
       NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createCommand");
       MTL::ComputeCommandEncoder *command = cmdLists[id]->computeCommandEncoder();
-
       commands.push_back(command);
+
+      // Add the kernel
+      if (kernId >= 0) {
+        NS::Error *pError = nullptr;
+        MTL::ComputePipelineState *pipeState = nullptr;
+        pipeState = device->newComputePipelineState(kernels[kernId], &pError);
+        command->setComputePipelineState(pipeState);
+      }
+
       return commands.size() - 1;
     }
 
@@ -161,6 +167,25 @@ class MetalDevice {
       librarys[id] = nullptr;
       return NXS_Success;
     }
+
+    nxs_int getKernel(nxs_int lib_id, const char *kernelName) {
+      if (lib_id < 0 || lib_id >= librarys.size())
+        return NXS_InvalidProgram;
+      
+      auto *lib = librarys[lib_id];
+      NS::Error *pError = nullptr;
+      MTL::Function *func = lib->newFunction(
+        NS::String::string(kernelName, NS::UTF8StringEncoding));
+      if (!func) {
+        NXSAPI_LOG(NXSAPI_STATUS_ERR, "getKernel " << pError->localizedDescription()->utf8String());
+        return NXS_InvalidKernel;
+      } else {
+
+      }
+      kernels.push_back(func);
+      return kernels.size() - 1;
+    }
+
 
     const MTL::Device *get() const { return device; }
 };
@@ -355,7 +380,7 @@ nxsReleaseBuffer(
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
-extern "C" nxs_int nxsCreateCommandList(
+extern "C" nxs_int nxsCreateSchedule(
   nxs_int device_id,
   nxs_command_queue_properties properties
 )
@@ -372,7 +397,7 @@ extern "C" nxs_int nxsCreateCommandList(
 * @brief Release the buffer on the device
 * @return Error status or Succes.
 ***********************************************************************/
-extern "C" nxs_status nxsRunCommandList(
+extern "C" nxs_status nxsRunSchedule(
   nxs_int device_id,
   nxs_int command_list_id
 )
@@ -389,7 +414,7 @@ extern "C" nxs_status nxsRunCommandList(
  * Allocate a buffer on the device.
  */ 
 extern "C" nxs_status NXS_API_CALL
-nxsReleaseCommandList(
+nxsReleaseSchedule(
   nxs_int device_id,
   nxs_int command_list_id
 )
@@ -398,6 +423,25 @@ nxsReleaseCommandList(
   if (!dev)
     return NXS_InvalidDevice;
   return (*dev)->releaseCommandBuffer(command_list_id);
+}
+
+/************************************************************************
+ * @def CreateCommand
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+extern "C" nxs_int NXS_API_CALL
+nxsCreateCommand(
+  nxs_int device_id,
+  nxs_int schedule_id,
+  nxs_int kernel_id
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+  return (*dev)->createCommand(schedule_id, kernel_id);
 }
 
 /*
@@ -432,7 +476,7 @@ nxsCreateLibraryFromFile(
 }
 
 /*
- * Allocate a buffer on the device.
+ * Release a Library.
  */ 
 extern "C" nxs_status NXS_API_CALL
 nxsReleaseLibrary(
@@ -444,4 +488,20 @@ nxsReleaseLibrary(
   if (!dev)
     return NXS_InvalidDevice;
   return (*dev)->releaseLibrary(library_id);
+}
+
+/*
+ * Lookup a Kernel in a Library.
+ */ 
+extern "C" nxs_int NXS_API_CALL
+nxsGetKernel(
+  nxs_int device_id,
+  nxs_int library_id,
+  const char *kernel_name
+)
+{
+  auto dev = getRuntime()->getDevice(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+  return (*dev)->getKernel(library_id, kernel_name);
 }

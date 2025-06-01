@@ -5,7 +5,10 @@ set(CMAKE_CXX_VISIBILITY_PRESET default)
 add_library(nexus-api SHARED
     buffer.cpp
     properties.cpp
+    kernel.cpp
     library.cpp
+    command.cpp
+    schedule.cpp
     device.cpp
     device_db.cpp
     utility.cpp

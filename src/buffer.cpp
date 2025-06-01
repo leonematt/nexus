@@ -10,17 +10,17 @@ using namespace nexus::detail;
 
 namespace nexus {
 namespace detail {
-  class BufferImpl {
+  class BufferImpl : public Buffer::OwnerRef {
   public:
     //BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
     /// @brief Construct a Platform for the current system
-    BufferImpl(SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData)
-      : system(_sys), id(_id), size(_sz), data(_hostData) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Buffer: " << id << " - " << size);
+    BufferImpl(Buffer::OwnerRef base, size_t _sz, void *_hostData)
+      : OwnerRef(base), size(_sz), data(_hostData) {
+        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Buffer: " << getId() << " - " << size);
       }
 
     ~BufferImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Buffer: " << id);
+      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Buffer: " << getId());
     }
 
     void release() {
@@ -34,9 +34,6 @@ namespace detail {
       devices.push_back(_dev);
     }
   private:
-    SystemImpl *system;
-    nxs_uint id;
-
     // set of runtimes
     size_t size;
     void *data;
@@ -45,11 +42,16 @@ namespace detail {
 }
 }
 
-Buffer::Buffer(detail::SystemImpl *_sys, nxs_int _id, size_t _sz, void *_hostData)
-  : Object(_sys, _id, _sz, _hostData) {}
+///////////////////////////////////////////////////////////////////////////////
+Buffer::Buffer(OwnerRef base, size_t _sz, void *_hostData)
+  : Object(base, _sz, _hostData) {}
 
 void Buffer::release() const {
   get()->release();
+}
+
+nxs_int Buffer::getId() const {
+  return get()->getId();
 }
 
 size_t Buffer::getSize() const {

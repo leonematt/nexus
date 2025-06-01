@@ -16,6 +16,9 @@ namespace detail {
       SystemImpl(int);
       ~SystemImpl();
 
+      nxs_int getRuntimeCount() const {
+        return runtimes.size();
+      }
       Runtime getRuntime(int idx) const {
           return runtimes[idx];
       }
@@ -34,7 +37,7 @@ namespace detail {
 SystemImpl::SystemImpl(int) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR");
   iterateEnvPaths("NEXUS_RUNTIME_PATH", "./runtime_libs", [&](const std::string &path, const std::string &name) {
-    runtimes.emplace_back(path);
+    runtimes.emplace_back(Runtime::OwnerRef(this, runtimes.size()), path);
   });
 }
 
@@ -49,7 +52,7 @@ SystemImpl::~SystemImpl() {
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
-  buffers.emplace_back(this, id, sz, hostData);
+  buffers.emplace_back(Buffer::OwnerRef(this, id), sz, hostData);
   return buffers.back();
 }
 
@@ -63,6 +66,10 @@ nxs_status SystemImpl::copyBuffer(Buffer buf, Device dev) {
 ///////////////////////////////////////////////////////////////////////////////
 /// @param  
 System::System(int i) : Object(i) {}
+
+nxs_int System::getRuntimeCount() const {
+  return get()->getRuntimeCount();
+}
 
 Runtime System::getRuntime(int idx) const {
   return get()->getRuntime(idx);

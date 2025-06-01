@@ -2,7 +2,6 @@
 #define NEXUS_RUNTIME_H
 
 #include <nexus/device.h>
-#include <nexus-api.h>
 
 #include <string>
 
@@ -10,17 +9,21 @@ namespace nexus {
 
     namespace detail {
         class RuntimeImpl;
+        class SystemImpl;
     }
 
     // Runtime class
-    class Runtime : Object<detail::RuntimeImpl> {
+    class Runtime : public Object<detail::RuntimeImpl, detail::SystemImpl> {
+        friend OwnerTy;
     public:
-        Runtime(const std::string& libraryPath);
+        Runtime(OwnerRef owner, const std::string& libraryPath);
         using Object::Object;
 
         void release();
 
-        int getDeviceCount() const;
+        nxs_int getId() const override;
+
+        nxs_int getDeviceCount() const;
         Device getDevice(nxs_uint deviceId);
 
         // Get Runtime Property Value

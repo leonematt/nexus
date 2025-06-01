@@ -1,52 +1,54 @@
 
-#include <nexus/library.h>
 #include <nexus/log.h>
 
-#include "_device_impl.h"
+#include "_library_impl.h"
 
 #define NEXUS_LOG_MODULE "library"
 
 using namespace nexus;
 using namespace nexus::detail;
 
-namespace nexus {
-namespace detail {
-  class LibraryImpl {
-  public:
-    /// @brief Construct a Platform for the current system
-    LibraryImpl(DeviceImpl *_dev, nxs_int _id)
-      : device(_dev), id(_id) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Library: " << id);
-      }
+/// @brief Construct a Platform for the current system
+LibraryImpl::LibraryImpl(Library::OwnerRef owner)
+  : OwnerRef(owner) {
+    NEXUS_LOG(NEXUS_STATUS_NOTE, "  Library: " << getId());
+  }
 
-    ~LibraryImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Library: " << id);
-      release();
-    }
-
-    void release() {
-      device->releaseLibrary(id);
-    }
-
-  private:
-    DeviceImpl *device;
-    nxs_int id;
-
-    // set of runtimes
-    size_t size;
-    void *data;
-  };
-}
+LibraryImpl::~LibraryImpl() {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Library: " << getId());
+  release();
 }
 
+void LibraryImpl::release() {
+  getOwner()->releaseLibrary(getId());
+}
+
+Kernel LibraryImpl::getKernel(const std::string &kernelName) {
+  auto kid = getOwner()->getKernel(getId(), kernelName);
+  Kernel kern(Kernel::OwnerRef(this, kernels.size()), kernelName);
+  kernels.emplace_back(kern, kid);
+  return kern;
+}
+
+nxs_int LibraryImpl::getKernelDevId(nxs_int kid) {
+  if (kid >= 0 && kid < kernels.size())
+    return kernels[kid].id;
+  return NXS_InvalidKernel;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-Library::Library(detail::DeviceImpl *_dev, nxs_int _id)
-  : Object(_dev, _id) {}
+Library::Library(OwnerRef owner) : Object(owner) {}
 
-Library::Library() : Object() {}
+//Library::Library() : Object() {}
 
 void Library::release() const {
   get()->release();
 }
 
+nxs_int Library::getId() const {
+  return get()->getId();
+}
+
+Kernel Library::getKernel(const std::string &kernelName) {
+  return get()->getKernel(kernelName);
+}

@@ -14,10 +14,12 @@ namespace nexus {
     namespace detail {
         class PropertiesImpl;
     }
-    class Properties : Object<detail::PropertiesImpl> {
+    class Properties : public Object<detail::PropertiesImpl> {
     public:
         Properties(const std::string &filepath);
         using Object::Object;
+
+        nxs_int getId() const override { return 0; }
 
         // Query Device Properties
         //   from name

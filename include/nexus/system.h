@@ -19,6 +19,9 @@ namespace nexus {
         System(int);
         using Object::Object;
     
+        nxs_int getId() const override { return 0; }
+
+        nxs_int getRuntimeCount() const;
         Runtime getRuntime(int idx) const;
         Buffer createBuffer(size_t sz, void *hostData = nullptr);
         nxs_status copyBuffer(Buffer buf, Device dev);
