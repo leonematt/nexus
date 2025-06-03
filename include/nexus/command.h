@@ -19,7 +19,7 @@ namespace nexus {
     class Command : public Object<detail::CommandImpl, detail::ScheduleImpl> {
         friend OwnerTy;
     public:
-        Command(OwnerRef owner, Kernel kern);
+        Command(detail::Impl owner, Kernel kern);
         using Object::Object;
 
         void release() const;
@@ -28,6 +28,7 @@ namespace nexus {
         nxs_status setArgument(nxs_uint index, Buffer buffer) const;
         //nxs_status setArgument(nxs_uint index, nxs_int scalar) const;
 
+        nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
     };
 }
 

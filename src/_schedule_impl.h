@@ -9,15 +9,17 @@ namespace detail {
 
     typedef DevObject<Command> DevCommand;
 
-    class ScheduleImpl : public Schedule::OwnerRef {
+    class ScheduleImpl : public Impl {
     public:
       /// @brief Construct a Platform for the current system
-      ScheduleImpl(Schedule::OwnerRef owner);
+      ScheduleImpl(Impl owner);
       ~ScheduleImpl();
 
       void release();
 
       Command getCommand(Kernel kern);
+
+      nxs_status run(nxs_bool blocking);
 
     private:
       std::vector<DevCommand> commands;

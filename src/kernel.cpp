@@ -7,15 +7,14 @@
 #define NEXUS_LOG_MODULE "kernel"
 
 using namespace nexus;
-using namespace nexus::detail;
 
 namespace nexus {
 namespace detail {
-  class KernelImpl : public Kernel::OwnerRef {
+  class KernelImpl : public Impl {
   public:
     /// @brief Construct a Platform for the current system
-    KernelImpl(Kernel::OwnerRef owner, const std::string &kName)
-      : OwnerRef(owner), kernelName(kName) {
+    KernelImpl(Impl owner, const std::string &kName)
+      : Impl(owner), kernelName(kName) {
         NEXUS_LOG(NEXUS_STATUS_NOTE, "  Kernel: " << kernelName << " - " << getId());
       }
 
@@ -36,7 +35,7 @@ namespace detail {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Kernel::Kernel(OwnerRef owner, const std::string &kernelName)
+Kernel::Kernel(detail::Impl owner, const std::string &kernelName)
   : Object(owner, kernelName) {}
 
 void Kernel::release() const {

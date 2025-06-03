@@ -11,7 +11,7 @@ using namespace nexus::detail;
 namespace nexus {
 namespace detail {
 
-  class SystemImpl : public detail::OwnerRef {
+  class SystemImpl : public detail::Impl {
   public:
       SystemImpl(int);
       ~SystemImpl();
@@ -23,7 +23,7 @@ namespace detail {
           return runtimes[idx];
       }
       Buffer createBuffer(size_t sz, void *hostData = nullptr);
-      nxs_status copyBuffer(Buffer buf, Device dev);
+      Buffer copyBuffer(Buffer buf, Device dev);
 
   private:
       // set of runtimes
@@ -37,7 +37,7 @@ namespace detail {
 SystemImpl::SystemImpl(int) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR");
   iterateEnvPaths("NEXUS_RUNTIME_PATH", "./runtime_libs", [&](const std::string &path, const std::string &name) {
-    runtimes.emplace_back(Runtime::OwnerRef(this, runtimes.size()), path);
+    runtimes.emplace_back(detail::Impl(this, runtimes.size()), path);
   });
 }
 
@@ -52,15 +52,15 @@ SystemImpl::~SystemImpl() {
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
-  buffers.emplace_back(Buffer::OwnerRef(this, id), sz, hostData);
+  buffers.emplace_back(detail::Impl(this, id), sz, hostData);
   return buffers.back();
 }
 
-nxs_status SystemImpl::copyBuffer(Buffer buf, Device dev) {
+Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "copyBuffer " << buf.getSize());
   buf._addDevice(dev);
-  dev._copyBuffer(buf);
-  return NXS_Success;
+  Buffer nbuf = dev.copyBuffer(buf);
+  return nbuf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ Buffer System::createBuffer(size_t sz, void *hostData) {
   return get()->createBuffer(sz, hostData);
 }
 
-nxs_status System::copyBuffer(Buffer buf, Device dev) {
+Buffer System::copyBuffer(Buffer buf, Device dev) {
   return get()->copyBuffer(buf, dev);
 }
 

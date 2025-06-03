@@ -16,8 +16,8 @@ using namespace nexus::detail;
 
 
 /// @brief Construct a Runtime for the current system
-RuntimeImpl::RuntimeImpl(Runtime::OwnerRef owner, const std::string &path)
- : OwnerRef(owner), pluginLibraryPath(path), library(nullptr) {
+RuntimeImpl::RuntimeImpl(Impl owner, const std::string &path)
+ : Impl(owner), pluginLibraryPath(path), library(nullptr) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  CTOR: " << path);
   loadPlugin();
 }
@@ -98,6 +98,7 @@ void RuntimeImpl::loadPlugin() {
   loadFn(FN_nxsGetDeviceProperty);
 
   loadFn(FN_nxsCreateBuffer);
+  loadFn(FN_nxsCopyBuffer);
   loadFn(FN_nxsReleaseBuffer);
 
   loadFn(FN_nxsCreateLibrary);
@@ -113,6 +114,7 @@ void RuntimeImpl::loadPlugin() {
   loadFn(FN_nxsCreateCommand);
   loadFn(FN_nxsReleaseCommand);
   loadFn(FN_nxsSetCommandArgument);
+  loadFn(FN_nxsFinalizeCommand);
 
   if (!runtimeFns[FN_nxsGetRuntimeProperty] || !runtimeFns[FN_nxsGetDeviceCount] ||
       !runtimeFns[FN_nxsGetDeviceProperty])
@@ -125,7 +127,7 @@ void RuntimeImpl::loadPlugin() {
   nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
-    devices.emplace_back(Device::OwnerRef(this, i));
+    devices.emplace_back(Impl(this, i));
   }
 }
 
@@ -133,7 +135,7 @@ void RuntimeImpl::loadPlugin() {
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-Runtime::Runtime(OwnerRef owner, const std::string &libraryPath)
+Runtime::Runtime(detail::Impl owner, const std::string &libraryPath)
  : Object(owner, libraryPath) {}
 
 void Runtime::release() { return get()->release(); }

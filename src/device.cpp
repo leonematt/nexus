@@ -1,21 +1,21 @@
 #include <nexus/device_db.h>
 #include <nexus/runtime.h>
+#include <nexus/buffer.h>
 #include <nexus/log.h>
 
 #include "_runtime_impl.h"
 #include "_device_impl.h"
+#include "_buffer_impl.h"
 
 #define NEXUS_LOG_MODULE "device"
 
 using namespace nexus;
-using namespace nexus::detail;
 
 #define APICALL(FUNC, ...) \
   nxs_int apiResult = getParent()->runPluginFunction<FUNC##_fn>(FN_##FUNC, __VA_ARGS__)
 
-
-DeviceImpl::DeviceImpl(OwnerRef base)
-: OwnerRef(base) {
+detail::DeviceImpl::DeviceImpl(detail::Impl base)
+: detail::Impl(base) {
   auto *runtime = getParent();
   auto id = getId();
   auto vendor = runtime->getProperty<std::string>(id, NP_Vendor);
@@ -29,12 +29,12 @@ DeviceImpl::DeviceImpl(OwnerRef base)
     NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
 }
 
-DeviceImpl::~DeviceImpl() {
+detail::DeviceImpl::~DeviceImpl() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Device: " << getId());
   release();
 }
 
-void DeviceImpl::release() {
+void detail::DeviceImpl::release() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    release: " << getId());
   for (auto &buf : buffers) {
     // release from device
@@ -46,53 +46,43 @@ void DeviceImpl::release() {
   schedules.clear();
 }
 
-Schedule DeviceImpl::createSchedule() {
+Library detail::DeviceImpl::createLibrary(void *data, size_t size) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
+  APICALL(nxsCreateLibrary, getId(), data, size);
+  Library lib(detail::Impl(this, apiResult));
+  libraries.emplace_back(lib, apiResult);
+  return lib;
+}
+
+Library detail::DeviceImpl::createLibrary(const std::string &path) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
+  APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
+  Library lib(detail::Impl(this, apiResult));
+  libraries.emplace_back(lib, apiResult);
+  return lib;
+}
+
+Schedule detail::DeviceImpl::createSchedule() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createSchedule");
   APICALL(nxsCreateSchedule, getId(), 0);
-  Schedule sched(Schedule::OwnerRef(this, apiResult));
+  Schedule sched(detail::Impl(this, apiResult));
   schedules.emplace_back(sched, apiResult);
   return sched;
 }
 
-
-nxs_int DeviceImpl::createCommand(nxs_int sid, nxs_int kid) {
-  APICALL(nxsCreateCommand, sid, kid);
-  return apiResult;
-}
-
-Library DeviceImpl::createLibrary(void *data, size_t size) {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
-  APICALL(nxsCreateLibrary, getId(), data, size);
-  Library lib(Library::OwnerRef(this, apiResult));
-  libraries.emplace_back(lib, apiResult);
-  return lib;
-}
-
-Library DeviceImpl::createLibrary(const std::string &path) {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
-  APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
-  Library lib(Library::OwnerRef(this, apiResult));
-  libraries.emplace_back(lib, apiResult);
-  return lib;
-}
-
-nxs_status DeviceImpl::_copyBuffer(Buffer buf) {
+Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  copyBuffer");
   APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
-  buffers.emplace_back(buf, apiResult);
-  return (nxs_status)(apiResult < 0 ? apiResult : NXS_Success);
-}
-
-nxs_int DeviceImpl::getKernel(nxs_int lid, const std::string &kernelName) {
-  APICALL(nxsGetKernel, lid, kernelName.c_str());
-  return apiResult;
+  Buffer nbuf(Impl(this, apiResult), buf.getSize());
+  buffers.emplace_back(nbuf, apiResult);
+  return nbuf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @return 
 ///////////////////////////////////////////////////////////////////////////////
 //Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
-Device::Device(OwnerRef base) : Object(base) {}
+Device::Device(detail::Impl base) : Object(base) {}
 
 void Device::release() const {
   get()->release();
@@ -109,8 +99,8 @@ Schedule Device::createSchedule() {
     return get()->createSchedule();
 }
 
-nxs_status Device::_copyBuffer(Buffer buf) {
-  return get()->_copyBuffer(buf);
+Buffer Device::copyBuffer(Buffer buf) {
+  return get()->copyBuffer(buf);
 }
 
 Library Device::createLibrary(void *libraryData, size_t librarySize) {

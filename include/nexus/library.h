@@ -18,7 +18,7 @@ namespace nexus {
     class Library : public Object<detail::LibraryImpl, detail::DeviceImpl> {
         friend OwnerTy;
     public:
-        Library(OwnerRef owner);
+        Library(detail::Impl owner);
         using Object::Object;
 
         void release() const;

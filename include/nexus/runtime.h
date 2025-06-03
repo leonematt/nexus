@@ -16,7 +16,7 @@ namespace nexus {
     class Runtime : public Object<detail::RuntimeImpl, detail::SystemImpl> {
         friend OwnerTy;
     public:
-        Runtime(OwnerRef owner, const std::string& libraryPath);
+        Runtime(detail::Impl owner, const std::string& libraryPath);
         using Object::Object;
 
         void release() override;

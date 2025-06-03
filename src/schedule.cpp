@@ -11,8 +11,8 @@ using namespace nexus;
 using namespace nexus::detail;
 
 /// @brief Construct a Platform for the current system
-ScheduleImpl::ScheduleImpl(Schedule::OwnerRef owner)
-  : OwnerRef(owner) {
+ScheduleImpl::ScheduleImpl(detail::Impl owner)
+  : detail::Impl(owner) {
     NEXUS_LOG(NEXUS_STATUS_NOTE, "  Schedule: " << getId());
   }
 
@@ -26,15 +26,20 @@ void ScheduleImpl::release() {
 }
 
 Command ScheduleImpl::getCommand(Kernel kern) {
-  nxs_int kid = kern.getId();
-  auto cid = getParent<Schedule::OwnerTy>()->createCommand(getId(), kid);
-  Command cmd(Command::OwnerRef(this, commands.size()), kern);
+  auto *rt = getParentOfType<RuntimeImpl>();
+  nxs_int cid = rt->runPluginFunction<nxsCreateCommand_fn>(FN_nxsCreateCommand, getId(), kern.getId());
+  Command cmd(detail::Impl(this, cid), kern);
   commands.emplace_back(cmd, cid);
   return cmd;
 }
 
+nxs_status ScheduleImpl::run(nxs_bool blocking) {
+  auto *rt = getParentOfType<RuntimeImpl>();
+  return (nxs_status)rt->runPluginFunction<nxsRunSchedule_fn>(FN_nxsRunSchedule, getId(), blocking);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-Schedule::Schedule(OwnerRef owner) : Object(owner) {}
+Schedule::Schedule(detail::Impl owner) : Object(owner) {}
 
 //Schedule::Schedule() : Object() {}
 
@@ -48,4 +53,8 @@ nxs_int Schedule::getId() const {
 
 Command Schedule::createCommand(Kernel kern) {
   return get()->getCommand(kern);
+}
+
+nxs_status Schedule::run(nxs_bool blocking) {
+  return get()->run(blocking);
 }

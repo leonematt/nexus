@@ -3,47 +3,34 @@
 #include <nexus/system.h>
 #include <nexus/log.h>
 
-using namespace nexus;
-using namespace nexus::detail;
+#include "_buffer_impl.h"
+#include "_runtime_impl.h"
 
 #define NEXUS_LOG_MODULE "buffer"
 
-namespace nexus {
-namespace detail {
-  class BufferImpl : public Buffer::OwnerRef {
-  public:
-    //BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
-    /// @brief Construct a Platform for the current system
-    BufferImpl(Buffer::OwnerRef base, size_t _sz, void *_hostData)
-      : OwnerRef(base), size(_sz), data(_hostData) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Buffer: " << getId() << " - " << size);
-      }
+using namespace nexus;
 
-    ~BufferImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Buffer: " << getId());
-    }
+detail::BufferImpl::BufferImpl(detail::Impl base, size_t _sz, void *_hostData)
+: Impl(base), size(_sz), data(_hostData) {
 
-    void release() {
-      devices.clear();
-    }
-
-    size_t getSize() const { return size; }
-    void *getHostData() const { return data; }
-
-    void _addDevice(Device _dev) {
-      devices.push_back(_dev);
-    }
-  private:
-    // set of runtimes
-    size_t size;
-    void *data;
-    std::list<Device> devices;
-  };
 }
+
+detail::BufferImpl::~BufferImpl() {
+  release();
 }
+
+void detail::BufferImpl::release() {
+
+}
+
+nxs_status detail::BufferImpl::copyData(void *_hostBuf) {
+  auto *rt = getParentOfType<RuntimeImpl>();
+  return (nxs_status)rt->runPluginFunction<nxsCopyBuffer_fn>(FN_nxsCopyBuffer, getId(), _hostBuf);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
-Buffer::Buffer(OwnerRef base, size_t _sz, void *_hostData)
+Buffer::Buffer(detail::Impl base, size_t _sz, void *_hostData)
   : Object(base, _sz, _hostData) {}
 
 void Buffer::release() const {
@@ -59,6 +46,10 @@ size_t Buffer::getSize() const {
 }
 void *Buffer::getHostData() const {
   return get()->getHostData();
+}
+
+nxs_status Buffer::copy(void *_hostBuf) {
+  return get()->copyData(_hostBuf);
 }
 
 void Buffer::_addDevice(Device _dev) {

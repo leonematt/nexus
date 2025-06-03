@@ -92,6 +92,16 @@ NEXUS_API_FUNC(nxs_int, CreateBuffer,
     void* host_ptr
 )
 /************************************************************************
+ * @def CreateBuffer
+ * @brief Create buffer on the device
+  * @return Negative value is an error status.
+  *         Non-negative is the bufferId.
+***********************************************************************/
+NEXUS_API_FUNC(nxs_status, CopyBuffer,
+    nxs_int buffer_id,
+    void* host_ptr
+)
+/************************************************************************
  * @def ReleaseBuffer
  * @brief Release the buffer on the device
   * @return Error status or Succes.
@@ -158,7 +168,8 @@ NEXUS_API_FUNC(nxs_int, CreateSchedule,
   * @return Error status or Succes.
 ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, RunSchedule,
-    nxs_int schedule_id
+    nxs_int schedule_id,
+    nxs_bool blocking
 )
 /************************************************************************
  * @def ReleaseCommandList
@@ -198,6 +209,17 @@ NEXUS_API_FUNC(nxs_status, SetCommandArgument,
     nxs_int command_id,
     nxs_int argument_index,
     nxs_int buffer_id
+)
+/************************************************************************
+ * @def CreateCommand
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, FinalizeCommand,
+    nxs_int command_id,
+    nxs_int group_size,
+    nxs_int grid_size
 )
 
 

@@ -13,9 +13,9 @@
 namespace nexus {
 
     namespace detail {
-        class RuntimeImpl : public Runtime::OwnerRef {
+        class RuntimeImpl : public Impl {
         public:
-            RuntimeImpl(Runtime::OwnerRef owner, const std::string &path);
+            RuntimeImpl(Impl owner, const std::string &path);
             ~RuntimeImpl();
 
             void release();

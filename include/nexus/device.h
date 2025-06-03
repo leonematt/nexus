@@ -20,9 +20,8 @@ namespace nexus {
     // Device class
     class Device : public Object<detail::DeviceImpl, detail::RuntimeImpl> {
         friend OwnerTy;
-        friend detail::SystemImpl;
     public:
-        Device(OwnerRef base);
+        Device(detail::Impl base);
         using Object::Object;
         
         void release() const;
@@ -37,8 +36,7 @@ namespace nexus {
         Library createLibrary(void *libraryData, size_t librarySize);
         Library createLibrary(const std::string &libraryPath);
 
-    protected:
-        nxs_status _copyBuffer(Buffer buf);
+        Buffer copyBuffer(Buffer buf);
     };
     
 }

@@ -1,25 +1,3 @@
-/* OpenCL runtime library: clGetPlatformIDs()
-
-   Copyright (c) 2011 Kalle Raiskila 
-   
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-   
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-   
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
-*/
 
 #include <assert.h>
 #include <string.h>
@@ -242,6 +220,19 @@ nxsCreateBuffer(
   return rt->addObject(buf);
 }
 
+extern "C" nxs_status NXS_API_CALL
+nxsCopyBuffer(
+  nxs_int buffer_id,
+  void* host_ptr
+)
+{
+  auto rt = getRuntime();
+  auto buf = rt->dropObject<MTL::Buffer>(buffer_id);
+  if (!buf)
+    return NXS_InvalidBuildOptions; // fix
+  memcpy(host_ptr, (*buf)->contents(), (*buf)->length());
+  return NXS_Success;
+}
 
 /*
  * Release a buffer on the device.
@@ -258,102 +249,6 @@ nxsReleaseBuffer(
 
   (*buf)->release();
   return NXS_Success;
-}
-
-
- /************************************************************************
- * @def CreateCommandBuffer
- * @brief Create command buffer on the device
- * @return Negative value is an error status.
- *         Non-negative is the bufferId.
- ***********************************************************************/
-extern "C" nxs_int nxsCreateSchedule(
-  nxs_int device_id,
-  nxs_command_queue_properties properties
-)
-{
-  auto rt = getRuntime();
-  auto dev = rt->getObject<MTL::Device>(device_id);
-  if (!dev)
-    return NXS_InvalidDevice;
-
-  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createCommandBuffer");
-  auto *queue = rt->getQueue(device_id);
-  MTL::CommandBuffer *cmdBuf = queue->commandBuffer();
-  return rt->addObject(cmdBuf);
-}
-
-/************************************************************************
-* @def ReleaseCommandList
-* @brief Release the buffer on the device
-* @return Error status or Succes.
-***********************************************************************/
-extern "C" nxs_status nxsRunSchedule(
-  nxs_int schedule_id
-)
-{
-  auto rt = getRuntime();
-  auto dev = rt->getObject<MTL::CommandBuffer>(schedule_id);
-  if (!dev)
-    return NXS_InvalidDevice;
-
-  return NXS_Success;
-  //return (*dev)->runCommandBuffer(command_list_id);
-}
-
-
-/*
- * Allocate a buffer on the device.
- */ 
-extern "C" nxs_status NXS_API_CALL
-nxsReleaseSchedule(
-  nxs_int schedule_id
-)
-{
-  auto rt = getRuntime();
-  auto cmdbuf = rt->dropObject<MTL::CommandBuffer>(schedule_id);
-  if (!cmdbuf)
-    return NXS_InvalidBuildOptions; // fix
-
-  (*cmdbuf)->release();
-  return NXS_Success;
-}
-
-/************************************************************************
- * @def CreateCommand
- * @brief Create command buffer on the device
- * @return Negative value is an error status.
- *         Non-negative is the bufferId.
- ***********************************************************************/
-extern "C" nxs_int NXS_API_CALL
-nxsCreateCommand(
-  nxs_int schedule_id,
-  nxs_int kernel_id
-)
-{
-  auto rt = getRuntime();
-  auto cmdbuf = rt->getObject<MTL::CommandBuffer>(schedule_id);
-  if (!cmdbuf)
-    return NXS_InvalidBuildOptions; // fix
-
-  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createCommand");
-  MTL::ComputeCommandEncoder *command = (*cmdbuf)->computeCommandEncoder();
-  auto res = rt->addObject(command);
-
-  // Add the kernel
-  if (kernel_id >= 0) {
-    NS::Error *pError = nullptr;
-    MTL::ComputePipelineState *pipeState = nullptr;
-    if (auto kern = rt->getObject<MTL::Function>(kernel_id)) {
-      pipeState = (*cmdbuf)->device()->newComputePipelineState(*kern, &pError);
-      command->setComputePipelineState(pipeState);
-    } else {
-      // test before creating Command
-      return NXS_InvalidKernel;
-    }
-  }
-
-  return res;
 }
 
 /*
@@ -454,6 +349,110 @@ nxsGetKernel(
   return rt->addObject(func);
 }
 
+
+ /************************************************************************
+ * @def CreateCommandBuffer
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+extern "C" nxs_int nxsCreateSchedule(
+  nxs_int device_id,
+  nxs_command_queue_properties properties
+)
+{
+  auto rt = getRuntime();
+  auto dev = rt->getObject<MTL::Device>(device_id);
+  if (!dev)
+    return NXS_InvalidDevice;
+
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createSchedule");
+  auto *queue = rt->getQueue(device_id);
+  MTL::CommandBuffer *cmdBuf = queue->commandBuffer();
+  return rt->addObject(cmdBuf);
+}
+
+/************************************************************************
+* @def ReleaseCommandList
+* @brief Release the buffer on the device
+* @return Error status or Succes.
+***********************************************************************/
+extern "C" nxs_status nxsRunSchedule(
+  nxs_int schedule_id,
+  nxs_bool blocking
+)
+{
+  auto rt = getRuntime();
+  auto cmdbuf = rt->getObject<MTL::CommandBuffer>(schedule_id);
+  if (!cmdbuf)
+    return NXS_InvalidDevice;
+
+  (*cmdbuf)->commit();
+  if (blocking) {
+    (*cmdbuf)->waitUntilCompleted(); // Synchronous wait for simplicity
+    if ((*cmdbuf)->status() == MTL::CommandBufferStatusError) {
+      NXSAPI_LOG(NXSAPI_STATUS_ERR, "runSchedule: "
+                << (*cmdbuf)->error()->localizedDescription()->utf8String());
+      return NXS_InvalidEvent;
+    }  
+  }
+  return NXS_Success;
+}
+
+
+/*
+ * Allocate a buffer on the device.
+ */ 
+extern "C" nxs_status NXS_API_CALL
+nxsReleaseSchedule(
+  nxs_int schedule_id
+)
+{
+  auto rt = getRuntime();
+  auto cmdbuf = rt->dropObject<MTL::CommandBuffer>(schedule_id);
+  if (!cmdbuf)
+    return NXS_InvalidBuildOptions; // fix
+
+  (*cmdbuf)->release();
+  return NXS_Success;
+}
+
+/************************************************************************
+ * @def CreateCommand
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+extern "C" nxs_int NXS_API_CALL
+nxsCreateCommand(
+  nxs_int schedule_id,
+  nxs_int kernel_id
+)
+{
+  auto rt = getRuntime();
+  auto cmdbuf = rt->getObject<MTL::CommandBuffer>(schedule_id);
+  if (!cmdbuf)
+    return NXS_InvalidBuildOptions; // fix
+
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createCommand");
+  MTL::ComputeCommandEncoder *command = (*cmdbuf)->computeCommandEncoder();
+  auto res = rt->addObject(command);
+
+  // Add the kernel
+  if (kernel_id >= 0) {
+    NS::Error *pError = nullptr;
+    MTL::ComputePipelineState *pipeState = nullptr;
+    if (auto kern = rt->getObject<MTL::Function>(kernel_id)) {
+      pipeState = (*cmdbuf)->device()->newComputePipelineState(*kern, &pError);
+      command->setComputePipelineState(pipeState);
+    } else {
+      // test before creating Command
+      return NXS_InvalidKernel;
+    }
+  }
+  return res;
+}
+
 /************************************************************************
  * @def CreateCommand
  * @brief Create command buffer on the device
@@ -467,5 +466,47 @@ nxsSetCommandArgument(
   nxs_int buffer_id
 )
 {
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "setCommandArg " << command_id << " - " << argument_index << " - " << buffer_id);
+  auto rt = getRuntime();
+  auto cmd = rt->getObject<MTL::ComputeCommandEncoder>(command_id);
+  if (!cmd)
+    return NXS_InvalidCommandQueue; // fix
+  auto buf = rt->getObject<MTL::Buffer>(buffer_id);
+    if (!buf)
+      return NXS_InvalidBufferSize; // fix
+  (*cmd)->setBuffer(*buf, 0, argument_index);
+  return NXS_Success;
+}
+
+/************************************************************************
+ * @def CreateCommand
+ * @brief Create command buffer on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+extern "C" nxs_status NXS_API_CALL
+nxsFinalizeCommand(
+  nxs_int command_id,
+  nxs_int group_size,
+  nxs_int grid_size
+)
+{
+  auto rt = getRuntime();
+  auto cmd = rt->getObject<MTL::ComputeCommandEncoder>(command_id);
+  if (!cmd)
+    return NXS_InvalidCommandQueue; // fix
+
+  MTL::Size gridSize = MTL::Size(grid_size, 1, 1);
+  #if 0
+  NS::UInteger threadGroupSize = pAddPSO->maxTotalThreadsPerThreadgroup();
+  if (threadGroupSize > ARRAY_LENGTH) {
+    threadGroupSize = ARRAY_LENGTH;
+  }
+  #endif
+  MTL::Size threadgroupSize = MTL::Size(group_size, 1, 1);
+
+  (*cmd)->dispatchThreads(gridSize, threadgroupSize);
+  (*cmd)->endEncoding();
+
   return NXS_Success;
 }

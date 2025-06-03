@@ -18,7 +18,7 @@ namespace nexus {
     class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
         friend OwnerTy;
     public:
-        Buffer(OwnerRef base, size_t _sz, void *_hostData = nullptr);
+        Buffer(detail::Impl base, size_t _sz, void *_hostData = nullptr);
         using Object::Object;
 
         void release() const;
@@ -27,6 +27,8 @@ namespace nexus {
 
         size_t getSize() const;
         void *getHostData() const;
+
+        nxs_status copy(void *_hostBuf);
 
     protected:
         void _addDevice(Device _dev);

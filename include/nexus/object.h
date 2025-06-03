@@ -10,18 +10,18 @@ namespace nexus {
 
         // All Actual objects need an owner (except System)
         // + and ID within the owner
-        class OwnerRef {
+        class Impl {
         public:
 
-            OwnerRef(OwnerRef *_owner = nullptr, nxs_int _id = 0)
+            Impl(Impl *_owner = nullptr, nxs_int _id = 0)
                 : owner(_owner), id(_id) {}
-            virtual ~OwnerRef() {}
+            virtual ~Impl() {}
 
             nxs_int getId() const { return id; }
 
         protected:
             // Only the derived class can access
-            template <typename T = OwnerRef>
+            template <typename T = Impl>
             T *getParent() const { return dynamic_cast<T*>(owner); }
 
             template <typename T>
@@ -33,8 +33,10 @@ namespace nexus {
                 return nullptr;
             }
 
+            void setId(nxs_int nid) { id = nid; }
+
         private:
-            OwnerRef *owner;
+            Impl *owner;
             nxs_int id;
         };
     }
@@ -49,10 +51,9 @@ namespace nexus {
     public:
 
         typedef Towner OwnerTy;
-        typedef detail::OwnerRef OwnerRef;
         
         template <typename... Args>
-        Object(OwnerRef owner, Args... args) : impl(std::make_shared<Timpl>(owner, args...)) {}
+        Object(detail::Impl owner, Args... args) : impl(std::make_shared<Timpl>(owner, args...)) {}
 
         template <typename... Args>
         Object(Args... args) : impl(std::make_shared<Timpl>(args...)) {}

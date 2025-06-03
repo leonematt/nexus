@@ -18,7 +18,7 @@ namespace nexus {
     class Schedule : public Object<detail::ScheduleImpl, detail::DeviceImpl> {
         friend OwnerTy;
     public:
-        Schedule(OwnerRef owner);
+        Schedule(detail::Impl owner);
         using Object::Object;
 
         void release() const;
@@ -26,6 +26,8 @@ namespace nexus {
         nxs_int getId() const override;
 
         Command createCommand(Kernel kern);
+
+        nxs_status run(nxs_bool blocking = true);
     };
 }
 

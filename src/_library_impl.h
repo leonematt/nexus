@@ -11,10 +11,10 @@ namespace detail {
 
   typedef DevObject<Kernel> DevKernel;
 
-  class LibraryImpl : public Library::OwnerRef {
+  class LibraryImpl : public Impl {
   public:
     /// @brief Construct a Platform for the current system
-    LibraryImpl(Library::OwnerRef owner);
+    LibraryImpl(Impl owner);
 
     ~LibraryImpl();
 
