@@ -14,6 +14,7 @@ using namespace nexus::detail;
 #define NEXUS_LOG_MODULE "runtime"
 
 
+
 /// @brief Construct a Runtime for the current system
 RuntimeImpl::RuntimeImpl(Runtime::OwnerRef owner, const std::string &path)
  : OwnerRef(owner), pluginLibraryPath(path), library(nullptr) {
@@ -111,6 +112,7 @@ void RuntimeImpl::loadPlugin() {
   
   loadFn(FN_nxsCreateCommand);
   loadFn(FN_nxsReleaseCommand);
+  loadFn(FN_nxsSetCommandArgument);
 
   if (!runtimeFns[FN_nxsGetRuntimeProperty] || !runtimeFns[FN_nxsGetDeviceCount] ||
       !runtimeFns[FN_nxsGetDeviceProperty])

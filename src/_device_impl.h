@@ -24,7 +24,7 @@ namespace detail {
   typedef DevObject<Schedule> DevSchedule;
   
   /// @class DesignImpl
-  class DeviceImpl : public OwnerRef<RuntimeImpl> {
+  class DeviceImpl : public Device::OwnerRef {
     Properties deviceProps;
     std::vector<DevBuffer> buffers;
     std::vector<DevLibrary> libraries;

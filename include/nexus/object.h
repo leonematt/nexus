@@ -12,17 +12,19 @@ namespace nexus {
         // + and ID within the owner
         template <typename Towner>
         class OwnerRef {
-            // TODO: use CRTP for Impl?
-            friend Towner;
         public:
+
+            typedef Towner OwnerTy;
 
             OwnerRef(Towner *_owner, nxs_int _id)
                 : owner(_owner), id(_id) {}
 
             nxs_int getId() const { return id; }
+
         protected:
             // Only the derived class can access
             Towner *getOwner() const { return owner; }
+
         private:
             Towner *owner;
             nxs_int id;
@@ -53,6 +55,8 @@ namespace nexus {
 
         operator bool() const { return impl; }
         bool operator ==(const Object &that) const { return impl == that.impl; }
+
+        virtual void release() { impl = nullptr; }
 
         virtual nxs_int getId() const = 0;
 

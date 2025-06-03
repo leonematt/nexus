@@ -3,6 +3,7 @@
 
 #include <nexus/object.h>
 #include <nexus/kernel.h>
+#include <nexus/buffer.h>
 #include <nexus-api.h>
 
 #include <list>
@@ -22,8 +23,11 @@ namespace nexus {
         using Object::Object;
 
         void release() const;
-
         nxs_int getId() const override;
+
+        nxs_status setArgument(nxs_uint index, Buffer buffer) const;
+        //nxs_status setArgument(nxs_uint index, nxs_int scalar) const;
+
     };
 }
 

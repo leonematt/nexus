@@ -8,10 +8,12 @@
 #include <string>
 #include <memory>
 
+#define NEXUS_LOG_MODULE "runtime"
+
 namespace nexus {
 
     namespace detail {
-        class RuntimeImpl : public OwnerRef<SystemImpl> {
+        class RuntimeImpl : public Runtime::OwnerRef {
         public:
             RuntimeImpl(Runtime::OwnerRef owner, const std::string &path);
             ~RuntimeImpl();
@@ -60,7 +62,10 @@ namespace nexus {
 
             std::vector<Device> devices;
         };
+
     }
 }
+
+#undef NEXUS_LOG_MODULE
 
 #endif // _NEXUS_RUNTIME_IMPL_H

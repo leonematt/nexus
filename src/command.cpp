@@ -2,7 +2,7 @@
 #include <nexus/command.h>
 #include <nexus/log.h>
 
-#include "_device_impl.h"
+#include "_schedule_impl.h"
 
 #define NEXUS_LOG_MODULE "command"
 
@@ -16,11 +16,13 @@ namespace detail {
     /// @brief Construct a Platform for the current system
     CommandImpl(Command::OwnerRef owner, Kernel kern)
       : OwnerRef(owner) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Command: " << " - " << getId());
+        NEXUS_LOG(NEXUS_STATUS_NOTE, "    Command: " << getId());
+
+        //TODO: gather kernel argument details
       }
 
     ~CommandImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Command: " << getId());
+      NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Command: " << getId());
       release();
     }
 
@@ -28,7 +30,15 @@ namespace detail {
       //getOwner()->releaseCommand(getId());
     }
 
+    nxs_status setArgument(nxs_uint index, Buffer buffer) {
+      arguments[index] = buffer;
+      //auto func = [&]() { return runPluginFunction<OwnerTy, nxsSetCommandArgument_fn>(FN_nxsSetCommandArgument, index, buffer); }
+      //return (nxs_status)walkUp(func);
+      return NXS_Success;
+    }
+
   private:
+    std::vector<Buffer> arguments;
   };
 }
 }
@@ -38,8 +48,6 @@ namespace detail {
 Command::Command(OwnerRef owner, Kernel kern)
   : Object(owner, kern) {}
 
-//Command::Command() : Object() {}
-
 void Command::release() const {
   get()->release();
 }
@@ -48,3 +56,7 @@ nxs_int Command::getId() const {
   return get()->getId();
 }
 
+nxs_status Command::setArgument(nxs_uint index, Buffer buffer) const {
+  return get()->setArgument(index, buffer);
+}
+        

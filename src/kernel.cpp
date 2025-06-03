@@ -28,10 +28,6 @@ namespace detail {
       //getOwner()->releaseKernel(getId());
     }
 
-    nxs_int getDevId() const {
-      return getOwner()->getKernelDevId(getId());
-    }
-
   private:
     std::string kernelName;
   };
@@ -49,8 +45,4 @@ void Kernel::release() const {
 
 nxs_int Kernel::getId() const {
   return get()->getId();
-}
-
-nxs_int Kernel::getDevId() const {
-  return get()->getDevId();
 }

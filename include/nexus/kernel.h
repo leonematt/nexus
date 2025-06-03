@@ -24,7 +24,6 @@ namespace nexus {
 
         nxs_int getId() const override;
 
-        nxs_int getDevId() const;
     };
 }
 

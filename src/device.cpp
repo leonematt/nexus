@@ -55,21 +55,21 @@ void DeviceImpl::release() {
 Schedule DeviceImpl::createSchedule() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createSchedule");
   APICALL(nxsCreateSchedule, getId(), 0);
-  Schedule sched(Schedule::OwnerRef(this, schedules.size()));
+  Schedule sched(Schedule::OwnerRef(this, apiResult));
   schedules.emplace_back(sched, apiResult);
   return sched;
 }
 
 
 nxs_int DeviceImpl::createCommand(nxs_int sid, nxs_int kid) {
-  APICALL(nxsCreateCommand, getId(), sid, kid);
+  APICALL(nxsCreateCommand, sid, kid);
   return apiResult;
 }
 
 Library DeviceImpl::createLibrary(void *data, size_t size) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibrary, getId(), data, size);
-  Library lib(Library::OwnerRef(this, libraries.size()));
+  Library lib(Library::OwnerRef(this, apiResult));
   libraries.emplace_back(lib, apiResult);
   return lib;
 }
@@ -77,7 +77,7 @@ Library DeviceImpl::createLibrary(void *data, size_t size) {
 Library DeviceImpl::createLibrary(const std::string &path) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
-  Library lib(Library::OwnerRef(this, libraries.size()));
+  Library lib(Library::OwnerRef(this, apiResult));
   libraries.emplace_back(lib, apiResult);
   return lib;
 }
@@ -91,14 +91,13 @@ nxs_status DeviceImpl::_copyBuffer(Buffer buf) {
 
 nxs_status DeviceImpl::releaseLibrary(nxs_int lid) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  releaseLibrary" << lid);
-  auto devId = libraries[lid].id;
-  APICALL(nxsReleaseLibrary, getId(), devId);
+  APICALL(nxsReleaseLibrary, lid);
   libraries[lid].obj = Library();
   return (nxs_status)apiResult;
 }
 
 nxs_int DeviceImpl::getKernel(nxs_int lid, const std::string &kernelName) {
-  APICALL(nxsGetKernel, getId(), lid, kernelName.c_str());
+  APICALL(nxsGetKernel, lid, kernelName.c_str());
   return apiResult;
 }
 

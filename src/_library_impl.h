@@ -22,8 +22,6 @@ namespace detail {
 
     Kernel getKernel(const std::string &kernelName);
 
-    nxs_int getKernelDevId(nxs_int k);
-
   private:
     std::vector<DevKernel> kernels;
 };

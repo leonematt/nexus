@@ -25,21 +25,13 @@ void LibraryImpl::release() {
 
 Kernel LibraryImpl::getKernel(const std::string &kernelName) {
   auto kid = getOwner()->getKernel(getId(), kernelName);
-  Kernel kern(Kernel::OwnerRef(this, kernels.size()), kernelName);
+  Kernel kern(Kernel::OwnerRef(this, kid), kernelName);
   kernels.emplace_back(kern, kid);
   return kern;
 }
 
-nxs_int LibraryImpl::getKernelDevId(nxs_int kid) {
-  if (kid >= 0 && kid < kernels.size())
-    return kernels[kid].id;
-  return NXS_InvalidKernel;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 Library::Library(OwnerRef owner) : Object(owner) {}
-
-//Library::Library() : Object() {}
 
 void Library::release() const {
   get()->release();

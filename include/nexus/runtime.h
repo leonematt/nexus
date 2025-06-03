@@ -19,7 +19,7 @@ namespace nexus {
         Runtime(OwnerRef owner, const std::string& libraryPath);
         using Object::Object;
 
-        void release();
+        void release() override;
 
         nxs_int getId() const override;
 
