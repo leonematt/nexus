@@ -67,7 +67,7 @@ public:
 
   nxs_int addObject(void *obj) {
     objects.push_back(obj);
-    return objects.size();
+    return objects.size() - 1;
   }
 
   MTL::CommandQueue *getQueue(nxs_int id) const {
@@ -398,6 +398,7 @@ nxsCreateLibraryFromFile(
   const char *library_path
 )
 {
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createLibraryFromFile " << device_id << " - " << library_path);
   auto rt = getRuntime();
   auto dev = rt->getObject<MTL::Device>(device_id);
   if (!dev)
@@ -406,7 +407,6 @@ nxsCreateLibraryFromFile(
   MTL::Library *pLibrary = (*dev)->newLibrary(
     NS::String::string(library_path, NS::UTF8StringEncoding), &pError
   );
-  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "createLibrary " << (int64_t)pError << " - " << (int64_t)pLibrary);
   if (pError) {
     NXSAPI_LOG(NXSAPI_STATUS_ERR, "createLibrary " << pError->localizedDescription()->utf8String());
     return NXS_InvalidProgram;
@@ -439,6 +439,7 @@ nxsGetKernel(
   const char *kernel_name
 )
 {
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "getKernel " << library_id << " - " << kernel_name);
   auto rt = getRuntime();
   auto lib = rt->getObject<MTL::Library>(library_id);
   if (!lib)
