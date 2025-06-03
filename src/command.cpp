@@ -32,9 +32,8 @@ namespace detail {
 
     nxs_status setArgument(nxs_uint index, Buffer buffer) {
       arguments[index] = buffer;
-      //auto func = [&]() { return runPluginFunction<OwnerTy, nxsSetCommandArgument_fn>(FN_nxsSetCommandArgument, index, buffer); }
-      //return (nxs_status)walkUp(func);
-      return NXS_Success;
+      auto *rt = getParentOfType<RuntimeImpl>();
+      return (nxs_status)rt->runPluginFunction<nxsSetCommandArgument_fn>(FN_nxsSetCommandArgument, getId(), index, buffer.getId());
     }
 
   private:

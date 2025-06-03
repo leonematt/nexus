@@ -11,7 +11,7 @@ using namespace nexus::detail;
 namespace nexus {
 namespace detail {
 
-  class SystemImpl {
+  class SystemImpl : public detail::OwnerRef {
   public:
       SystemImpl(int);
       ~SystemImpl();
@@ -45,8 +45,8 @@ SystemImpl::~SystemImpl() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "DTOR");
   for (auto rt : runtimes)
     rt.release();
-  for (auto buf : buffers)
-    buf.release();
+  //for (auto buf : buffers)
+  //  buf.release();
 }
 
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {

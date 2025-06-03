@@ -27,7 +27,7 @@ void ScheduleImpl::release() {
 
 Command ScheduleImpl::getCommand(Kernel kern) {
   nxs_int kid = kern.getId();
-  auto cid = getOwner()->createCommand(getId(), kid);
+  auto cid = getParent<Schedule::OwnerTy>()->createCommand(getId(), kid);
   Command cmd(Command::OwnerRef(this, commands.size()), kern);
   commands.emplace_back(cmd, cid);
   return cmd;

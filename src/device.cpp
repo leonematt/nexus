@@ -11,18 +11,12 @@ using namespace nexus;
 using namespace nexus::detail;
 
 #define APICALL(FUNC, ...) \
-  nxs_int apiResult = NXS_InvalidDevice; \
-  if (auto fn = getOwner()->getFunction<FUNC##_fn>(FN_##FUNC)) { \
-    apiResult = (*fn)(__VA_ARGS__); \
-    NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(FN_##FUNC) << ": " << apiResult); \
-  } else { \
-    NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(FN_##FUNC) << ": API not present"); \
-  }
+  nxs_int apiResult = getParent()->runPluginFunction<FUNC##_fn>(FN_##FUNC, __VA_ARGS__)
 
 
-DeviceImpl::DeviceImpl(OwnerRef<RuntimeImpl> base)
+DeviceImpl::DeviceImpl(OwnerRef base)
 : OwnerRef(base) {
-  auto *runtime = getOwner();
+  auto *runtime = getParent();
   auto id = getId();
   auto vendor = runtime->getProperty<std::string>(id, NP_Vendor);
   auto type = runtime->getProperty<std::string>(id, NP_Type);
@@ -87,13 +81,6 @@ nxs_status DeviceImpl::_copyBuffer(Buffer buf) {
   APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
   buffers.emplace_back(buf, apiResult);
   return (nxs_status)(apiResult < 0 ? apiResult : NXS_Success);
-}
-
-nxs_status DeviceImpl::releaseLibrary(nxs_int lid) {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "  releaseLibrary" << lid);
-  APICALL(nxsReleaseLibrary, lid);
-  libraries[lid].obj = Library();
-  return (nxs_status)apiResult;
 }
 
 nxs_int DeviceImpl::getKernel(nxs_int lid, const std::string &kernelName) {

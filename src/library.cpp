@@ -20,11 +20,14 @@ LibraryImpl::~LibraryImpl() {
 }
 
 void LibraryImpl::release() {
-  getOwner()->releaseLibrary(getId());
+  kernels.clear();
+  auto *rt = getParentOfType<RuntimeImpl>();
+  nxs_int kid = rt->runPluginFunction<nxsReleaseLibrary_fn>(FN_nxsReleaseLibrary, getId());
 }
 
 Kernel LibraryImpl::getKernel(const std::string &kernelName) {
-  auto kid = getOwner()->getKernel(getId(), kernelName);
+  auto *rt = getParentOfType<RuntimeImpl>();
+  nxs_int kid = rt->runPluginFunction<nxsGetKernel_fn>(FN_nxsGetKernel, getId(), kernelName.c_str());
   Kernel kern(Kernel::OwnerRef(this, kid), kernelName);
   kernels.emplace_back(kern, kid);
   return kern;

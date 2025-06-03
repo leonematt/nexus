@@ -53,6 +53,18 @@ namespace nexus {
             template <>
             const std::string getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const;
 
+            template <typename Tfn, typename... Args>
+            nxs_int runPluginFunction(nxs_function fne, Args... args) {
+                nxs_int apiResult = NXS_InvalidDevice;
+                if (auto *fn = getFunction<Tfn>(fne)) {
+                  apiResult = (*fn)(args...);
+                  NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(fne) << ": " << apiResult);
+                } else {
+                  NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(fne) << ": API not present");
+                }
+                return apiResult;
+            }
+
         private:
             void loadPlugin();
 

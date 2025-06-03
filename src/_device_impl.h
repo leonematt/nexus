@@ -31,9 +31,11 @@ namespace detail {
     std::vector<DevSchedule> schedules;
   public:
     DeviceImpl(OwnerRef base);
-    ~DeviceImpl();
+    virtual ~DeviceImpl();
 
     void release();
+
+    RuntimeImpl *getParent() const { return OwnerRef::getParent<RuntimeImpl>(); }
 
     Properties getProperties() const { return deviceProps; }
 
@@ -42,7 +44,6 @@ namespace detail {
 
     Library createLibrary(const std::string &path);
     Library createLibrary(void *libraryData, size_t size);
-    nxs_status releaseLibrary(nxs_int lid);
 
     nxs_int getKernel(nxs_int lid, const std::string &kernelName);
 
