@@ -48,21 +48,12 @@ Device RuntimeImpl::getDevice(nxs_int deviceId) {
 
 template <>
 const std::string RuntimeImpl::getProperty<std::string>(nxs_property pn) const {
-  if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(FN_nxsGetRuntimeProperty)) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "Runtime.getProperty: " << pn);
+  if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(NF_nxsGetRuntimeProperty)) {
       size_t size = 256;
       char name[size];
+      name[0] = '\0';
       (*fn)(pn, name, &size);
-      return name;
-  }
-  return std::string();
-}
-
-template <>
-const std::string RuntimeImpl::getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const {
-  if (auto fn = getFunction<nxsGetDeviceProperty_fn>(FN_nxsGetDeviceProperty)) {
-      size_t size = 256;
-      char name[size];
-      (*fn)(deviceId, pn, name, &size);
       return name;
   }
   return std::string();
@@ -93,37 +84,37 @@ void RuntimeImpl::loadPlugin() {
     }
   };
 
-  loadFn(FN_nxsGetRuntimeProperty);
-  loadFn(FN_nxsGetDeviceCount);
-  loadFn(FN_nxsGetDeviceProperty);
+  loadFn(NF_nxsGetRuntimeProperty);
+  loadFn(NF_nxsGetDeviceCount);
+  loadFn(NF_nxsGetDeviceProperty);
 
-  loadFn(FN_nxsCreateBuffer);
-  loadFn(FN_nxsCopyBuffer);
-  loadFn(FN_nxsReleaseBuffer);
+  loadFn(NF_nxsCreateBuffer);
+  loadFn(NF_nxsCopyBuffer);
+  loadFn(NF_nxsReleaseBuffer);
 
-  loadFn(FN_nxsCreateLibrary);
-  loadFn(FN_nxsCreateLibraryFromFile);
-  loadFn(FN_nxsReleaseLibrary);
+  loadFn(NF_nxsCreateLibrary);
+  loadFn(NF_nxsCreateLibraryFromFile);
+  loadFn(NF_nxsReleaseLibrary);
 
-  loadFn(FN_nxsGetKernel);
+  loadFn(NF_nxsGetKernel);
 
-  loadFn(FN_nxsCreateSchedule);
-  loadFn(FN_nxsRunSchedule);
-  loadFn(FN_nxsReleaseSchedule);
+  loadFn(NF_nxsCreateSchedule);
+  loadFn(NF_nxsRunSchedule);
+  loadFn(NF_nxsReleaseSchedule);
   
-  loadFn(FN_nxsCreateCommand);
-  loadFn(FN_nxsReleaseCommand);
-  loadFn(FN_nxsSetCommandArgument);
-  loadFn(FN_nxsFinalizeCommand);
+  loadFn(NF_nxsCreateCommand);
+  loadFn(NF_nxsReleaseCommand);
+  loadFn(NF_nxsSetCommandArgument);
+  loadFn(NF_nxsFinalizeCommand);
 
-  if (!runtimeFns[FN_nxsGetRuntimeProperty] || !runtimeFns[FN_nxsGetDeviceCount] ||
-      !runtimeFns[FN_nxsGetDeviceProperty])
+  if (!runtimeFns[NF_nxsGetRuntimeProperty] || !runtimeFns[NF_nxsGetDeviceCount] ||
+      !runtimeFns[NF_nxsGetDeviceProperty])
       return;
 
   // Load device properties
 
   // Lazy load Device properties
-  auto fn = (nxsGetDeviceCount_fn)runtimeFns[FN_nxsGetDeviceCount];
+  auto fn = (nxsGetDeviceCount_fn)runtimeFns[NF_nxsGetDeviceCount];
   nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
@@ -161,18 +152,4 @@ const int64_t Runtime::getProperty<int64_t>(nxs_property pn) const {
 template <>
 const double Runtime::getProperty<double>(nxs_property pn) const {
   return get()->getProperty<double>(pn);
-}
-
-// Get Device Property Value
-template <>
-const std::string Runtime::getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const {
-    return get()->getProperty<std::string>(deviceId, pn);
-}
-template <>
-const int64_t Runtime::getProperty<int64_t>(nxs_uint deviceId, nxs_property pn) const {
-    return get()->getProperty<int64_t>(deviceId, pn);
-}
-template <>
-const double Runtime::getProperty<double>(nxs_uint deviceId, nxs_property pn) const {
-    return get()->getProperty<double>(deviceId, pn);
 }

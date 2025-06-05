@@ -1,3 +1,9 @@
+# Build
+build/
+
+# VS-code
+.vscode
+
 # Prerequisites
 *.d
 
@@ -30,3 +36,12 @@
 *.exe
 *.out
 *.app
+
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache
+
+*.egg-info
+

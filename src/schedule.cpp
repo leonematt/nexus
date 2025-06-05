@@ -27,7 +27,7 @@ void ScheduleImpl::release() {
 
 Command ScheduleImpl::getCommand(Kernel kern) {
   auto *rt = getParentOfType<RuntimeImpl>();
-  nxs_int cid = rt->runPluginFunction<nxsCreateCommand_fn>(FN_nxsCreateCommand, getId(), kern.getId());
+  nxs_int cid = rt->runPluginFunction<nxsCreateCommand_fn>(NF_nxsCreateCommand, getId(), kern.getId());
   Command cmd(detail::Impl(this, cid), kern);
   commands.emplace_back(cmd, cid);
   return cmd;
@@ -35,7 +35,7 @@ Command ScheduleImpl::getCommand(Kernel kern) {
 
 nxs_status ScheduleImpl::run(nxs_bool blocking) {
   auto *rt = getParentOfType<RuntimeImpl>();
-  return (nxs_status)rt->runPluginFunction<nxsRunSchedule_fn>(FN_nxsRunSchedule, getId(), blocking);
+  return (nxs_status)rt->runPluginFunction<nxsRunSchedule_fn>(NF_nxsRunSchedule, getId(), blocking);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -22,17 +22,23 @@
 
 
 const char *nxsGetPropName(nxs_property propEnum) {
-    return magic_enum::enum_name(propEnum).data();
+    if (propEnum >= 0 && propEnum < NXS_PROPERTY_CNT)
+        return magic_enum::enum_name(propEnum).data() + NXS_PROPERTY_PREFIX_LEN;
+    return "";
 }
 
 nxs_property nxsGetPropEnum(const char *propName) {
-    return *magic_enum::enum_cast<nxs_property>(propName);
+    std::string pname = std::string("NP_") + propName;
+    return *magic_enum::enum_cast<nxs_property>(pname);
 }
 
 const char *nxsGetStatusName(nxs_status statusEnum) {
-    return magic_enum::enum_name(statusEnum).data();
+    if (statusEnum >= NXS_STATUS_MIN && statusEnum <= NXS_STATUS_MAX)
+        return magic_enum::enum_name(statusEnum).data() + NXS_STATUS_PREFIX_LEN;
+    return "";
 }
 
 nxs_status nxsGetStatusEnum(const char *statusName) {
-    return *magic_enum::enum_cast<nxs_status>(statusName);
+    std::string sname = std::string("NXS_") + statusName;
+    return *magic_enum::enum_cast<nxs_status>(sname);
 }

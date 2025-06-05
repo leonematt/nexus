@@ -67,13 +67,14 @@ NEXUS_API_PROP(MaxPower,        nxs_double,  "Max Power")
  * Cleanup
  ***********************************************************************/
 #ifdef NEXUS_API_GENERATE_PROP_ENUM
-    NP_PROPERTY_COUNT,
-    NP_PROPERTY_PREFIX_SIZE = 3
+    NXS_PROPERTY_CNT,
+    NXS_PROPERTY_PREFIX_LEN        = 3
 }; /* close _nxs_property */
 
 typedef enum _nxs_property nxs_property;
 
 /* Translation functions */
+nxs_int nxsGetPropCount();
 const char *nxsGetPropName(nxs_property propEnum);
 nxs_property nxsGetPropEnum(const char *propName);
 

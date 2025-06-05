@@ -22,12 +22,12 @@ LibraryImpl::~LibraryImpl() {
 void LibraryImpl::release() {
   kernels.clear();
   auto *rt = getParentOfType<RuntimeImpl>();
-  nxs_int kid = rt->runPluginFunction<nxsReleaseLibrary_fn>(FN_nxsReleaseLibrary, getId());
+  nxs_int kid = rt->runPluginFunction<nxsReleaseLibrary_fn>(NF_nxsReleaseLibrary, getId());
 }
 
 Kernel LibraryImpl::getKernel(const std::string &kernelName) {
   auto *rt = getParentOfType<RuntimeImpl>();
-  nxs_int kid = rt->runPluginFunction<nxsGetKernel_fn>(FN_nxsGetKernel, getId(), kernelName.c_str());
+  nxs_int kid = rt->runPluginFunction<nxsGetKernel_fn>(NF_nxsGetKernel, getId(), kernelName.c_str());
   Kernel kern(Impl(this, kid), kernelName);
   kernels.emplace_back(kern, kid);
   return kern;

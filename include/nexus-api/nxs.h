@@ -253,7 +253,11 @@ enum _nxs_status {
     NXS_InvalidCompilerOptions               = -66,
     NXS_InvalidDeviceQueue                   = -70,
     NXS_InvalidSpecId                        = -71,
-    NXS_MaxSizeRestrictionExceeded           = -72
+    NXS_MaxSizeRestrictionExceeded           = -72,
+
+    NXS_STATUS_MIN                           = -72,
+    NXS_STATUS_MAX                           = 0,
+    NXS_STATUS_PREFIX_LEN                    = 4
 };
 
 typedef enum _nxs_status nxs_status;

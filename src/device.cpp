@@ -12,15 +12,17 @@
 using namespace nexus;
 
 #define APICALL(FUNC, ...) \
-  nxs_int apiResult = getParent()->runPluginFunction<FUNC##_fn>(FN_##FUNC, __VA_ARGS__)
+  nxs_int apiResult = getParent()->runPluginFunction<FUNC##_fn>(NF_##FUNC, __VA_ARGS__); \
+  if (apiResult < 0) \
+    NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " << nxsGetStatusName((nxs_status)apiResult))
+    
 
 detail::DeviceImpl::DeviceImpl(detail::Impl base)
 : detail::Impl(base) {
-  auto *runtime = getParent();
   auto id = getId();
-  auto vendor = runtime->getProperty<std::string>(id, NP_Vendor);
-  auto type = runtime->getProperty<std::string>(id, NP_Type);
-  auto arch = runtime->getProperty<std::string>(id, NP_Architecture);
+  auto vendor = getProperty<std::string>(NP_Vendor);
+  auto type = getProperty<std::string>(NP_Type);
+  auto arch = getProperty<std::string>(NP_Architecture);
   auto devTag = vendor + "-" + type + "-" + arch;
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
   if (auto props = nexus::lookupDevice(devTag))
@@ -45,6 +47,21 @@ void detail::DeviceImpl::release() {
   libraries.clear();
   schedules.clear();
 }
+
+template <>
+const std::string detail::DeviceImpl::getProperty<std::string>(nxs_property pn) const {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "Device.getProperty: " << pn);
+  auto *runtime = getParent();
+  if (auto fn = runtime->getFunction<nxsGetDeviceProperty_fn>(NF_nxsGetDeviceProperty)) {
+      size_t size = 256;
+      char name[size];
+      name[0] = '\0';
+      (*fn)(getId(), pn, &name, &size);
+      return name;
+  }
+  return std::string();
+}
+
 
 Library detail::DeviceImpl::createLibrary(void *data, size_t size) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
@@ -90,6 +107,21 @@ void Device::release() const {
 
 nxs_int Device::getId() const {
   return get()->getId();
+}
+
+
+// Get Device Property Value
+template <>
+const std::string Device::getProperty<std::string>(nxs_property pn) const {
+    return get()->getProperty<std::string>(pn);
+}
+template <>
+const int64_t Device::getProperty<int64_t>(nxs_property pn) const {
+    return get()->getProperty<int64_t>(pn);
+}
+template <>
+const double Device::getProperty<double>(nxs_property pn) const {
+    return get()->getProperty<double>(pn);
 }
 
 Properties Device::getProperties() const { return get()->getProperties(); }

@@ -8,7 +8,7 @@ __version__ = '0.0.1'
 
 #from . import machines
 
-from ._C.libnexus import runtime
+from ._C.libnexus import system
 
 __all__ = [
     "buffer",

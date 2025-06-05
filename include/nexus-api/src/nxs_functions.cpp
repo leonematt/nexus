@@ -22,9 +22,12 @@
 
 
 const char *nxsGetFuncName(nxs_function funcEnum) {
-    return magic_enum::enum_name(funcEnum).data() + NXSAPI_FUNCTION_PREFIX_LEN;
+    if (funcEnum >= 0 && funcEnum < NXS_FUNCTION_CNT)
+        return magic_enum::enum_name(funcEnum).data() + NXS_FUNCTION_PREFIX_LEN;
+    return "";
 }
 
 nxs_function nxsGetFuncEnum(const char *funcName) {
-    return *magic_enum::enum_cast<nxs_function>(funcName);
+    std::string fname = std::string("NF_") + funcName;
+    return *magic_enum::enum_cast<nxs_function>(fname);
 }

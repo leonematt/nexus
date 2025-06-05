@@ -16,7 +16,7 @@
  ***********************************************************************/
 /* Generate the Enum name */
 #define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
-        FN_nxs##NAME,
+        NF_nxs##NAME,
     
 /* Declare the Enumeration */
 enum _nxs_function {
@@ -225,14 +225,13 @@ NEXUS_API_FUNC(nxs_status, FinalizeCommand,
 
 
 #ifdef NEXUS_API_GENERATE_FUNC_ENUM
-    NXSAPI_FUNCTION_COUNT,
-    NXSAPI_FUNCTION_PREFIX_LEN = 3
+    NXS_FUNCTION_CNT,
+    NXS_FUNCTION_PREFIX_LEN = 3
 }; /* close _nxs_function */
 
 typedef enum _nxs_function nxs_function;
 
 const char *nxsGetFuncName(nxs_function funcEnum);
-
 nxs_function nxsGetFuncEnum(const char *funcName);
 
 #endif

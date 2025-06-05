@@ -37,6 +37,18 @@ namespace detail {
 
     RuntimeImpl *getParent() const { return Impl::getParent<RuntimeImpl>(); }
 
+    // Get Runtime Property Value
+    template <typename T>
+    const T getProperty(nxs_property pn) const {
+      size_t size = sizeof(T);
+      T val = 0;
+      if (auto fn = getParent()->getFunction<nxsGetDeviceProperty_fn>(NF_nxsGetDeviceProperty))
+        (*fn)(getId(), pn, &val, &size);
+      return val;
+    }
+    template <>
+    const std::string getProperty<std::string>(nxs_property pn) const;
+
     Properties getProperties() const { return deviceProps; }
 
     // Runtime functions

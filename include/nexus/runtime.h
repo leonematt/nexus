@@ -29,9 +29,6 @@ namespace nexus {
         // Get Runtime Property Value
         template <typename T>
         const T getProperty(nxs_property pn) const;
-        // Get Device Property Value
-        template <typename T>
-        const T getProperty(nxs_uint deviceId, nxs_property pn) const;
     };
     
 }

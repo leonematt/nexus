@@ -90,6 +90,8 @@ nxsGetRuntimeProperty(
 {
   auto rt = getRuntime();
 
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "getRuntimeProperty " << runtime_property_id);
+
   /* lookup HIP equivalent */
   /* return value size */
   /* return value */
@@ -97,7 +99,7 @@ nxsGetRuntimeProperty(
     case NP_Name: {
       const char *name = "metal";
       if (property_value != NULL) {
-        strncpy((char*)property_value, name, strlen(name));
+        strncpy((char*)property_value, name, strlen(name) + 1);
       } else if (property_value_size != NULL) {
         *property_value_size = strlen(name);
       }

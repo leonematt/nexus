@@ -32,13 +32,13 @@ namespace detail {
     nxs_status setArgument(nxs_uint index, Buffer buffer) {
       //arguments[index] = buffer;
       auto *rt = getParentOfType<RuntimeImpl>();
-      return (nxs_status)rt->runPluginFunction<nxsSetCommandArgument_fn>(FN_nxsSetCommandArgument, getId(), index, buffer.getId());
+      return (nxs_status)rt->runPluginFunction<nxsSetCommandArgument_fn>(NF_nxsSetCommandArgument, getId(), index, buffer.getId());
     }
 
     nxs_status finalize(nxs_int groupSize, nxs_int gridSize) {
       //arguments[index] = buffer;
       auto *rt = getParentOfType<RuntimeImpl>();
-      return (nxs_status)rt->runPluginFunction<nxsFinalizeCommand_fn>(FN_nxsFinalizeCommand, getId(), groupSize, gridSize);
+      return (nxs_status)rt->runPluginFunction<nxsFinalizeCommand_fn>(NF_nxsFinalizeCommand, getId(), groupSize, gridSize);
     }
 
   private:

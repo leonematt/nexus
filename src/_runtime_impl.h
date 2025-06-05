@@ -33,29 +33,16 @@ namespace nexus {
                 size_t size = sizeof(T);
                 T val = 0;
                 //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
-                if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(FN_nxsGetRuntimeProperty))
+                if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(NF_nxsGetRuntimeProperty))
                     (*fn)(pn, &val, &size);
                 return val;
             }
             template <>
             const std::string getProperty<std::string>(nxs_property pn) const;
 
-            // Get Device Property Value
-            template <typename T>
-            const T getProperty(nxs_uint deviceId, nxs_property pn) const {
-                size_t size = sizeof(T);
-                T val = 0;
-                //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
-                if (auto fn = getFunction<nxsGetDeviceProperty_fn>(FN_nxsGetDeviceProperty))
-                    (*fn)(deviceId, pn, &val, &size);
-                return val;
-            }
-            template <>
-            const std::string getProperty<std::string>(nxs_uint deviceId, nxs_property pn) const;
-
             template <typename Tfn, typename... Args>
             nxs_int runPluginFunction(nxs_function fne, Args... args) {
-                nxs_int apiResult = NXS_InvalidDevice;
+                nxs_int apiResult = NXS_InvalidDevice; // invalid runtime
                 if (auto *fn = getFunction<Tfn>(fne)) {
                   apiResult = (*fn)(args...);
                   NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(fne) << ": " << apiResult);
@@ -70,7 +57,7 @@ namespace nexus {
 
             std::string pluginLibraryPath;
             void * library;
-            void * runtimeFns[NXSAPI_FUNCTION_COUNT];
+            void * runtimeFns[NXS_FUNCTION_CNT];
 
             std::vector<Device> devices;
         };

@@ -16,7 +16,8 @@ int main() {
   std::cout << "RUNTIME: " << rt.getProperty<std::string>(NP_Name) << " - " << count << std::endl;
 
   for (int i = 0; i < count; ++i) {
-    std::cout << "  Device: " << rt.getProperty<std::string>(i, NP_Name) << " - " << rt.getProperty<std::string>(i, NP_Architecture) << std::endl;
+    auto dev = rt.getDevice(i);
+    std::cout << "  Device: " << dev.getProperty<std::string>(NP_Name) << " - " << dev.getProperty<std::string>(NP_Architecture) << std::endl;
   }
   std::vector<char> data(1024, 1);
   std::vector<float> vecA(1024, 1.0);
