@@ -25,7 +25,7 @@ void detail::BufferImpl::release() {
 
 nxs_status detail::BufferImpl::copyData(void *_hostBuf) {
   auto *rt = getParentOfType<RuntimeImpl>();
-  return (nxs_status)rt->runPluginFunction<nxsCopyBuffer_fn>(NF_nxsCopyBuffer, getId(), _hostBuf);
+  return (nxs_status)rt->runAPIFunction<NF_nxsCopyBuffer>(getId(), _hostBuf);
 }
 
 

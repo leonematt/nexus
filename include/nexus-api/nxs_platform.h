@@ -41,6 +41,11 @@
     #endif
 #endif
 
+#ifdef __cplusplus
+#define NXS_API_EXTERN_C "C"
+#else
+#define NXS_API_EXTERN_C
+#endif
 /*
  * Deprecation flags refer to the last version of the header in which the
  * feature was not deprecated.

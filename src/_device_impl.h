@@ -31,7 +31,7 @@ namespace detail {
     const T getProperty(nxs_property pn) const {
       size_t size = sizeof(T);
       T val = 0;
-      if (auto fn = getParent()->getFunction<nxsGetDeviceProperty_fn>(NF_nxsGetDeviceProperty))
+      if (auto fn = getParent()->getFunction<NF_nxsGetDeviceProperty>())
         (*fn)(getId(), pn, &val, &size);
       return val;
     }

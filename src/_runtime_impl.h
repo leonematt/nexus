@@ -24,8 +24,8 @@ namespace nexus {
 
             Device getDevice(nxs_int deviceId);
 
-            template <typename T>
-            T getFunction(nxs_function fn) const { return (T)runtimeFns[fn]; }
+            template <nxs_function Tfn, typename Tfnp = typename nxsFunctionType<Tfn>::type>
+            Tfnp getFunction() const { return (Tfnp)runtimeFns[Tfn]; }
 
             // Get Runtime Property Value
             template <typename T>
@@ -33,21 +33,21 @@ namespace nexus {
                 size_t size = sizeof(T);
                 T val = 0;
                 //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
-                if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(NF_nxsGetRuntimeProperty))
+                if (auto fn = getFunction<NF_nxsGetRuntimeProperty>())
                     (*fn)(pn, &val, &size);
                 return val;
             }
             template <>
             const std::string getProperty<std::string>(nxs_property pn) const;
 
-            template <typename Tfn, typename... Args>
-            nxs_int runPluginFunction(nxs_function fne, Args... args) {
+            template <nxs_function Tfn, typename... Args>
+            nxs_int runAPIFunction(Args... args) {
                 nxs_int apiResult = NXS_InvalidDevice; // invalid runtime
-                if (auto *fn = getFunction<Tfn>(fne)) {
+                if (auto *fn = getFunction<Tfn>()) {
                   apiResult = (*fn)(args...);
-                  NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(fne) << ": " << apiResult);
+                  NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(Tfn) << ": " << apiResult);
                 } else {
-                  NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(fne) << ": API not present");
+                  NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(Tfn) << ": API not present");
                 }
                 return apiResult;
             }

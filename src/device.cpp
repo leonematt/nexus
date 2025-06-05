@@ -12,7 +12,7 @@
 using namespace nexus;
 
 #define APICALL(FUNC, ...) \
-  nxs_int apiResult = getParent()->runPluginFunction<FUNC##_fn>(NF_##FUNC, __VA_ARGS__); \
+  nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__); \
   if (apiResult < 0) \
     NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " << nxsGetStatusName((nxs_status)apiResult))
     
@@ -52,7 +52,7 @@ template <>
 const std::string detail::DeviceImpl::getProperty<std::string>(nxs_property pn) const {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "Device.getProperty: " << pn);
   auto *runtime = getParent();
-  if (auto fn = runtime->getFunction<nxsGetDeviceProperty_fn>(NF_nxsGetDeviceProperty)) {
+  if (auto fn = runtime->getFunction<NF_nxsGetDeviceProperty>()) {
       size_t size = 256;
       char name[size];
       name[0] = '\0';

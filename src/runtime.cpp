@@ -49,7 +49,7 @@ Device RuntimeImpl::getDevice(nxs_int deviceId) {
 template <>
 const std::string RuntimeImpl::getProperty<std::string>(nxs_property pn) const {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "Runtime.getProperty: " << pn);
-  if (auto fn = getFunction<nxsGetRuntimeProperty_fn>(NF_nxsGetRuntimeProperty)) {
+  if (auto fn = getFunction<NF_nxsGetRuntimeProperty>()) {
       size_t size = 256;
       char name[size];
       name[0] = '\0';

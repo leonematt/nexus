@@ -7,7 +7,7 @@
  ***********************************************************************/
 /* Generate the Function extern */
 #define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
-    extern NXS_API_ENTRY RETURN_TYPE NXS_API_CALL nxs##NAME(__VA_ARGS__);
+    extern NXS_API_EXTERN_C NXS_API_ENTRY RETURN_TYPE NXS_API_CALL nxs##NAME(__VA_ARGS__);
 
 #else
 #if defined(NEXUS_API_GENERATE_FUNC_ENUM)
@@ -26,10 +26,26 @@ enum _nxs_function {
 /************************************************************************
  * Generate the Function typedefs
  ***********************************************************************/
-/* Generate the Function typedefs */
-#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+ /* Generate enum lookup of Function type */
+#ifdef __cplusplus
+template <nxs_function Tfn>
+struct nxsFunctionType { typedef void *type; };
+#endif
+
+
+ /* Generate the Function typedefs */
+#define _NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
     typedef RETURN_TYPE NXS_API_CALL NXS_CONCAT(nxs##NAME, _t)(__VA_ARGS__); \
     typedef NXS_CONCAT(nxs##NAME, _t) * NXS_CONCAT(nxs##NAME, _fn);
+
+#ifdef __cplusplus
+#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+    _NEXUS_API_FUNC(RETURN_TYPE, NAME, __VA_ARGS__) \
+    template <> struct nxsFunctionType<NF_nxs##NAME> { typedef NXS_CONCAT(nxs##NAME, _fn) type; };
+#else
+#define NEXUS_API_FUNC(RETURN_TYPE, NAME, ...) \
+    _NEXUS_API_FUNC(RETURN_TYPE, NAME, __VA_ARGS__)
+#endif
 
 #endif
 #endif
