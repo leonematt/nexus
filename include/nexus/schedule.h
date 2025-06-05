@@ -29,6 +29,9 @@ namespace nexus {
 
         nxs_status run(nxs_bool blocking = true);
     };
+
+    typedef Objects<Schedule> Schedules;
+
 }
 
 #endif // NEXUS_SCHEDULE_H

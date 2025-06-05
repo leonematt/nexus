@@ -59,7 +59,7 @@ namespace nexus {
             void * library;
             void * runtimeFns[NXS_FUNCTION_CNT];
 
-            std::vector<Device> devices;
+            Objects<Device> devices;
         };
 
     }

@@ -31,6 +31,8 @@ namespace nexus {
         const T getProperty(nxs_property pn) const;
     };
     
+    typedef Objects<Runtime> Runtimes;
+
 }
 
 #endif // NEXUS_RUNTIME_H

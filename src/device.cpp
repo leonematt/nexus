@@ -67,7 +67,7 @@ Library detail::DeviceImpl::createLibrary(void *data, size_t size) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibrary, getId(), data, size);
   Library lib(detail::Impl(this, apiResult));
-  libraries.emplace_back(lib, apiResult);
+  libraries.add(lib);
   return lib;
 }
 
@@ -75,7 +75,7 @@ Library detail::DeviceImpl::createLibrary(const std::string &path) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibraryFromFile, getId(), path.c_str());
   Library lib(detail::Impl(this, apiResult));
-  libraries.emplace_back(lib, apiResult);
+  libraries.add(lib);
   return lib;
 }
 
@@ -83,7 +83,7 @@ Schedule detail::DeviceImpl::createSchedule() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createSchedule");
   APICALL(nxsCreateSchedule, getId(), 0);
   Schedule sched(detail::Impl(this, apiResult));
-  schedules.emplace_back(sched, apiResult);
+  schedules.add(sched);
   return sched;
 }
 
@@ -91,7 +91,7 @@ Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  copyBuffer");
   APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
   Buffer nbuf(Impl(this, apiResult), buf.getSize());
-  buffers.emplace_back(nbuf, apiResult);
+  buffers.add(nbuf);
   return nbuf;
 }
 

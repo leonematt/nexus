@@ -12,23 +12,12 @@
 namespace nexus {
 namespace detail {
 
-  template <typename T>
-  struct DevObject {
-    T obj;
-    nxs_int id;
-    DevObject(T _obj, nxs_int _id) : obj(_obj), id(_id) {}
-  };
-
-  typedef DevObject<Buffer> DevBuffer;
-  typedef DevObject<Library> DevLibrary;
-  typedef DevObject<Schedule> DevSchedule;
-  
   /// @class DesignImpl
   class DeviceImpl : public Impl {
     Properties deviceProps;
-    std::vector<DevBuffer> buffers;
-    std::vector<DevLibrary> libraries;
-    std::vector<DevSchedule> schedules;
+    Buffers buffers;
+    Objects<Library> libraries;
+    Objects<Schedule> schedules;
   public:
     DeviceImpl(Impl base);
     virtual ~DeviceImpl();

@@ -20,15 +20,23 @@ namespace detail {
         return runtimes.size();
       }
       Runtime getRuntime(int idx) const {
-          return runtimes[idx];
+          return runtimes.get(idx);
       }
       Buffer createBuffer(size_t sz, void *hostData = nullptr);
       Buffer copyBuffer(Buffer buf, Device dev);
 
+      Runtimes getRuntimes() const {
+        return runtimes;
+      }
+
+      Buffers getBuffers() const {
+        return buffers;
+      }
+
   private:
       // set of runtimes
-      std::vector<Runtime> runtimes;
-      std::vector<Buffer> buffers;
+      Runtimes runtimes;
+      Buffers buffers;
   };
 } // namespace detail
 } // namespace nexus
@@ -37,14 +45,15 @@ namespace detail {
 SystemImpl::SystemImpl(int) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR");
   iterateEnvPaths("NEXUS_RUNTIME_PATH", "./runtime_libs", [&](const std::string &path, const std::string &name) {
-    runtimes.emplace_back(detail::Impl(this, runtimes.size()), path);
+    Runtime rt(detail::Impl(this, runtimes.size()), path);
+    runtimes.add(rt);
   });
 }
 
 SystemImpl::~SystemImpl() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "DTOR");
-  for (auto rt : runtimes)
-    rt.release();
+  //for (auto rt : runtimes)
+  //  rt.release();
   //for (auto buf : buffers)
   //  buf.release();
 }
@@ -52,8 +61,9 @@ SystemImpl::~SystemImpl() {
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
-  buffers.emplace_back(detail::Impl(this, id), sz, hostData);
-  return buffers.back();
+  Buffer buf(detail::Impl(this, id), sz, hostData);
+  buffers.add(buf);
+  return buf;
 }
 
 Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
@@ -81,6 +91,10 @@ Buffer System::createBuffer(size_t sz, void *hostData) {
 
 Buffer System::copyBuffer(Buffer buf, Device dev) {
   return get()->copyBuffer(buf, dev);
+}
+
+Buffers System::getBuffers() const {
+  return get()->getBuffers();
 }
 
 

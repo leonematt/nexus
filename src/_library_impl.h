@@ -9,8 +9,6 @@
 namespace nexus {
 namespace detail {
 
-  typedef DevObject<Kernel> DevKernel;
-
   class LibraryImpl : public Impl {
   public:
     /// @brief Construct a Platform for the current system
@@ -23,7 +21,7 @@ namespace detail {
     Kernel getKernel(const std::string &kernelName);
 
   private:
-    std::vector<DevKernel> kernels;
+    Objects<Kernel> kernels;
 };
 }
 }

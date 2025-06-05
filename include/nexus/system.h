@@ -25,6 +25,9 @@ namespace nexus {
         Runtime getRuntime(int idx) const;
         Buffer createBuffer(size_t sz, void *hostData = nullptr);
         Buffer copyBuffer(Buffer buf, Device dev);
+
+        Runtimes getRuntimes() const;
+        Buffers getBuffers() const;
     };
 
     extern System getSystem();

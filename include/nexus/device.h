@@ -40,9 +40,14 @@ namespace nexus {
         Library createLibrary(void *libraryData, size_t librarySize);
         Library createLibrary(const std::string &libraryPath);
 
+        const Objects<Library> &getLibraries();
+        const Objects<Schedule> &getSchedules();
+
         Buffer copyBuffer(Buffer buf);
     };
     
+    typedef Objects<Device> Devices;
+
 }
 
 #endif // NEXUS_DEVICE_H

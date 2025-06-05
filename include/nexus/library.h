@@ -27,6 +27,9 @@ namespace nexus {
 
         Kernel getKernel(const std::string &kernelName);
     };
+
+    typedef Objects<Library> Librarys;
+
 }
 
 #endif // NEXUS_LIBRARY_H

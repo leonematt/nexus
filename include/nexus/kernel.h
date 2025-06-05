@@ -25,6 +25,9 @@ namespace nexus {
         nxs_int getId() const override;
 
     };
+
+    typedef Objects<Kernel> Kernels;
+
 }
 
 #endif // NEXUS_KERNEL_H

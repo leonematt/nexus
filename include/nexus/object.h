@@ -2,6 +2,7 @@
 #define NEXUS_OBJECT_H
 
 #include <memory>
+#include <vector>
 #include <nexus-api.h>
 
 namespace nexus {
@@ -33,11 +34,10 @@ namespace nexus {
                 return nullptr;
             }
 
-            void setId(nxs_int nid) { id = nid; }
-
         private:
             Impl *owner;
             nxs_int id;
+            //nxs_type type;
         };
     }
 
@@ -71,6 +71,37 @@ namespace nexus {
 
     protected:
         ImplRef get() const { return impl; }
+    };
+    
+
+    // Storage of vector of objects
+    template <typename Tobject>
+    class Objects {
+        // set of runtimes
+        typedef std::vector<Tobject> ObjectVec;
+        std::shared_ptr<ObjectVec> objects;
+    
+    public:
+        Objects() : objects(std::make_shared<ObjectVec>()) {}
+
+        nxs_int size() const {
+            return objects->size();
+        }
+        nxs_int add(Tobject obj) {
+            objects->push_back(obj);
+            return objects->size() - 1;
+        }
+        Tobject get(nxs_int idx) const {
+            if (idx >= 0 && idx < objects->size())
+                return (*objects)[idx];
+            return Tobject();
+        }
+        void clear() {
+            objects->clear();
+        }
+
+        typename ObjectVec::iterator begin() const { return objects->begin(); }
+        typename ObjectVec::iterator end() const { return objects->end(); }
     };
     
 }

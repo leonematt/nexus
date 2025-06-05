@@ -33,6 +33,8 @@ namespace nexus {
     protected:
         void _addDevice(Device _dev);
     };
+
+    typedef Objects<Buffer> Buffers;
 }
 
 #endif // NEXUS_BUFFER_H

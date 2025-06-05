@@ -2,5 +2,18 @@
 #define _NEXUS_API_H
 
 
+namespace nexus {
+
+    enum NXS_Type {
+        NT_Buffer,
+        NT_Command,
+        NT_Device,
+
+
+    };
+
+    typedef enum NXS_Type nxs_type;
+}
+
 
 #endif // _NEXUS_API_H

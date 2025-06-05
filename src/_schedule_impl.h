@@ -7,8 +7,6 @@
 namespace nexus {
 namespace detail {
 
-    typedef DevObject<Command> DevCommand;
-
     class ScheduleImpl : public Impl {
     public:
       /// @brief Construct a Platform for the current system
@@ -22,7 +20,7 @@ namespace detail {
       nxs_status run(nxs_bool blocking);
 
     private:
-      std::vector<DevCommand> commands;
+      Objects<Command> commands;
     };
 }
 }

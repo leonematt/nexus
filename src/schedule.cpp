@@ -29,7 +29,7 @@ Command ScheduleImpl::getCommand(Kernel kern) {
   auto *rt = getParentOfType<RuntimeImpl>();
   nxs_int cid = rt->runPluginFunction<nxsCreateCommand_fn>(NF_nxsCreateCommand, getId(), kern.getId());
   Command cmd(detail::Impl(this, cid), kern);
-  commands.emplace_back(cmd, cid);
+  commands.add(cmd);
   return cmd;
 }
 

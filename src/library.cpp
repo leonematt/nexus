@@ -29,7 +29,7 @@ Kernel LibraryImpl::getKernel(const std::string &kernelName) {
   auto *rt = getParentOfType<RuntimeImpl>();
   nxs_int kid = rt->runPluginFunction<nxsGetKernel_fn>(NF_nxsGetKernel, getId(), kernelName.c_str());
   Kernel kern(Impl(this, kid), kernelName);
-  kernels.emplace_back(kern, kid);
+  kernels.add(kern);
   return kern;
 }
 

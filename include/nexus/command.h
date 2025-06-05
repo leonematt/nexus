@@ -30,6 +30,9 @@ namespace nexus {
 
         nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
     };
+
+    typedef Objects<Command> Commands;
+
 }
 
 #endif // NEXUS_COMMAND_H

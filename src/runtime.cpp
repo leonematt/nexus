@@ -42,7 +42,7 @@ int RuntimeImpl::getDeviceCount() const {
 Device RuntimeImpl::getDevice(nxs_int deviceId) {
   if (deviceId < 0 || deviceId >= devices.size())
       return Device();
-  return devices[deviceId];
+  return devices.get(deviceId);
 }
 
 
@@ -118,7 +118,7 @@ void RuntimeImpl::loadPlugin() {
   nxs_int count = (*fn)();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
   for (int i = 0; i < count; ++i) {
-    devices.emplace_back(Impl(this, i));
+    devices.add(Impl(this, i));
   }
 }
 
