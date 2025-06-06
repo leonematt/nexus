@@ -16,8 +16,8 @@ namespace detail {
   class DeviceImpl : public Impl {
     Properties deviceProps;
     Buffers buffers;
-    Objects<Library> libraries;
-    Objects<Schedule> schedules;
+    Librarys libraries;
+    Schedules schedules;
   public:
     DeviceImpl(Impl base);
     virtual ~DeviceImpl();
@@ -41,6 +41,8 @@ namespace detail {
     Properties getProperties() const { return deviceProps; }
 
     // Runtime functions
+    Librarys getLibraries() const { return libraries; }
+    Schedules getSchedules() const { return schedules; }
 
     Library createLibrary(const std::string &path);
     Library createLibrary(void *libraryData, size_t size);

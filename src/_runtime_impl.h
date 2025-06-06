@@ -20,9 +20,8 @@ namespace nexus {
 
             void release();
 
-            int getDeviceCount() const;
-
-            Device getDevice(nxs_int deviceId);
+            Devices getDevices() const { return devices; }
+            Device getDevice(nxs_int deviceId) const;
 
             template <nxs_function Tfn, typename Tfnp = typename nxsFunctionType<Tfn>::type>
             Tfnp getFunction() const { return (Tfnp)runtimeFns[Tfn]; }

@@ -16,9 +16,6 @@ namespace detail {
       SystemImpl(int);
       ~SystemImpl();
 
-      nxs_int getRuntimeCount() const {
-        return runtimes.size();
-      }
       Runtime getRuntime(int idx) const {
           return runtimes.get(idx);
       }
@@ -77,8 +74,12 @@ Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
 /// @param  
 System::System(int i) : Object(i) {}
 
-nxs_int System::getRuntimeCount() const {
-  return get()->getRuntimeCount();
+Buffers System::getBuffers() const {
+  return get()->getBuffers();
+}
+
+Runtimes System::getRuntimes() const {
+  return get()->getRuntimes();
 }
 
 Runtime System::getRuntime(int idx) const {
@@ -91,10 +92,6 @@ Buffer System::createBuffer(size_t sz, void *hostData) {
 
 Buffer System::copyBuffer(Buffer buf, Device dev) {
   return get()->copyBuffer(buf, dev);
-}
-
-Buffers System::getBuffers() const {
-  return get()->getBuffers();
 }
 
 

@@ -23,8 +23,8 @@ namespace nexus {
 
         nxs_int getId() const override;
 
-        nxs_int getDeviceCount() const;
-        Device getDevice(nxs_uint deviceId);
+        Devices getDevices() const;
+        Device getDevice(nxs_uint deviceId) const;
 
         // Get Runtime Property Value
         template <typename T>

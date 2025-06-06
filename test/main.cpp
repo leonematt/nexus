@@ -11,7 +11,7 @@ int main() {
   auto sys = nexus::getSystem();
   auto rt = sys.getRuntime(1);
 
-  auto count = rt.getDeviceCount();
+  auto count = rt.getDevices().size();
 
   std::cout << "RUNTIME: " << rt.getProperty<std::string>(NP_Name) << " - " << count << std::endl;
 

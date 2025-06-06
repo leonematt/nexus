@@ -35,16 +35,11 @@ void RuntimeImpl::release() {
   }
 }
 
-int RuntimeImpl::getDeviceCount() const {
-  return devices.size();
-}
-
-Device RuntimeImpl::getDevice(nxs_int deviceId) {
+Device RuntimeImpl::getDevice(nxs_int deviceId) const {
   if (deviceId < 0 || deviceId >= devices.size())
       return Device();
   return devices.get(deviceId);
 }
-
 
 template <>
 const std::string RuntimeImpl::getProperty<std::string>(nxs_property pn) const {
@@ -135,8 +130,11 @@ nxs_int Runtime::getId() const {
   return get()->getId();
 }
 
-int Runtime::getDeviceCount() const { return get()->getDeviceCount(); }
-Device Runtime::getDevice(nxs_uint deviceId) {
+Devices Runtime::getDevices() const {
+  return get()->getDevices();
+}
+
+Device Runtime::getDevice(nxs_uint deviceId) const {
   return get()->getDevice(deviceId);
 }
 

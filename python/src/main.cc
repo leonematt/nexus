@@ -21,6 +21,7 @@ PYBIND11_MODULE(libnexus, m) {
            devices
     )pbdoc";
 
+    // remove extra 'system' module (its redundant)
     pynexus::init_system_bindings(m.def_submodule("system"));
 
     m.def_submodule("devices");

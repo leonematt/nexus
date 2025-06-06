@@ -38,10 +38,6 @@ detail::DeviceImpl::~DeviceImpl() {
 
 void detail::DeviceImpl::release() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    release: " << getId());
-  for (auto &buf : buffers) {
-    // release from device
-    //buf.buf.release(id); // not owned
-  }
   buffers.clear();
 
   libraries.clear();
@@ -62,7 +58,7 @@ const std::string detail::DeviceImpl::getProperty<std::string>(nxs_property pn) 
   return std::string();
 }
 
-
+// Runtime functions
 Library detail::DeviceImpl::createLibrary(void *data, size_t size) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createLibrary");
   APICALL(nxsCreateLibrary, getId(), data, size);
@@ -127,6 +123,14 @@ const double Device::getProperty<double>(nxs_property pn) const {
 Properties Device::getProperties() const { return get()->getProperties(); }
 
 // Runtime functions
+Librarys Device::getLibraries() const {
+  return get()->getLibraries();
+}
+
+Schedules Device::getSchedules() const {
+  return get()->getSchedules();
+}
+
 Schedule Device::createSchedule() {
     return get()->createSchedule();
 }
