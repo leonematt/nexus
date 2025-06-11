@@ -1,2 +1,83 @@
-# nexus
-Nexus Device Interface
+# Nexus
+
+Nexus Device API
+
+## Interfaces
+
+There are 4 interfaces in Nexus: Python API, C++ Source API, JSON DB, and the Runtime Plugin C-API.
+
+### Python API
+
+The Python API is designed to be intuitive with full device discovery, characterization and kernel execution.
+
+```python
+import nexus
+
+runtimes = nexus.get_runtimes()
+rt0 = runtimes.get(0)
+rt0_name = rt0.get_property_str('Name')
+
+dev0 = rt0.get_device(0)
+dev0_arch = dev0.get_property_str('Architecture')
+
+buf0 = dev0.create_buffer(tensor0)
+buf1 = dev0.create_buffer((1024,1024), dtype='fp16')
+
+sched0 = dev0.create_schedule()
+
+cmd0 = sched0.create_command(kernel)
+...
+
+sched0.run()
+```
+
+### C++ Source API
+
+The C++ Source API provides direct access to all API objects with clean interface and garbage collection.
+
+```
+// insert test/cpp/main.cpp
+```
+
+### JSON DB
+
+The JSON DB interface provides deep device/system characteristics to improve compilation and runtime distribution.
+
+// see schema/gpu_architecture_schema.json
+
+
+### Runtime Plugin C-API
+
+The Runtime Plugin C-API is a thin wrapper for clean dynamic library loading to call into vendor specific runtimes.
+
+// See plugins/metal/metal_runtime.cpp for example
+
+
+## Building Nexus
+
+First clone the repo.
+
+```shell
+git clone https://github.com/kernelize-ai/nexus.git
+cd nexus
+## ??
+git submodule init --update
+```
+
+Then create the environment.
+
+```shell
+python3 -m venv .venv --prompt nexus
+source .venv/bin/activate
+```
+
+Now build and install in your python.
+
+```shell
+pip install -e .
+```
+
+## Testing
+
+Try test/pynexus/test.py
+(still needs kernel.so)
