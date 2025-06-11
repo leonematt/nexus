@@ -1,6 +1,6 @@
-# Nexus
+# Nexus Device API
 
-Nexus Device API
+The Nexus Device API provides a clean, standardized Interface to Device Discovery, Characterization and Kernel Deployment.
 
 ## Interfaces
 
