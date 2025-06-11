@@ -4,7 +4,15 @@ Nexus Device API
 
 ## Interfaces
 
-There are 4 interfaces in Nexus: Python API, C++ Source API, JSON DB, and the Runtime Plugin C-API.
+There are 4 interfaces in Nexus, 2 User APIs and 2 Vendor APIs.
+
+User APIs:
+* Python API
+* C++ Source API
+
+Vendor APIs:
+* JSON DB
+* Runtime Plugin C-API
 
 ### Python API
 
@@ -41,7 +49,14 @@ The C++ Source API provides direct access to all API objects with clean interfac
 
 ### JSON DB
 
-The JSON DB interface provides deep device/system characteristics to improve compilation and runtime distribution.
+The JSON DB interface provides deep device/system characteristics to improve compilation and runtime distribution. There should be a device_lib.json for each architecture. 
+The file name follows the convention `<vendor_name>-<device_type>-<architecture>.json`. This should correlate with querying the device:
+
+```c++
+auto vendor = device.getProperty<std::string>("Vendor");
+auto type = device.getProperty<std::string>("Type");
+auto arch = device.getProperty<std::string>("Architecture");
+```
 
 // see schema/gpu_architecture_schema.json
 
