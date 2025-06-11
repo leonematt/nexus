@@ -1,6 +1,8 @@
 #include "pynexus.h"
 #include <iostream>
 
+//#include <torch/torch.h>
+
 #include <nexus.h>
 #include <nexus-api.h>
 
@@ -8,21 +10,96 @@ namespace py = pybind11;
 
 using namespace nexus;
 
-void pynexus::init_system_bindings(py::module &&m) {
+
+struct DevPtr {
+    void *ptr;
+    size_t size;
+};
+
+static DevPtr getPointer(PyObject *obj) {
+    DevPtr result = { nullptr, 0 };
+    if (obj == Py_None) {
+        return result;
+    }
+    PyObject *data_ptr_m = PyObject_GetAttrString(obj, "data_ptr");
+    PyObject *nbytes_ret = PyObject_GetAttrString(obj, "nbytes");
+    if (data_ptr_m && nbytes_ret) {
+        PyObject *empty_tuple = PyTuple_New(0);
+        PyObject *data_ret = PyObject_Call(data_ptr_m, empty_tuple, NULL);
+        Py_DECREF(empty_tuple);
+        Py_DECREF(data_ptr_m);
+        if (!PyLong_Check(data_ret)) {
+            PyErr_SetString(PyExc_TypeError, "data_ptr method of Pointer object must return 64-bit int");
+            return result;
+        }
+        result.ptr = (void *)PyLong_AsUnsignedLongLong(data_ret);
+        result.size = PyLong_AsUnsignedLongLong(nbytes_ret);
+    }
+    return result;
+}
+
+#if 0
+static DevPtr getPointer(py::object obj) {
+    DevPtr result = { nullptr, 0 };
+    if (obj.is_none()) {
+        return result;
+    }
+    py::object data_ptr_m = obj.attr("data_ptr");
+    py::object nbytes_ret = obj.attr("nbytes");
+    if (!data_ptr_m.is_none() && !nbytes_res.is_none()) {
+        py::object data_ret = data_ptr_m();
+        if (!PyLong_Check(data_ret)) {
+            PyErr_SetString(PyExc_TypeError, "data_ptr method of Pointer object must return 64-bit int");
+            return result;
+        }
+        result.ptr = (void *)data_ret.cast<int64_t>();
+        result.size = PyLong_AsUnsignedLongLong(nbytes_ret);
+    }
+    return result;
+}
+#endif
+
+void pynexus::init_system_bindings(py::module &m) {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
 
+    auto statusEnum = py::enum_<nxs_status>(m, "nxs_status", py::module_local());
+    for (nxs_int i = NXS_STATUS_MIN; i <= NXS_STATUS_MAX; ++i) {
+        nxs_status status = (nxs_status)i;
+        const char *str = nxsGetStatusName(i);
+        if (str && *str)
+            statusEnum.value(str, status);
+    }
+    statusEnum.export_values();
+
     // generate enums for Nexus properties and status
 
-    py::class_<Buffer>(m, "buffer", py::module_local())
+    py::class_<Buffer>(m, "_buffer", py::module_local())
+        .def("__bool__", 
+            [](Buffer &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Buffer &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
                 return "";
+            })
+        .def("copy", 
+            [](Buffer &self, py::object tensor) {
+                auto local = self.getLocal();
+                auto devp = getPointer(tensor.ptr());
+                if (devp.ptr != nullptr && local.getHostData() != nullptr && devp.size == self.getSize()) {
+                    return local.copy(devp.ptr);
+                }
+                return NXS_InvalidDevice;
             });
 
-    py::class_<Kernel>(m, "kernel", py::module_local())
+    py::class_<Kernel>(m, "_kernel", py::module_local())
+        .def("__bool__", 
+            [](Kernel &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Kernel &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
@@ -30,7 +107,11 @@ void pynexus::init_system_bindings(py::module &&m) {
                 return "";
             });
     
-    py::class_<Library>(m, "library", py::module_local())
+    py::class_<Library>(m, "_library", py::module_local())
+        .def("__bool__", 
+            [](Library &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Library &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
@@ -42,7 +123,11 @@ void pynexus::init_system_bindings(py::module &&m) {
                 return self.getKernel(name);
             });
 
-    py::class_<Command>(m, "command", py::module_local())
+    py::class_<Command>(m, "_command", py::module_local())
+        .def("__bool__", 
+            [](Command &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Command &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
@@ -59,7 +144,11 @@ void pynexus::init_system_bindings(py::module &&m) {
             });
         
 
-    py::class_<Schedule>(m, "schedule", py::module_local())
+    py::class_<Schedule>(m, "_schedule", py::module_local())
+        .def("__bool__", 
+            [](Schedule &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Schedule &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
@@ -69,16 +158,37 @@ void pynexus::init_system_bindings(py::module &&m) {
         .def("create_command", 
             [](Schedule &self, Kernel kernel) {
                 return self.createCommand(kernel);
+            })
+        .def("run", 
+            [](Schedule &self) {
+                return self.run();
             });
-
     
-    py::class_<Device>(m, "device", py::module_local())
+    
+    py::class_<Device>(m, "_device", py::module_local())
+        .def("__bool__", 
+            [](Device &self) {
+                return (bool)self;
+            })
         .def("get_property_str", 
             [](Device &self, const std::string &name) {
                 auto prop = nxsGetPropEnum(name.c_str());
                 return self.getProperty<std::string>(prop);
             })
-        .def("create_library", 
+        .def("create_buffer", 
+            [](Device &self, py::object tensor) {
+                auto devp = getPointer(tensor.ptr());
+                return self.createBuffer(devp.size, devp.ptr);
+            })
+        .def("create_buffer", 
+            [](Device &self, size_t size) {
+                return self.createBuffer(size);
+            })
+        .def("copy_buffer", 
+            [](Device &self, Buffer buf) {
+                return self.copyBuffer(buf);
+            })
+        .def("load_library", 
             [](Device &self, const std::string &filepath) {
                 return self.createLibrary(filepath);
             })
@@ -88,7 +198,7 @@ void pynexus::init_system_bindings(py::module &&m) {
             });
     
     
-    py::class_<Devices>(m, "devices", py::module_local())
+    py::class_<Devices>(m, "_devices", py::module_local())
         .def("size", 
             [](Devices &self) {
                 return self.size();
@@ -99,7 +209,11 @@ void pynexus::init_system_bindings(py::module &&m) {
             });
         
     
-    py::class_<Runtime>(m, "runtime", py::module_local())
+    py::class_<Runtime>(m, "_runtime", py::module_local())
+        .def("__bool__", 
+            [](Runtime &self) {
+                return (bool)self;
+            })
         .def("get_device",
             [](Runtime &self, nxs_int id) { return self.getDevice(id); })
         .def("get_devices",
@@ -115,7 +229,7 @@ void pynexus::init_system_bindings(py::module &&m) {
                 return self.getProperty<int64_t>(prop);
             });
 
-    py::class_<Runtimes>(m, "runtimes", py::module_local())
+    py::class_<Runtimes>(m, "_runtimes", py::module_local())
         .def("size", 
             [](Runtimes &self) {
                 return self.size();
@@ -129,10 +243,10 @@ void pynexus::init_system_bindings(py::module &&m) {
     m.def("get_runtimes", []() { return nexus::getSystem().getRuntimes(); });
 
     m.def("create_buffer", [](size_t size) { return nexus::getSystem().createBuffer(size); });
-}
+    m.def("create_buffer", [](py::object tens) {
+        auto devp = getPointer(tens.ptr());
+        return nexus::getSystem().createBuffer(devp.size, devp.ptr);
+    });
 
-// Function to get a value from the dictionary
-py::object pynexus::create_buffer(nxs_int size, const std::string& key) {
-    return py::none();  // Return None if key is not found
+   
 }
-

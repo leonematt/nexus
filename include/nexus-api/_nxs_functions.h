@@ -247,7 +247,7 @@ NEXUS_API_FUNC(nxs_status, FinalizeCommand,
 
 typedef enum _nxs_function nxs_function;
 
-const char *nxsGetFuncName(nxs_function funcEnum);
+const char *nxsGetFuncName(nxs_int funcEnum);
 nxs_function nxsGetFuncEnum(const char *funcName);
 
 #endif

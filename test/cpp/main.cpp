@@ -37,28 +37,31 @@ int main() {
   auto kern = nlib.getKernel("add_vectors");
   std::cout << "   Kernel: " << kern.getId() << std::endl;
 
-  auto buf0 = sys.createBuffer(size, vecA.data());
-  auto buf1 = sys.createBuffer(size, vecB.data());
-  auto buf2 = sys.createBuffer(size, vecResult_GPU.data());
-
-  auto cpv0 = sys.copyBuffer(buf0, dev0);
-  auto cpv1 = sys.copyBuffer(buf1, dev0);
-  auto cpv2 = sys.copyBuffer(buf2, dev0);
-  //std::cout << "    CopyBuffer: " << cpv0 << std::endl;
+  auto buf0 = dev0.createBuffer(size, vecA.data());
+  auto buf1 = dev0.createBuffer(size, vecB.data());
+  auto buf2 = dev0.createBuffer(size, vecResult_GPU.data());
 
   auto sched = dev0.createSchedule();
-  std::cout << "    CList: " << sched.getId() << std::endl;
 
   auto cmd = sched.createCommand(kern);
-  cmd.setArgument(0, cpv0);
-  cmd.setArgument(1, cpv1);
-  cmd.setArgument(2, cpv2);
+  cmd.setArgument(0, buf0);
+  cmd.setArgument(1, buf1);
+  cmd.setArgument(2, buf2);
 
   cmd.finalize(32, 1024);
 
   sched.run();
 
-  cpv2.copy(vecResult_GPU.data());
+  buf2.copy(vecResult_GPU.data());
+
+  int i = 0;
+  for (auto v : vecResult_GPU) {
+    if (v != 3.0) {
+      std::cout << "Fail: result[" << i << "] = " << v << std::endl;
+    }
+    ++i;
+  }
+  std::cout << "Test PASSED" << std::endl;
 
   return 0;
 }

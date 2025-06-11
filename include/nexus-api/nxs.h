@@ -262,10 +262,10 @@ enum _nxs_status {
 
 typedef enum _nxs_status nxs_status;
 
-/*
-nxs_bool nxs_succeeded(nxs_int result) { return result >= 0; }
-nxs_bool nxs_failed(nxs_int result) { return result < 0; }
-*/
+inline nxs_bool nxs_success(nxs_int result) { return result >= 0; }
+inline nxs_bool nxs_failed(nxs_int result) { return result < 0; }
+
+inline nxs_bool nxs_valid_id(nxs_int id) { return id >= 0; }
 
 /* nxs_bool */
 #define NXS_FALSE                                    0

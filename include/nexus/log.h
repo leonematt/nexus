@@ -5,13 +5,14 @@
 #define NEXUS_STATUS_NOTE ""
 #define NEXUS_STATUS_WARN " WARN"
 
+#define NEXUS_LOG_DEPTH 30
+
 #ifdef NEXUS_LOGGING
 #include <iostream>
 #include <iomanip>
 
-#define NEXUS_LOG(STATUS, s)  {\
-    const char *_log_prefix = "[NEXUS][" NEXUS_LOG_MODULE "]" STATUS ": "; \
-    std::cerr << std::left << std::setw(30) << _log_prefix << s << std::endl; }
+#define NEXUS_LOG(STATUS, s)  \
+    std::cerr << std::left << std::setw(NEXUS_LOG_DEPTH) << "[NEXUS][" NEXUS_LOG_MODULE "]" STATUS ": " << s << std::endl
 
 #else
 #define NEXUS_LOG(x, s)

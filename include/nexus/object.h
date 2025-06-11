@@ -14,7 +14,7 @@ namespace nexus {
         class Impl {
         public:
 
-            Impl(Impl *_owner = nullptr, nxs_int _id = 0)
+            Impl(Impl *_owner = nullptr, nxs_int _id = -1)
                 : owner(_owner), id(_id) {}
             virtual ~Impl() {}
 
@@ -62,7 +62,7 @@ namespace nexus {
         Object() = default;
         virtual ~Object() {}
 
-        operator bool() const { return impl && getId() >= 0; }
+        operator bool() const { return impl && nxs_valid_id(getId()); }
         bool operator ==(const Object &that) const { return impl == that.impl; }
 
         virtual void release() { impl = nullptr; }

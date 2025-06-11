@@ -19,19 +19,20 @@ namespace nexus {
         friend OwnerTy;
     public:
         Buffer(detail::Impl base, size_t _sz, void *_hostData = nullptr);
+        Buffer(detail::Impl base, nxs_int devId, size_t _sz, void *_hostData = nullptr);
         using Object::Object;
 
         void release() const;
         
         nxs_int getId() const override;
+        nxs_int getDeviceId() const;
 
         size_t getSize() const;
         void *getHostData() const;
 
-        nxs_status copy(void *_hostBuf);
+        Buffer getLocal() const;
 
-    protected:
-        void _addDevice(Device _dev);
+        nxs_status copy(void *_hostBuf);
     };
 
     typedef Objects<Buffer> Buffers;

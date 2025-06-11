@@ -10,7 +10,7 @@ namespace py = pybind11;
 
 namespace pynexus {
 
-    void init_system_bindings(py::module &&m);
+    void init_system_bindings(py::module &m);
 
 // Function to read from a Python dictionary
 py::object create_buffer(nxs_int size, const std::string &key = "");

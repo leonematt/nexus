@@ -20,10 +20,23 @@
 #include <nexus-api.h>
 #include <magic_enum/magic_enum.hpp>
 
+const char *nxsGetFuncName(nxs_int funcEnum) {
+    auto fenum = magic_enum::enum_cast<nxs_function>(funcEnum);
+    if (fenum)
+        return magic_enum::enum_name(*fenum).data() + NXS_FUNCTION_PREFIX_LEN;
+    return "";
+}
 
-const char *nxsGetPropName(nxs_property propEnum) {
-    if (propEnum >= 0 && propEnum < NXS_PROPERTY_CNT)
-        return magic_enum::enum_name(propEnum).data() + NXS_PROPERTY_PREFIX_LEN;
+nxs_function nxsGetFuncEnum(const char *funcName) {
+    std::string fname = std::string("NF_") + funcName;
+    return *magic_enum::enum_cast<nxs_function>(fname);
+}
+
+
+const char *nxsGetPropName(nxs_int propEnum) {
+    auto penum = magic_enum::enum_cast<nxs_property>(propEnum);
+    if (penum)
+        return magic_enum::enum_name(*penum).data() + NXS_PROPERTY_PREFIX_LEN;
     return "";
 }
 
@@ -32,9 +45,10 @@ nxs_property nxsGetPropEnum(const char *propName) {
     return *magic_enum::enum_cast<nxs_property>(pname);
 }
 
-const char *nxsGetStatusName(nxs_status statusEnum) {
-    if (statusEnum >= NXS_STATUS_MIN && statusEnum <= NXS_STATUS_MAX)
-        return magic_enum::enum_name(statusEnum).data() + NXS_STATUS_PREFIX_LEN;
+const char *nxsGetStatusName(nxs_int statusEnum) {
+    auto senum = magic_enum::enum_cast<nxs_status>(statusEnum);
+    if (senum)
+        return magic_enum::enum_name(*senum).data() + NXS_STATUS_PREFIX_LEN;
     return "";
 }
 

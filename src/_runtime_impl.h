@@ -43,8 +43,11 @@ namespace nexus {
             nxs_int runAPIFunction(Args... args) {
                 nxs_int apiResult = NXS_InvalidDevice; // invalid runtime
                 if (auto *fn = getFunction<Tfn>()) {
-                  apiResult = (*fn)(args...);
-                  NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(Tfn) << ": " << apiResult);
+                    apiResult = (*fn)(args...);
+                    if (nxs_failed(apiResult))
+                        NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(Tfn) << ": " << nxsGetStatusName(apiResult));
+                    else
+                        NEXUS_LOG(NEXUS_STATUS_NOTE, nxsGetFuncName(Tfn) << ": " << apiResult);
                 } else {
                   NEXUS_LOG(NEXUS_STATUS_ERR, nxsGetFuncName(Tfn) << ": API not present");
                 }

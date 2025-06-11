@@ -48,6 +48,7 @@ namespace detail {
     Library createLibrary(void *libraryData, size_t size);
     Schedule createSchedule();
 
+    Buffer createBuffer(size_t size, void *data = nullptr);
     Buffer copyBuffer(Buffer buf);
   };
 

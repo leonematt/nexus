@@ -75,10 +75,10 @@ typedef enum _nxs_property nxs_property;
 
 /* Translation functions */
 nxs_int nxsGetPropCount();
-const char *nxsGetPropName(nxs_property propEnum);
+const char *nxsGetPropName(nxs_int propEnum);
 nxs_property nxsGetPropEnum(const char *propName);
 
-const char *nxsGetStatusName(nxs_status statusEnum);
+const char *nxsGetStatusName(nxs_int statusEnum);
 nxs_status nxsGetStatusEnum(const char *statusName);
 
 #endif

@@ -1,4 +1,6 @@
 
+#include "_system_impl.h"
+
 #include <nexus/system.h>
 #include <nexus/utility.h>
 #include <nexus/log.h>
@@ -8,35 +10,6 @@ using namespace nexus::detail;
 
 #define NEXUS_LOG_MODULE "system"
 
-namespace nexus {
-namespace detail {
-
-  class SystemImpl : public detail::Impl {
-  public:
-      SystemImpl(int);
-      ~SystemImpl();
-
-      Runtime getRuntime(int idx) const {
-          return runtimes.get(idx);
-      }
-      Buffer createBuffer(size_t sz, void *hostData = nullptr);
-      Buffer copyBuffer(Buffer buf, Device dev);
-
-      Runtimes getRuntimes() const {
-        return runtimes;
-      }
-
-      Buffers getBuffers() const {
-        return buffers;
-      }
-
-  private:
-      // set of runtimes
-      Runtimes runtimes;
-      Buffers buffers;
-  };
-} // namespace detail
-} // namespace nexus
 
 /// @brief Construct a Platform for the current system
 SystemImpl::SystemImpl(int) {
@@ -65,7 +38,6 @@ Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
 
 Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "copyBuffer " << buf.getSize());
-  buf._addDevice(dev);
   Buffer nbuf = dev.copyBuffer(buf);
   return nbuf;
 }

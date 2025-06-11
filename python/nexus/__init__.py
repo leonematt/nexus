@@ -6,7 +6,7 @@ __version__ = '0.0.1'
 
 # submodules
 
-from ._C.libnexus import system
+from ._C.libnexus import *
 
 __all__ = [
 ]

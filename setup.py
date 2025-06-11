@@ -238,6 +238,8 @@ setup(
         "sdist": sdist,
     },
     zip_safe=False,
+    keywords=["Runtime", "Triton"],
+    url="https://github.com/kernelize-ai/nexus/",
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=PYTHON_REQUIRES,
     classifiers=CLASSIFIERS,

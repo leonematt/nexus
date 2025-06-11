@@ -3,6 +3,8 @@
 #include <nexus/buffer.h>
 #include <nexus/log.h>
 
+#include <filesystem>
+
 #include "_runtime_impl.h"
 #include "_device_impl.h"
 #include "_buffer_impl.h"
@@ -13,8 +15,8 @@ using namespace nexus;
 
 #define APICALL(FUNC, ...) \
   nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__); \
-  if (apiResult < 0) \
-    NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " << nxsGetStatusName((nxs_status)apiResult))
+  if (nxs_failed(apiResult)) \
+    NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " << nxsGetStatusName(apiResult))
     
 
 detail::DeviceImpl::DeviceImpl(detail::Impl base)
@@ -83,6 +85,14 @@ Schedule detail::DeviceImpl::createSchedule() {
   return sched;
 }
 
+Buffer detail::DeviceImpl::createBuffer(size_t size, void *data) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "  createBuffer");
+  APICALL(nxsCreateBuffer, getId(), size, 0, data);
+  Buffer nbuf(Impl(this, apiResult), getId(), size, data);
+  buffers.add(nbuf);
+  return nbuf;
+}
+
 Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  copyBuffer");
   APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
@@ -104,7 +114,6 @@ void Device::release() const {
 nxs_int Device::getId() const {
   return get()->getId();
 }
-
 
 // Get Device Property Value
 template <>
@@ -133,6 +142,10 @@ Schedules Device::getSchedules() const {
 
 Schedule Device::createSchedule() {
     return get()->createSchedule();
+}
+
+Buffer Device::createBuffer(size_t size, void *data) {
+  return get()->createBuffer(size, data);
 }
 
 Buffer Device::copyBuffer(Buffer buf) {

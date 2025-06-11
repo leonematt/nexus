@@ -4,6 +4,8 @@
 #include "_library_impl.h"
 
 #define NEXUS_LOG_MODULE "library"
+#undef NEXUS_LOG_DEPTH
+#define NEXUS_LOG_DEPTH 34
 
 using namespace nexus;
 using namespace nexus::detail;
@@ -11,11 +13,11 @@ using namespace nexus::detail;
 /// @brief Construct a Platform for the current system
 LibraryImpl::LibraryImpl(Impl owner)
   : Impl(owner) {
-    NEXUS_LOG(NEXUS_STATUS_NOTE, "  Library: " << getId());
+    NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR: " << getId());
   }
 
 LibraryImpl::~LibraryImpl() {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Library: " << getId());
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "DTOR: " << getId());
   release();
 }
 

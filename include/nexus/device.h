@@ -43,6 +43,7 @@ namespace nexus {
         Library createLibrary(void *libraryData, size_t librarySize);
         Library createLibrary(const std::string &libraryPath);
 
+        Buffer createBuffer(size_t _sz, void *_hostData = nullptr);
         Buffer copyBuffer(Buffer buf);
     };
     

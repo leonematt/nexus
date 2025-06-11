@@ -14,8 +14,7 @@ add_library(nexus-api SHARED
     utility.cpp
     system.cpp
     runtime.cpp
-    ${CMAKE_SOURCE_DIR}/include/nexus-api/src/nxs_propertys.cpp
-    ${CMAKE_SOURCE_DIR}/include/nexus-api/src/nxs_functions.cpp
+    ${CMAKE_SOURCE_DIR}/api-src/nxs_api.cpp
 )
 
 target_link_libraries(nexus-api PRIVATE nlohmann_json::nlohmann_json)
