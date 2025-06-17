@@ -13,12 +13,20 @@
       "Name": "GPU Core",
       "subUnits": [
         {
-          "Type": "Execution Unit",
-          "Count": 10,
-          "Size": 128,
-          "Description": "SIMD execution units for parallel shader processing with 128 ALUs per unit",
-          "Memory": ["L1", "vector register file", "shared memory"],
-          "SubunitType": "SIMD"
+            "Type": "Cores",
+            "Count": 10,
+            "Size": 160,
+            "Description": "Compute Cores per Chip",
+            "Memory": ["L2"],
+            "SubunitType": "Execution Unit"
+        },
+        {
+            "Type": "Execution Unit",
+            "Count": 160,
+            "Size": 128,
+            "Description": "SIMD execution units for parallel shader processing with 128 ALUs per unit",
+            "Memory": ["L1", "vector register file", "shared memory"],
+            "SubunitType": "SIMD"
         },
         {
           "Type": "Texture Unit",

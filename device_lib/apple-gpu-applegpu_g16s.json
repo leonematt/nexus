@@ -1,6 +1,7 @@
 {
   "Name": "Apple GPU G16S",
   "Vendor": "Apple",
+  "Type": "gpu",
   "Architecture": "applegpu_g16s",
   "ReleaseYear": 2024,
   "FabricationProcess": {
@@ -9,7 +10,7 @@
     "Technology": "N3E"
   },
   "CoreSubsystem": {
-    "Name": "GPU Core",
+    "Name": "Core",
     "SubUnits": [
       {
         "Type": "Chip",
@@ -24,12 +25,13 @@
         "Count": 10,
         "Size": 2,
         "Description": "High-level GPU cluster containing multiple cores",
-        "SubunitType": "GPU Core"
+        "SubunitType": "Core"
       },
       {
-        "Type": "GPU Core",
+        "Type": "Core",
         "Count": 2,
         "Size": 4,
+        "ISA": "",
         "Description": "Individual GPU compute core with 128 ALUs",
         "Memory": ["L1 Cache", "Tile Memory", "Vector Register File", "Scalar Register File", "Shared Memory"],
         "SubunitType": "SIMD"
@@ -55,50 +57,49 @@
         "Type": "Vector Register File",
         "Size": 256,
         "BankCount": 4,
-        "description": "Vector register file for SIMD operations per GPU core"
+        "Description": "Vector register file for SIMD operations per GPU core"
       },
       {
         "Type": "Scalar Register File",
         "Size": 16,
         "BankCount": 2,
-        "description": "Scalar register file for control flow and addressing per GPU core"
+        "Description": "Scalar register file for control flow and addressing per GPU core"
       },
       {
         "Type": "Shared Memory",
         "Size": 32,
         "BankCount": 32,
-        "description": "Threadgroup shared memory for inter-thread communication within a GPU core"
+        "Description": "Threadgroup shared memory for inter-thread communication within a GPU core"
       },
       {
         "Type": "L1 Cache",
         "Size": 16,
         "BankCount": 4,
-        "description": "Per-core L1 cache for fast data access"
+        "Description": "Per-core L1 cache for fast data access"
       },
       {
         "Type": "L2 Cache",
         "Size": 4096,
         "BankCount": 8,
-        "description": "Shared L2 cache across GPU cores"
+        "Description": "Shared L2 cache across GPU cores"
       },
       {
         "Type": "Tile Memory",
         "Size": 32,
         "BankCount": 1,
-        "description": "On-chip tile memory for efficient rendering"
+        "Description": "On-chip tile memory for efficient rendering"
       },
       {
         "Type": "System Memory",
         "Size": 0,
         "MaxMemoryBandwidth": 273,
         "maxBusWidth": 256,
-        "description": "Unified memory architecture shared with CPU"
+        "Description": "Unified memory architecture shared with CPU"
       }
     ]
   },
   "KernelModel": {
-    "LLVMTarget": "aarch64-apple-ios",
-    "LLVMTriple": "aarch64-apple-ios17.0",
+    "LLVMTriple": "aarch64-apple-macosx",
     "LLVMFeatures": [
       {
         "Name": "apple-gpu",

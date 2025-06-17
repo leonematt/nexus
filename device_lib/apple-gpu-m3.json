@@ -1,0 +1,184 @@
+{
+    "Name": "Apple GPU (M3)",
+    "Vendor": "Apple",
+    "Architecture": "Apple GPU Gen 3",
+    "ReleaseYear": 2023,
+    "FabricationProcess": {
+      "ProcessNode": 3,
+      "Manufacturer": "TSMC",
+      "Technology": "N3B"
+    },
+    "CoreSubsystem": {
+      "Name": "GPU Core",
+      "subUnits": [
+        {
+          "Type": "Execution Unit",
+          "Count": 10,
+          "Size": 128,
+          "Description": "Next-generation unified shader processors with hardware ray tracing support",
+          "Memory": ["L1", "L2"],
+          "SubunitType": "SIMD"
+        },
+        {
+          "Type": "Ray Tracing Unit",
+          "Count": 10,
+          "Size": 1,
+          "Description": "Dedicated hardware ray tracing acceleration units",
+          "Memory": ["L1"],
+          "SubunitType": "RT"
+        },
+        {
+          "Type": "Tile Memory",
+          "Count": 10,
+          "Size": 32,
+          "Description": "On-chip tile memory for efficient rendering",
+          "Memory": ["Tile"],
+          "SubunitType": "Memory"
+        }
+      ]
+    },
+    "MemorySubsystem": {
+      "SupportedMemoryTypes": ["LPDDR5"],
+      "MemoryTypes": [
+        {
+          "Type": "L1",
+          "Size": 64,
+          "BankCount": 10,
+          "MaxMemoryBandwidth": 100,
+          "maxBusWidth": 128,
+          "description": "L1 cache per GPU core"
+        },
+        {
+          "Type": "L2",
+          "Size": 4096,
+          "BankCount": 1,
+          "MaxMemoryBandwidth": 100,
+          "maxBusWidth": 128,
+          "description": "Shared L2 cache"
+        },
+        {
+          "Type": "Unified Memory",
+          "Size": 25165824,
+          "BankCount": 6,
+          "MaxMemoryBandwidth": 100,
+          "maxBusWidth": 128,
+          "description": "Unified memory shared with CPU"
+        }
+      ]
+    },
+    "KernelModel": {
+      "SubUnits": [
+        {
+          "Type": "Metal",
+          "Version": "3.1"
+        },
+        {
+          "Type": "OpenGL ES",
+          "Version": "3.0"
+        },
+        {
+          "Type": "Vulkan",
+          "Version": "1.3"
+        }
+      ]
+    },
+    "SpecializedHardware": {
+      "RayTracingAccelerators": {
+        "Present": true,
+        "Name": "RT Unit",
+        "Count": 1,
+        "Performance": {
+          "RaysPerSecond": 2.5
+        }
+      },
+      "AiAccelerators": {
+        "Present": false,
+        "Name": null,
+        "Count": 0,
+        "SupportedPrecisions": [],
+        "Performance": {
+          "fp16TopsPerGPU": 0,
+          "int8TopsPerGPU": 0
+        }
+      },
+      "videoCodecs": {
+        "encoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "4K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "4K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "AV1",
+            "maxResolution": "4K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          }
+        ],
+        "decoders": [
+          {
+            "codec": "H.264",
+            "maxResolution": "8K",
+            "maxBitrate": 400,
+            "maxFPS": 30
+          },
+          {
+            "codec": "H.265/HEVC",
+            "maxResolution": "8K",
+            "maxBitrate": 400,
+            "maxFPS": 30
+          },
+          {
+            "codec": "VP9",
+            "maxResolution": "4K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          },
+          {
+            "codec": "AV1",
+            "maxResolution": "4K",
+            "maxBitrate": 200,
+            "maxFPS": 60
+          }
+        ]
+      }
+    },
+    "PowerEfficiency": {
+      "BaseClock": 1000,
+      "BoostClock": 1424,
+      "MaxTDP": 22,
+      "PowerStates": [
+        {
+          "Name": "Performance",
+          "Description": "Maximum performance for demanding workloads"
+        },
+        {
+          "Name": "Balanced",
+          "Description": "Balance between performance and power efficiency"
+        },
+        {
+          "Name": "Power Saving",
+          "Description": "Optimized for battery life"
+        }
+      ],
+      "ClockGating": true,
+      "DynamicVoltageFrequencyScaling": true
+    },
+    "PciExpress": {
+      "Version": "N/A",
+      "Lanes": 0,
+      "Bandwidth": 0
+    },
+    "MultiGpuSupport": {
+      "Technologies": ["None"],
+      "MaxGpus": 1,
+      "InterconnectBandwidth": 0
+    }
+  }
