@@ -15,7 +15,13 @@ kernel void add_vectors(device const float* inA [[buffer(0)]],
 }
 ```
 
+To generate LLVM IR:
 ```script
 xcrun -sdk macosx metal -c kernel.metal -o kernel.ir
 llvm-dis kernel.ir -o kernel.ll
+```
+
+To generate SO library binary:
+```script
+xcrun -sdk macosx metal -c kernel.metal -o kernel.so
 ```
