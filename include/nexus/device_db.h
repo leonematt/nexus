@@ -11,7 +11,9 @@ namespace nexus {
 
     typedef std::unordered_map<std::string, Properties> DeviceMap;
 
-    std::optional<Properties> lookupDevice(const std::string &archName);
+    const DeviceMap *getDeviceDB();
+
+    Properties lookupDevice(const std::string &archName);
 
 }
 

@@ -29,9 +29,8 @@ namespace nexus {
         nxs_int getId() const override;
 
         // Get Device Property Value
-        template <typename T>
-        const T getProperty(nxs_property pn) const;
-        
+        std::optional<Property> getProperty(nxs_int prop) const override;
+
         Properties getProperties() const;
 
         // Runtime functions

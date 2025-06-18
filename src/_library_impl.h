@@ -18,6 +18,8 @@ namespace detail {
 
     void release();
 
+    std::optional<Property> getProperty(nxs_int prop) const;
+
     Kernel getKernel(const std::string &kernelName);
 
   private:

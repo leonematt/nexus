@@ -28,6 +28,11 @@ SystemImpl::~SystemImpl() {
   //  buf.release();
 }
 
+std::optional<Property> SystemImpl::getProperty(nxs_int prop) const {
+
+  return std::nullopt;
+}
+
 Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
@@ -45,6 +50,10 @@ Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
 ///////////////////////////////////////////////////////////////////////////////
 /// @param  
 System::System(int i) : Object(i) {}
+
+std::optional<Property> System::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
+}
 
 Buffers System::getBuffers() const {
   return get()->getBuffers();

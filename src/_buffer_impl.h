@@ -18,6 +18,8 @@ namespace detail {
 
     nxs_int getDeviceId() const { return deviceId; }
 
+    std::optional<Property> getProperty(nxs_int prop) const;
+    
     size_t getSize() const { return size; }
     void *getHostData() const { return data; }
 

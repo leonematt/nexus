@@ -7,9 +7,9 @@ buf0 = torch.ones(1024)
 buf1 = torch.ones(1024)
 res2 = torch.zeros(1024)
 
-rt = nexus.get_runtimes().get(1)
+rt = nexus.get_runtimes()[1]
 
-dev = rt.get_devices().get(0)
+dev = rt.get_devices()[0]
 
 nb0 = dev.create_buffer(buf0)
 nb1 = dev.create_buffer(buf1)

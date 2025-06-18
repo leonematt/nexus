@@ -21,6 +21,8 @@ namespace nexus {
     
         nxs_int getId() const override { return 0; }
 
+        std::optional<Property> getProperty(nxs_int prop) const override;
+
         Runtimes getRuntimes() const;
         Buffers getBuffers() const;
 

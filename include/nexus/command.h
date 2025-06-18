@@ -25,6 +25,8 @@ namespace nexus {
         void release() const;
         nxs_int getId() const override;
 
+        std::optional<Property> getProperty(nxs_int prop) const override;
+
         nxs_status setArgument(nxs_uint index, Buffer buffer) const;
         //nxs_status setArgument(nxs_uint index, nxs_int scalar) const;
 

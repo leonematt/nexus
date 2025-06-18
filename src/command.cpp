@@ -29,6 +29,10 @@ namespace detail {
       //getOwner()->releaseCommand(getId());
     }
 
+    std::optional<Property> getProperty(nxs_int prop) const {
+      return std::nullopt;
+    }
+
     nxs_status setArgument(nxs_uint index, Buffer buffer) {
       //arguments[index] = buffer;
       auto *rt = getParentOfType<RuntimeImpl>();
@@ -58,6 +62,10 @@ void Command::release() const {
 
 nxs_int Command::getId() const {
   return get()->getId();
+}
+
+std::optional<Property> Command::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }
 
 nxs_status Command::setArgument(nxs_uint index, Buffer buffer) const {

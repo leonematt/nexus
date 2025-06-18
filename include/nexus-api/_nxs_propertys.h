@@ -14,15 +14,71 @@
 enum _nxs_property {
 
 #else
+#if defined(NEXUS_API_GENERATE_PROP_MAP)
+/************************************************************************
+ * Generate the Property type trait lookup
+ ***********************************************************************/
+enum _nxs_property_type {
+    NPT_INT,
+    NPT_FLT,
+    NPT_STR,
+    NPT_INT_VEC,
+    NPT_FLT_VEC,
+    NPT_STR_VEC,
+    NPT_OBJ_VEC,
+    NPT_UNK
+};
+
+typedef enum _nxs_property_type nxs_property_type;
+
+#define _prop_int NPT_INT
+#define _prop_flt NPT_FLT
+#define _prop_str NPT_STR
+#define _prop_int_vec NPT_INT_VEC
+#define _prop_flt_vec NPT_FLT_VEC
+#define _prop_str_vec NPT_STR_VEC
+#define _prop_obj_vec NPT_OBJ_VEC
+
+static nxs_property_type nxs_property_type_map[] = {
+
+#define NEXUS_API_PROP(NAME, TYPE, DESC) \
+    TYPE,
+
+#else
 #if defined(NEXUS_API_GENERATE_PROP_TYPE)
 /************************************************************************
- * Generate the Function typedefs
+ * Generate the Property type trait lookup
  ***********************************************************************/
-        
-// Generate the Function typedefs
-#define NEXUS_API_PROP(NAME, TYPE, DESC) \
-    typedef TYPE NXS_CONCAT(nxs##NAME, _t);
+typedef nxs_long _prop_int;
+typedef nxs_double _prop_flt;
 
+#ifdef __cplusplus
+
+typedef std::string _prop_str;
+typedef std::vector<nxs_long> _prop_int_vec;
+typedef std::vector<nxs_double> _prop_flt_vec;
+typedef std::vector<std::string> _prop_str_vec;
+
+template <nxs_property Tnp>
+struct nxsPropertyType { typedef void *type; };
+
+#else
+typedef char * _prop_str;
+typedef void * _prop_int_vec;
+typedef void * _prop_flt_vec;
+typedef void * _prop_str_vec;
+#endif
+
+// Generate the Property typedefs
+#ifdef __cplusplus
+#define NEXUS_API_PROP(NAME, TYPE, DESC) \
+    template <> struct nxsPropertyType<NP_##NAME> { typedef TYPE type; };
+#else
+#define NEXUS_API_PROP(RETURN_TYPE, NAME, ...)
+#endif
+
+
+#endif
 #endif
 #endif
 
@@ -35,30 +91,33 @@ enum _nxs_property {
  * @def Name
  * @brief Object Name 
  ***********************************************************************/
-NEXUS_API_PROP(Name,            char *,      "Unit Name")
-NEXUS_API_PROP(Type,            char *,      "Unit Type")
-NEXUS_API_PROP(Description,     char *,      "Unit Description")
+NEXUS_API_PROP(Name,            _prop_str,        "Unit Name")
+NEXUS_API_PROP(Type,            _prop_str,        "Unit Type")
+NEXUS_API_PROP(Description,     _prop_str,        "Unit Description")
 
 /* Property Hierarchy */
-NEXUS_API_PROP(Count,           nxs_uint,    "Number of Units")
-NEXUS_API_PROP(Size,            nxs_uint,    "Number of Sub-Units")
-NEXUS_API_PROP(SubUnits,        void *,      "Sub-Unit Vector")
-NEXUS_API_PROP(SubUnitType,     char *,      "Sub-Unit Type")
+NEXUS_API_PROP(Count,           _prop_int,        "Number of Units")
+NEXUS_API_PROP(Size,            _prop_int,        "Number of Sub-Units")
+NEXUS_API_PROP(SubUnits,        _prop_str_vec,    "Sub-Unit Vector")
+NEXUS_API_PROP(SubUnitType,     _prop_str,        "Sub-Unit Type")
+
+NEXUS_API_PROP(Keys,            _prop_str_vec,    "Node Keys")
 
 /* Device Properties */
-NEXUS_API_PROP(Vendor,          char *,      "Vendor Name")
-NEXUS_API_PROP(Architecture,    char *,      "Architecture Designation")
-NEXUS_API_PROP(Version,         char *,      "Version String")
-NEXUS_API_PROP(MajorVersion,    nxs_uint,    "Major Version")
-NEXUS_API_PROP(MinorVersion,    nxs_uint,    "Minor Version")
+NEXUS_API_PROP(Vendor,          _prop_str,        "Vendor Name")
+NEXUS_API_PROP(Architecture,    _prop_str,        "Architecture Designation")
+NEXUS_API_PROP(Version,         _prop_str,        "Version String")
+NEXUS_API_PROP(MajorVersion,    _prop_int,        "Major Version")
+NEXUS_API_PROP(MinorVersion,    _prop_int,        "Minor Version")
 
-NEXUS_API_PROP(CoreSubsystem,   void *,      "Core Subsystem Hierarchy")
-NEXUS_API_PROP(MemorySubsystem, void *,      "Memory Subsystem Hierarchy")
+NEXUS_API_PROP(CoreSubsystem,   _prop_str_vec,    "Core Subsystem Hierarchy")
+NEXUS_API_PROP(MemorySubsystem, _prop_str_vec,    "Memory Subsystem Hierarchy")
 
-NEXUS_API_PROP(ClockModes,      void *,      "Clock Modes")
-NEXUS_API_PROP(BaseClock,       nxs_uint,    "Max Power")
-NEXUS_API_PROP(PowerModes,      void *,      "Power Modes")
-NEXUS_API_PROP(MaxPower,        nxs_double,  "Max Power")
+NEXUS_API_PROP(DataTypes,       _prop_str_vec,    "Data Types")
+NEXUS_API_PROP(ClockModes,      _prop_str_vec,    "Clock Modes")
+NEXUS_API_PROP(BaseClock,       _prop_int,        "Max Power")
+NEXUS_API_PROP(PowerModes,      _prop_str_vec,    "Power Modes")
+NEXUS_API_PROP(MaxPower,        _prop_flt,        "Max Power")
 
 /* THIS SHOULD BE GENERATED FROM THE SCHEMA */
 
@@ -80,10 +139,25 @@ nxs_property nxsGetPropEnum(const char *propName);
 
 const char *nxsGetStatusName(nxs_int statusEnum);
 nxs_status nxsGetStatusEnum(const char *statusName);
+#else
+#if defined(NEXUS_API_GENERATE_PROP_MAP)
 
+}; /* close nxs_property_type_map */
+
+#undef _prop_int
+#undef _prop_flt
+#undef _prop_str
+#undef _prop_int_vec
+#undef _prop_flt_vec
+#undef _prop_str_vec
+#undef _prop_obj_vec
+
+#endif
 #endif
 
 #undef NEXUS_API_GENERATE_PROP_ENUM
+#undef NEXUS_API_GENERATE_PROP_MAP
 #undef NEXUS_API_GENERATE_PROP_TYPE
 
+#undef _NEXUS_API_PROP
 #undef NEXUS_API_PROP

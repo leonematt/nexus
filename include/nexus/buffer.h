@@ -27,6 +27,8 @@ namespace nexus {
         nxs_int getId() const override;
         nxs_int getDeviceId() const;
 
+        std::optional<Property> getProperty(nxs_int prop) const override;
+
         size_t getSize() const;
         void *getHostData() const;
 

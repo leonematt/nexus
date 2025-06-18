@@ -41,17 +41,32 @@ Device RuntimeImpl::getDevice(nxs_int deviceId) const {
   return devices.get(deviceId);
 }
 
-template <>
-const std::string RuntimeImpl::getProperty<std::string>(nxs_property pn) const {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "Runtime.getProperty: " << pn);
+std::optional<Property> detail::RuntimeImpl::getProperty(nxs_int prop) const {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "Runtime.getProperty: " << nxsGetPropName(prop));
   if (auto fn = getFunction<NF_nxsGetRuntimeProperty>()) {
+    auto npt_prop = nxs_property_type_map[prop];
+    if (npt_prop == NPT_INT) {
+      nxs_long val = 0;
+      size_t size = sizeof(val);
+      if (nxs_success((*fn)(prop, &val, &size)))
+        return Property(val);
+    } else if (npt_prop == NPT_FLT) {
+      nxs_double val = 0.;
+      size_t size = sizeof(val);
+      if (nxs_success((*fn)(prop, &val, &size)))
+        return Property(val);
+    } else if (npt_prop == NPT_STR) {
       size_t size = 256;
       char name[size];
       name[0] = '\0';
-      (*fn)(pn, name, &size);
-      return name;
+      if (nxs_success((*fn)(prop, &name, &size)))
+        return std::string(name);
+    } else {
+      NEXUS_LOG(NEXUS_STATUS_ERR, "Runtime.getProperty: Unknown property type for - " << nxsGetPropName(prop));
+      //assert(0);
+    }
   }
-  return std::string();
+  return std::nullopt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,15 +154,6 @@ Device Runtime::getDevice(nxs_uint deviceId) const {
 }
 
 // Get Runtime Property Value
-template <>
-const std::string Runtime::getProperty<std::string>(nxs_property pn) const {
-  return get()->getProperty<std::string>(pn);
-}
-template <>
-const int64_t Runtime::getProperty<int64_t>(nxs_property pn) const {
-  return get()->getProperty<int64_t>(pn);
-}
-template <>
-const double Runtime::getProperty<double>(nxs_property pn) const {
-  return get()->getProperty<double>(pn);
+std::optional<Property> Runtime::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }

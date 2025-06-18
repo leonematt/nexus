@@ -22,8 +22,9 @@ namespace nexus {
         using Object::Object;
 
         void release() const;
-
         nxs_int getId() const override;
+
+        std::optional<Property> getProperty(nxs_int prop) const override;
 
         Kernel getKernel(const std::string &kernelName);
     };

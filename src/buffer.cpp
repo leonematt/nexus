@@ -29,6 +29,11 @@ void detail::BufferImpl::release() {
 
 }
 
+std::optional<Property> detail::BufferImpl::getProperty(nxs_int prop) const {
+
+  return std::nullopt;
+}
+
 Buffer detail::BufferImpl::getLocal() const {
   if (!nxs_valid_id(getDeviceId()))
     return *this;
@@ -68,6 +73,10 @@ nxs_int Buffer::getId() const {
 
 nxs_int Buffer::getDeviceId() const {
   return get()->getDeviceId();
+}
+
+std::optional<Property> Buffer::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }
 
 size_t Buffer::getSize() const {

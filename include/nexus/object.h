@@ -5,6 +5,8 @@
 #include <vector>
 #include <nexus-api.h>
 
+#include <nexus/property.h>
+
 namespace nexus {
 
     namespace detail {
@@ -37,7 +39,6 @@ namespace nexus {
         private:
             Impl *owner;
             nxs_int id;
-            //nxs_type type;
         };
     }
 
@@ -68,6 +69,15 @@ namespace nexus {
         virtual void release() { impl = nullptr; }
 
         virtual nxs_int getId() const = 0;
+
+        virtual std::optional<Property> getProperty(nxs_int prop) const = 0;
+
+        template <typename T>
+        const T getProp(nxs_int prop) const {
+            if (auto val = getProperty(prop))
+                return getPropertyValue<T>(*val);
+            return T();
+        }
 
     protected:
         ImplRef get() const { return impl; }

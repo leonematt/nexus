@@ -27,6 +27,10 @@ namespace detail {
       //getOwner()->releaseKernel(getId());
     }
 
+    std::optional<Property> getProperty(nxs_int prop) const {
+      return std::nullopt;
+    }
+
   private:
     std::string kernelName;
   };
@@ -44,4 +48,8 @@ void Kernel::release() const {
 
 nxs_int Kernel::getId() const {
   return get()->getId();
+}
+
+std::optional<Property> Kernel::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }

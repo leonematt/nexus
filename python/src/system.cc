@@ -1,7 +1,7 @@
 #include "pynexus.h"
 #include <iostream>
 
-//#include <torch/torch.h>
+#include <pybind11/stl.h>
 
 #include <nexus.h>
 #include <nexus-api.h>
@@ -63,7 +63,9 @@ void pynexus::init_system_bindings(py::module &m) {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
 
-    auto statusEnum = py::enum_<nxs_status>(m, "nxs_status", py::module_local());
+    auto mstatus = m.def_submodule("status");
+
+    auto statusEnum = py::enum_<nxs_status>(mstatus, "nxs_status", py::module_local());
     for (nxs_int i = NXS_STATUS_MIN; i <= NXS_STATUS_MAX; ++i) {
         nxs_status status = (nxs_status)i;
         const char *str = nxsGetStatusName(i);
@@ -72,8 +74,68 @@ void pynexus::init_system_bindings(py::module &m) {
     }
     statusEnum.export_values();
 
+    auto mprop = m.def_submodule("property");
+    auto propEnum = py::enum_<nxs_property>(mprop, "nxs_property", py::module_local());
+    for (nxs_int i = 0; i <= NXS_PROPERTY_CNT; ++i) {
+        nxs_property prop = (nxs_property)i;
+        const char *str = nxsGetPropName(i);
+        if (str && *str)
+            propEnum.value(str, prop);
+    }
+    propEnum.export_values();
+
     // generate enums for Nexus properties and status
 
+    py::class_<Properties>(m, "_properties", py::module_local())
+        .def("__bool__", 
+            [](Properties &self) {
+                return (bool)self;
+            })
+        .def("get_property_str", 
+            [](Properties &self, const std::string &name) {
+                if (auto pval = self.getProperty(name))
+                    return nexus::getPropertyValue<std::string>(*pval);
+                return std::string();
+            })
+        .def("get_property_str", 
+            [](Properties &self, nxs_property prop) {
+                return self.getProp<std::string>(prop);
+            })
+        .def("get_property_int",
+            [](Properties &self, const std::string &name) {
+                if (auto pval = self.getProperty(name))
+                    return nexus::getPropertyValue<nxs_long>(*pval);
+                return (nxs_long)NXS_InvalidDevice;
+            })
+        .def("get_property_int",
+            [](Properties &self, nxs_property prop) {
+                return self.getProp<nxs_long>(prop);
+            })
+        .def("get_property_str", 
+            [](Properties &self, const std::vector<std::string> &path) {
+                if (auto pval = self.getProperty(path))
+                    return nexus::getPropertyValue<std::string>(*pval);
+                return std::string();
+            })
+        .def("get_property_str", 
+            [](Properties &self, const std::vector<nxs_int> &path) {
+                if (auto pval = self.getProperty(path))
+                    return nexus::getPropertyValue<std::string>(*pval);
+                return std::string();
+            })
+        .def("get_property_int", 
+            [](Properties &self, const std::vector<std::string> &path) {
+                if (auto pval = self.getProperty(path))
+                    return nexus::getPropertyValue<nxs_long>(*pval);
+                return (nxs_long)NXS_InvalidDevice;
+            })
+        .def("get_property_int", 
+            [](Properties &self, const std::vector<nxs_int> &path) {
+                if (auto pval = self.getProperty(path))
+                    return nexus::getPropertyValue<nxs_long>(*pval);
+                return (nxs_long)NXS_InvalidDevice;
+            });
+    
     py::class_<Buffer>(m, "_buffer", py::module_local())
         .def("__bool__", 
             [](Buffer &self) {
@@ -83,7 +145,7 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Buffer &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
-                return "";
+                return std::string();
             })
         .def("copy", 
             [](Buffer &self, py::object tensor) {
@@ -104,7 +166,7 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Kernel &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
-                return "";
+                return std::string();
             });
     
     py::class_<Library>(m, "_library", py::module_local())
@@ -116,7 +178,7 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Library &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
-                return "";
+                return std::string();
             })
         .def("get_kernel", 
             [](Library &self, const std::string &name) {
@@ -132,7 +194,7 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Command &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
-                return "";
+                return std::string();
             })
         .def("set_buffer", 
             [](Command &self, int index, Buffer buf) {
@@ -153,7 +215,7 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Schedule &self, const std::string &name) {
                 //auto prop = nxsGetPropEnum(name.c_str());
                 //return self.getProperty<std::string>(prop);
-                return "";
+                return std::string();
             })
         .def("create_command", 
             [](Schedule &self, Kernel kernel) {
@@ -170,10 +232,14 @@ void pynexus::init_system_bindings(py::module &m) {
             [](Device &self) {
                 return (bool)self;
             })
-        .def("get_property_str", 
+        .def("get_property_str",
             [](Device &self, const std::string &name) {
                 auto prop = nxsGetPropEnum(name.c_str());
-                return self.getProperty<std::string>(prop);
+                return self.getProp<std::string>(prop);
+            })
+        .def("get_device_info",
+            [](Device &self) {
+                return self.getProperties();
             })
         .def("create_buffer", 
             [](Device &self, py::object tensor) {
@@ -199,11 +265,15 @@ void pynexus::init_system_bindings(py::module &m) {
     
     
     py::class_<Devices>(m, "_devices", py::module_local())
+        .def("__iter__",
+            [](const Devices &rts) {
+                return py::make_iterator(rts.begin(), rts.end());
+            }, py::keep_alive<0, 1>() /* Essential: keep object alive */)
         .def("size", 
             [](Devices &self) {
                 return self.size();
             })
-        .def("get", 
+        .def("__getitem__", 
             [](Devices &self, int idx) {
                 return self.get(idx);
             });
@@ -221,20 +291,32 @@ void pynexus::init_system_bindings(py::module &m) {
         .def("get_property_str",
             [](Runtime &self, const std::string &name) {
                 auto prop = nxsGetPropEnum(name.c_str());
-                return self.getProperty<std::string>(prop);
+                return self.getProp<std::string>(prop);
             })
         .def("get_property_int",
             [](Runtime &self, const std::string &name) {
                 auto prop = nxsGetPropEnum(name.c_str());
-                return self.getProperty<int64_t>(prop);
+                return self.getProp<nxs_long>(prop);
+            })
+        .def("get_property_str",
+            [](Runtime &self, nxs_property prop) {
+                return self.getProp<std::string>(prop);
+            })
+        .def("get_property_int",
+            [](Runtime &self, nxs_property prop) {
+                return self.getProp<nxs_long>(prop);
             });
 
     py::class_<Runtimes>(m, "_runtimes", py::module_local())
+        .def("__iter__",
+            [](const Runtimes &rts) {
+                return py::make_iterator(rts.begin(), rts.end());
+            }, py::keep_alive<0, 1>() /* Essential: keep object alive */)
         .def("size", 
             [](Runtimes &self) {
                 return self.size();
             })
-        .def("get", 
+        .def("__getitem__", 
             [](Runtimes &self, int idx) {
                 return self.get(idx);
             });
@@ -248,5 +330,11 @@ void pynexus::init_system_bindings(py::module &m) {
         return nexus::getSystem().createBuffer(devp.size, devp.ptr);
     });
 
-   
+    m.def("get_chip_info", []() {
+        return *nexus::getDeviceDB();
+    });
+    m.def("lookup_chip_info", [](const std::string &name) {
+        return nexus::lookupDevice(name);
+    });
+
 }

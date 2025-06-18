@@ -27,8 +27,7 @@ namespace nexus {
         Device getDevice(nxs_uint deviceId) const;
 
         // Get Runtime Property Value
-        template <typename T>
-        const T getProperty(nxs_property pn) const;
+        std::optional<Property> getProperty(nxs_int prop) const override;
     };
     
     typedef Objects<Runtime> Runtimes;

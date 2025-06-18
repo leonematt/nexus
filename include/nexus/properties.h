@@ -23,25 +23,21 @@ namespace nexus {
 
         // Query Device Properties
         //   from name
-        template <typename T>
-        std::optional<T> getProperty(const std::string &name) const;
+        std::optional<Property> getProperty(const std::string &prop) const;
         //   from path
-        template <typename T>
-        std::optional<T> getProperty(const std::vector<std::string> &path) const;
+        std::optional<Property> getProperty(const std::vector<std::string> &path) const;
 
         //   from name
-        template <typename T>
-        std::optional<T> getProperty(nxs_property prop) const {
-            return getProperty<T>(nxsGetPropName(prop));
+        std::optional<Property> getProperty(nxs_int prop) const override {
+            return getProperty(nxsGetPropName(prop));
         }
 
         //   from path
-        template <typename T>
-        std::optional<T> getProperty(const std::vector<nxs_property> &propPath) const {
+        std::optional<Property> getProperty(const std::vector<nxs_int> &propPath) const {
             std::vector<std::string> names;
             std::for_each(propPath.begin(), propPath.end(),
-                 [&](nxs_property pn) { names.push_back(nxsGetPropName(pn)); });
-            return getProperty<T>(names);
+                 [&](nxs_int pn) { names.push_back(nxsGetPropName(pn)); });
+            return getProperty(names);
         }
     };
 

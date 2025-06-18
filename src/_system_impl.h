@@ -13,6 +13,8 @@ namespace detail {
       SystemImpl(int);
       ~SystemImpl();
 
+      std::optional<Property> getProperty(nxs_int prop) const;
+
       Runtime getRuntime(int idx) const {
           return runtimes.get(idx);
       }

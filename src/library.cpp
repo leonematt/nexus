@@ -27,6 +27,10 @@ void LibraryImpl::release() {
   nxs_int kid = rt->runAPIFunction<NF_nxsReleaseLibrary>(getId());
 }
 
+std::optional<Property> detail::LibraryImpl::getProperty(nxs_int prop) const {
+  return std::nullopt;
+}
+
 Kernel LibraryImpl::getKernel(const std::string &kernelName) {
   auto *rt = getParentOfType<RuntimeImpl>();
   nxs_int kid = rt->runAPIFunction<NF_nxsGetKernel>(getId(), kernelName.c_str());
@@ -44,6 +48,10 @@ void Library::release() const {
 
 nxs_int Library::getId() const {
   return get()->getId();
+}
+
+std::optional<Property> Library::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }
 
 Kernel Library::getKernel(const std::string &kernelName) {

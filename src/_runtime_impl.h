@@ -20,6 +20,8 @@ namespace nexus {
 
             void release();
 
+            std::optional<Property> getProperty(nxs_int prop) const;
+
             Devices getDevices() const { return devices; }
             Device getDevice(nxs_int deviceId) const;
 

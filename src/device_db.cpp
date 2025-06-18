@@ -31,12 +31,17 @@ static bool initDevices(DeviceMap &devs) {
   return true;
 }
 
-std::optional<Properties> nexus::lookupDevice(const std::string &archName) {
+const DeviceMap *nexus::getDeviceDB() {
   static DeviceMap s_devices;
   static bool init = initDevices(s_devices);
-  auto ii = s_devices.find(archName);
-  if (ii != s_devices.end())
+  return &s_devices;
+}
+
+Properties nexus::lookupDevice(const std::string &archName) {
+  const DeviceMap *devmap = getDeviceDB();
+  auto ii = devmap->find(archName);
+  if (ii != devmap->end())
     return ii->second;
-  return std::nullopt;
+  return Properties();
 }
 

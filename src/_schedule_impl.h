@@ -15,6 +15,8 @@ namespace detail {
 
       void release();
 
+      std::optional<Property> getProperty(nxs_int prop) const;
+
       Command getCommand(Kernel kern);
 
       nxs_status run(nxs_bool blocking);

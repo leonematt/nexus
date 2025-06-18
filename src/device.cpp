@@ -22,13 +22,17 @@ using namespace nexus;
 detail::DeviceImpl::DeviceImpl(detail::Impl base)
 : detail::Impl(base) {
   auto id = getId();
-  auto vendor = getProperty<std::string>(NP_Vendor);
-  auto type = getProperty<std::string>(NP_Type);
-  auto arch = getProperty<std::string>(NP_Architecture);
-  auto devTag = vendor + "-" + type + "-" + arch;
+  auto vendor = getProperty(NP_Vendor);
+  auto type = getProperty(NP_Type);
+  auto arch = getProperty(NP_Architecture);
+  if (!vendor || !type || !arch)
+    return;
+
+  auto devTag = getPropertyValue<NP_Vendor>(*vendor) + "-" + getPropertyValue<NP_Type>(*type)
+    + "-" + getPropertyValue<NP_Architecture>(*arch);
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
   if (auto props = nexus::lookupDevice(devTag))
-    deviceProps = *props;
+    deviceProps = props;
   else // load defaults
     NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
 }
@@ -46,18 +50,33 @@ void detail::DeviceImpl::release() {
   schedules.clear();
 }
 
-template <>
-const std::string detail::DeviceImpl::getProperty<std::string>(nxs_property pn) const {
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "Device.getProperty: " << pn);
+std::optional<Property> detail::DeviceImpl::getProperty(nxs_int prop) const {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "Device.getProperty: " << prop);
   auto *runtime = getParent();
   if (auto fn = runtime->getFunction<NF_nxsGetDeviceProperty>()) {
+    auto npt_prop = nxs_property_type_map[prop];
+    if (npt_prop == NPT_INT) {
+      nxs_long val = 0;
+      size_t size = sizeof(val);
+      if (nxs_success((*fn)(getId(), prop, &val, &size)))
+        return Property(val);
+    } else if (npt_prop == NPT_FLT) {
+      nxs_double val = 0.;
+      size_t size = sizeof(val);
+      if (nxs_success((*fn)(getId(), prop, &val, &size)))
+        return Property(val);
+    } else if (npt_prop == NPT_STR) {
       size_t size = 256;
       char name[size];
       name[0] = '\0';
-      (*fn)(getId(), pn, &name, &size);
-      return name;
+      if (nxs_success((*fn)(getId(), prop, &name, &size)))
+        return std::string(name);
+    } else {
+      NEXUS_LOG(NEXUS_STATUS_ERR, "Device.getProperty: Unknown property type for - " << nxsGetPropName(prop));
+      //assert(0);
+    }
   }
-  return std::string();
+  return std::nullopt;
 }
 
 // Runtime functions
@@ -102,9 +121,8 @@ Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @return 
+/// Object wrapper - Device
 ///////////////////////////////////////////////////////////////////////////////
-//Device::Device(detail::RuntimeImpl *rt, nxs_uint id) : Object(rt, id) {}
 Device::Device(detail::Impl base) : Object(base) {}
 
 void Device::release() const {
@@ -116,17 +134,8 @@ nxs_int Device::getId() const {
 }
 
 // Get Device Property Value
-template <>
-const std::string Device::getProperty<std::string>(nxs_property pn) const {
-    return get()->getProperty<std::string>(pn);
-}
-template <>
-const int64_t Device::getProperty<int64_t>(nxs_property pn) const {
-    return get()->getProperty<int64_t>(pn);
-}
-template <>
-const double Device::getProperty<double>(nxs_property pn) const {
-    return get()->getProperty<double>(pn);
+std::optional<Property> Device::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }
 
 Properties Device::getProperties() const { return get()->getProperties(); }

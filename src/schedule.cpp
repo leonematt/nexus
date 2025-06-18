@@ -25,6 +25,11 @@ void ScheduleImpl::release() {
   //getOwner()->releaseSchedule(getId());
 }
 
+std::optional<Property> ScheduleImpl::getProperty(nxs_int prop) const {
+  return std::nullopt;
+}
+
+
 Command ScheduleImpl::getCommand(Kernel kern) {
   auto *rt = getParentOfType<RuntimeImpl>();
   nxs_int cid = rt->runAPIFunction<NF_nxsCreateCommand>(getId(), kern.getId());
@@ -49,6 +54,10 @@ void Schedule::release() const {
 
 nxs_int Schedule::getId() const {
   return get()->getId();
+}
+
+std::optional<Property> Schedule::getProperty(nxs_int prop) const {
+  return get()->getProperty(prop);
 }
 
 Command Schedule::createCommand(Kernel kern) {

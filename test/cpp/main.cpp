@@ -13,11 +13,11 @@ int main() {
 
   auto count = rt.getDevices().size();
 
-  std::cout << "RUNTIME: " << rt.getProperty<std::string>(NP_Name) << " - " << count << std::endl;
+  std::cout << "RUNTIME: " << rt.getProp<std::string>(NP_Name) << " - " << count << std::endl;
 
   for (int i = 0; i < count; ++i) {
     auto dev = rt.getDevice(i);
-    std::cout << "  Device: " << dev.getProperty<std::string>(NP_Name) << " - " << dev.getProperty<std::string>(NP_Architecture) << std::endl;
+    std::cout << "  Device: " << dev.getProp<std::string>(NP_Name) << " - " << dev.getProp<std::string>(NP_Architecture) << std::endl;
   }
   std::vector<char> data(1024, 1);
   std::vector<float> vecA(1024, 1.0);
