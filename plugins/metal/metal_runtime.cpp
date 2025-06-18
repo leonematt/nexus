@@ -201,7 +201,7 @@ extern "C" nxs_int NXS_API_CALL
 nxsCreateBuffer(
   nxs_int device_id,
   size_t size,
-  nxs_mem_flags flags,
+  nxs_uint mem_flags,
   void* host_ptr
 )
 {
@@ -360,7 +360,7 @@ nxsGetKernel(
  ***********************************************************************/
 extern "C" nxs_int nxsCreateSchedule(
   nxs_int device_id,
-  nxs_command_queue_properties properties
+  nxs_uint sched_properties
 )
 {
   auto rt = getRuntime();

@@ -104,7 +104,7 @@ NEXUS_API_FUNC(nxs_status, GetDevicePropertyFromPath,
 NEXUS_API_FUNC(nxs_int, CreateBuffer,
     nxs_int device_id,
     size_t size,
-    nxs_mem_flags flags,
+    nxs_uint mem_flags,
     void* host_ptr
 )
 /************************************************************************
@@ -176,7 +176,7 @@ NEXUS_API_FUNC(nxs_int, GetKernel,
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_int, CreateSchedule,
     nxs_int device_id,
-    nxs_command_queue_properties properties
+    nxs_uint sched_properties
 )
 /************************************************************************
  * @def ReleaseCommandList
