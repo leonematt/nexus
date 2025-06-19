@@ -1,40 +1,41 @@
 #ifndef NEXUS_COMMAND_H
 #define NEXUS_COMMAND_H
 
-#include <nexus/object.h>
-#include <nexus/kernel.h>
-#include <nexus/buffer.h>
 #include <nexus-api.h>
+#include <nexus/buffer.h>
+#include <nexus/kernel.h>
+#include <nexus/object.h>
 
 #include <list>
 
 namespace nexus {
-    
-    namespace detail {
-        class ScheduleImpl; // owner
-        class CommandImpl;
-    }
 
-    // System class
-    class Command : public Object<detail::CommandImpl, detail::ScheduleImpl> {
-        friend OwnerTy;
-    public:
-        Command(detail::Impl owner, Kernel kern);
-        using Object::Object;
+namespace detail {
+class ScheduleImpl;  // owner
+class CommandImpl;
+}  // namespace detail
 
-        void release() const;
-        nxs_int getId() const override;
+// System class
+class Command : public Object<detail::CommandImpl, detail::ScheduleImpl> {
+  friend OwnerTy;
 
-        std::optional<Property> getProperty(nxs_int prop) const override;
+ public:
+  Command(detail::Impl owner, Kernel kern);
+  using Object::Object;
 
-        nxs_status setArgument(nxs_uint index, Buffer buffer) const;
-        //nxs_status setArgument(nxs_uint index, nxs_int scalar) const;
+  void release() const;
+  nxs_int getId() const override;
 
-        nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
-    };
+  std::optional<Property> getProperty(nxs_int prop) const override;
 
-    typedef Objects<Command> Commands;
+  nxs_status setArgument(nxs_uint index, Buffer buffer) const;
+  // nxs_status setArgument(nxs_uint index, nxs_int scalar) const;
 
-}
+  nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
+};
 
-#endif // NEXUS_COMMAND_H
+typedef Objects<Command> Commands;
+
+}  // namespace nexus
+
+#endif  // NEXUS_COMMAND_H

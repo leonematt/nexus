@@ -1,49 +1,50 @@
 #ifndef _NEXUS_DEVICE_IMPL_H
 #define _NEXUS_DEVICE_IMPL_H
 
-#include <nexus/properties.h>
 #include <nexus/buffer.h>
 #include <nexus/library.h>
-#include <nexus/schedule.h>
+#include <nexus/properties.h>
 #include <nexus/runtime.h>
+#include <nexus/schedule.h>
 
 #include "_runtime_impl.h"
 
 namespace nexus {
 namespace detail {
 
-  /// @class DesignImpl
-  class DeviceImpl : public Impl {
-    Properties deviceProps;
-    Buffers buffers;
-    Librarys libraries;
-    Schedules schedules;
-  public:
-    DeviceImpl(Impl base);
-    virtual ~DeviceImpl();
+/// @class DesignImpl
+class DeviceImpl : public Impl {
+  Properties deviceProps;
+  Buffers buffers;
+  Librarys libraries;
+  Schedules schedules;
 
-    void release();
+ public:
+  DeviceImpl(Impl base);
+  virtual ~DeviceImpl();
 
-    RuntimeImpl *getParent() const { return Impl::getParent<RuntimeImpl>(); }
+  void release();
 
-    // Get Runtime Property Value
-    std::optional<Property> getProperty(nxs_int prop) const;
+  RuntimeImpl *getParent() const { return Impl::getParent<RuntimeImpl>(); }
 
-    Properties getProperties() const { return deviceProps; }
+  // Get Runtime Property Value
+  std::optional<Property> getProperty(nxs_int prop) const;
 
-    // Runtime functions
-    Librarys getLibraries() const { return libraries; }
-    Schedules getSchedules() const { return schedules; }
+  Properties getProperties() const { return deviceProps; }
 
-    Library createLibrary(const std::string &path);
-    Library createLibrary(void *libraryData, size_t size);
-    Schedule createSchedule();
+  // Runtime functions
+  Librarys getLibraries() const { return libraries; }
+  Schedules getSchedules() const { return schedules; }
 
-    Buffer createBuffer(size_t size, void *data = nullptr);
-    Buffer copyBuffer(Buffer buf);
-  };
+  Library createLibrary(const std::string &path);
+  Library createLibrary(void *libraryData, size_t size);
+  Schedule createSchedule();
 
-} // namespace detail
-} // namespace nexus
+  Buffer createBuffer(size_t size, void *data = nullptr);
+  Buffer copyBuffer(Buffer buf);
+};
 
-#endif // _NEXUS_DESIGN_IMPL_H
+}  // namespace detail
+}  // namespace nexus
+
+#endif  // _NEXUS_DESIGN_IMPL_H

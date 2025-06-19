@@ -3,18 +3,18 @@
 
 #include <nexus/properties.h>
 
-#include <unordered_map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace nexus {
 
-    typedef std::unordered_map<std::string, Properties> DeviceMap;
+typedef std::unordered_map<std::string, Properties> DeviceMap;
 
-    const DeviceMap *getDeviceDB();
+const DeviceMap *getDeviceDB();
 
-    Properties lookupDevice(const std::string &archName);
+Properties lookupDevice(const std::string &archName);
 
-}
+}  // namespace nexus
 
-#endif // NEXUS_DEVICE_DB_H
+#endif  // NEXUS_DEVICE_DB_H

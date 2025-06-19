@@ -1,7 +1,7 @@
 #include <nexus.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <numeric>
 
 std::vector<std::string_view> nexusArgs;
@@ -13,11 +13,13 @@ int main() {
 
   auto count = rt.getDevices().size();
 
-  std::cout << "RUNTIME: " << rt.getProp<std::string>(NP_Name) << " - " << count << std::endl;
+  std::cout << "RUNTIME: " << rt.getProp<std::string>(NP_Name) << " - " << count
+            << std::endl;
 
   for (int i = 0; i < count; ++i) {
     auto dev = rt.getDevice(i);
-    std::cout << "  Device: " << dev.getProp<std::string>(NP_Name) << " - " << dev.getProp<std::string>(NP_Architecture) << std::endl;
+    std::cout << "  Device: " << dev.getProp<std::string>(NP_Name) << " - "
+              << dev.getProp<std::string>(NP_Architecture) << std::endl;
   }
   std::vector<char> data(1024, 1);
   std::vector<float> vecA(1024, 1.0);
@@ -30,8 +32,9 @@ int main() {
 
   // std::ifstream f("kernel.so", std::ios::binary);
   // std::vector<char> soData;
-  // soData.insert(soData.begin(), std::istream_iterator<char>(f), std::istream_iterator<char>());
-  
+  // soData.insert(soData.begin(), std::istream_iterator<char>(f),
+  // std::istream_iterator<char>());
+
   auto nlib = dev0.createLibrary("kernel.so");
 
   auto kern = nlib.getKernel("add_vectors");

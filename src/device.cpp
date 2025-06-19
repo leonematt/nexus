@@ -1,39 +1,38 @@
-#include <nexus/device_db.h>
-#include <nexus/runtime.h>
 #include <nexus/buffer.h>
+#include <nexus/device_db.h>
 #include <nexus/log.h>
+#include <nexus/runtime.h>
 
 #include <filesystem>
 
-#include "_runtime_impl.h"
-#include "_device_impl.h"
 #include "_buffer_impl.h"
+#include "_device_impl.h"
+#include "_runtime_impl.h"
 
 #define NEXUS_LOG_MODULE "device"
 
 using namespace nexus;
 
-#define APICALL(FUNC, ...) \
-  nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__); \
-  if (nxs_failed(apiResult)) \
-    NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " << nxsGetStatusName(apiResult))
-    
+#define APICALL(FUNC, ...)                                                   \
+  nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__);   \
+  if (nxs_failed(apiResult))                                                 \
+  NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " \
+                                       << nxsGetStatusName(apiResult))
 
-detail::DeviceImpl::DeviceImpl(detail::Impl base)
-: detail::Impl(base) {
+detail::DeviceImpl::DeviceImpl(detail::Impl base) : detail::Impl(base) {
   auto id = getId();
   auto vendor = getProperty(NP_Vendor);
   auto type = getProperty(NP_Type);
   auto arch = getProperty(NP_Architecture);
-  if (!vendor || !type || !arch)
-    return;
+  if (!vendor || !type || !arch) return;
 
-  auto devTag = vendor->getValue<NP_Vendor>() + "-" + type->getValue<NP_Type>()
-    + "-" + arch->getValue<NP_Architecture>();
+  auto devTag = vendor->getValue<NP_Vendor>() + "-" +
+                type->getValue<NP_Type>() + "-" +
+                arch->getValue<NP_Architecture>();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
   if (auto props = nexus::lookupDevice(devTag))
     deviceProps = props;
-  else // load defaults
+  else  // load defaults
     NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
 }
 
@@ -58,13 +57,11 @@ std::optional<Property> detail::DeviceImpl::getProperty(nxs_int prop) const {
     if (npt_prop == NPT_INT) {
       nxs_long val = 0;
       size_t size = sizeof(val);
-      if (nxs_success((*fn)(getId(), prop, &val, &size)))
-        return Property(val);
+      if (nxs_success((*fn)(getId(), prop, &val, &size))) return Property(val);
     } else if (npt_prop == NPT_FLT) {
       nxs_double val = 0.;
       size_t size = sizeof(val);
-      if (nxs_success((*fn)(getId(), prop, &val, &size)))
-        return Property(val);
+      if (nxs_success((*fn)(getId(), prop, &val, &size))) return Property(val);
     } else if (npt_prop == NPT_STR) {
       size_t size = 256;
       char name[size];
@@ -72,8 +69,10 @@ std::optional<Property> detail::DeviceImpl::getProperty(nxs_int prop) const {
       if (nxs_success((*fn)(getId(), prop, &name, &size)))
         return std::string(name);
     } else {
-      NEXUS_LOG(NEXUS_STATUS_ERR, "Device.getProperty: Unknown property type for - " << nxsGetPropName(prop));
-      //assert(0);
+      NEXUS_LOG(NEXUS_STATUS_ERR,
+                "Device.getProperty: Unknown property type for - "
+                    << nxsGetPropName(prop));
+      // assert(0);
     }
   }
   return std::nullopt;
@@ -125,13 +124,9 @@ Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
 ///////////////////////////////////////////////////////////////////////////////
 Device::Device(detail::Impl base) : Object(base) {}
 
-void Device::release() const {
-  get()->release();
-}
+void Device::release() const { get()->release(); }
 
-nxs_int Device::getId() const {
-  return get()->getId();
-}
+nxs_int Device::getId() const { return get()->getId(); }
 
 // Get Device Property Value
 std::optional<Property> Device::getProperty(nxs_int prop) const {
@@ -141,25 +136,17 @@ std::optional<Property> Device::getProperty(nxs_int prop) const {
 Properties Device::getProperties() const { return get()->getProperties(); }
 
 // Runtime functions
-Librarys Device::getLibraries() const {
-  return get()->getLibraries();
-}
+Librarys Device::getLibraries() const { return get()->getLibraries(); }
 
-Schedules Device::getSchedules() const {
-  return get()->getSchedules();
-}
+Schedules Device::getSchedules() const { return get()->getSchedules(); }
 
-Schedule Device::createSchedule() {
-    return get()->createSchedule();
-}
+Schedule Device::createSchedule() { return get()->createSchedule(); }
 
 Buffer Device::createBuffer(size_t size, void *data) {
   return get()->createBuffer(size, data);
 }
 
-Buffer Device::copyBuffer(Buffer buf) {
-  return get()->copyBuffer(buf);
-}
+Buffer Device::copyBuffer(Buffer buf) { return get()->copyBuffer(buf); }
 
 Library Device::createLibrary(void *libraryData, size_t librarySize) {
   return get()->createLibrary(libraryData, librarySize);

@@ -17,6 +17,8 @@
 #ifndef __NXS_VERSION_H
 #define __NXS_VERSION_H
 
+/* clang-format off */
+
 /* Detect which version to target */
 #if !defined(NXS_TARGET_NEXUSAPI_VERSION)
 /* #pragma message("nxs_version.h: NXS_TARGET_NEXUSAPI_VERSION is not defined. Defaulting to 300 (OpenCL 3.0)") */

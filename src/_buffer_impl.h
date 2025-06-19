@@ -5,34 +5,34 @@
 
 namespace nexus {
 namespace detail {
-  class BufferImpl : public Impl {
-  public:
-    //BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
-    /// @brief Construct a Platform for the current system
-    BufferImpl(Impl base, size_t _sz, void *_hostData);
-    BufferImpl(Impl base, nxs_int _devId, size_t _sz, void *_hostData);
+class BufferImpl : public Impl {
+ public:
+  // BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
+  /// @brief Construct a Platform for the current system
+  BufferImpl(Impl base, size_t _sz, void *_hostData);
+  BufferImpl(Impl base, nxs_int _devId, size_t _sz, void *_hostData);
 
-    ~BufferImpl();
+  ~BufferImpl();
 
-    void release();
+  void release();
 
-    nxs_int getDeviceId() const { return deviceId; }
+  nxs_int getDeviceId() const { return deviceId; }
 
-    std::optional<Property> getProperty(nxs_int prop) const;
-    
-    size_t getSize() const { return size; }
-    void *getHostData() const { return data; }
+  std::optional<Property> getProperty(nxs_int prop) const;
 
-    Buffer getLocal() const;
-    nxs_status copyData(void *_hostBuf) const;
+  size_t getSize() const { return size; }
+  void *getHostData() const { return data; }
 
-  private:
-    // set of runtimes
-    nxs_int deviceId;
-    size_t size;
-    void *data;
-  };
-}
-}
+  Buffer getLocal() const;
+  nxs_status copyData(void *_hostBuf) const;
 
-#endif // _NEXUS_BUFFER_IMPL_H
+ private:
+  // set of runtimes
+  nxs_int deviceId;
+  size_t size;
+  void *data;
+};
+}  // namespace detail
+}  // namespace nexus
+
+#endif  // _NEXUS_BUFFER_IMPL_H

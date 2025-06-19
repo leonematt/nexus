@@ -10,45 +10,41 @@ using namespace nexus;
 
 namespace nexus {
 namespace detail {
-  class KernelImpl : public Impl {
-  public:
-    /// @brief Construct a Platform for the current system
-    KernelImpl(Impl owner, const std::string &kName)
+class KernelImpl : public Impl {
+ public:
+  /// @brief Construct a Platform for the current system
+  KernelImpl(Impl owner, const std::string &kName)
       : Impl(owner), kernelName(kName) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "  Kernel: " << kernelName << " - " << getId());
-      }
+    NEXUS_LOG(NEXUS_STATUS_NOTE,
+              "  Kernel: " << kernelName << " - " << getId());
+  }
 
-    ~KernelImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Kernel: " << getId());
-      release();
-    }
+  ~KernelImpl() {
+    NEXUS_LOG(NEXUS_STATUS_NOTE, "  ~Kernel: " << getId());
+    release();
+  }
 
-    void release() {
-      //getOwner()->releaseKernel(getId());
-    }
+  void release() {
+    // getOwner()->releaseKernel(getId());
+  }
 
-    std::optional<Property> getProperty(nxs_int prop) const {
-      return std::nullopt;
-    }
+  std::optional<Property> getProperty(nxs_int prop) const {
+    return std::nullopt;
+  }
 
-  private:
-    std::string kernelName;
-  };
-}
-}
-
+ private:
+  std::string kernelName;
+};
+}  // namespace detail
+}  // namespace nexus
 
 ///////////////////////////////////////////////////////////////////////////////
 Kernel::Kernel(detail::Impl owner, const std::string &kernelName)
-  : Object(owner, kernelName) {}
+    : Object(owner, kernelName) {}
 
-void Kernel::release() const {
-  get()->release();
-}
+void Kernel::release() const { get()->release(); }
 
-nxs_int Kernel::getId() const {
-  return get()->getId();
-}
+nxs_int Kernel::getId() const { return get()->getId(); }
 
 std::optional<Property> Kernel::getProperty(nxs_int prop) const {
   return get()->getProperty(prop);

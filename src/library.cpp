@@ -11,10 +11,9 @@ using namespace nexus;
 using namespace nexus::detail;
 
 /// @brief Construct a Platform for the current system
-LibraryImpl::LibraryImpl(Impl owner)
-  : Impl(owner) {
-    NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR: " << getId());
-  }
+LibraryImpl::LibraryImpl(Impl owner) : Impl(owner) {
+  NEXUS_LOG(NEXUS_STATUS_NOTE, "CTOR: " << getId());
+}
 
 LibraryImpl::~LibraryImpl() {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "DTOR: " << getId());
@@ -33,7 +32,8 @@ std::optional<Property> detail::LibraryImpl::getProperty(nxs_int prop) const {
 
 Kernel LibraryImpl::getKernel(const std::string &kernelName) {
   auto *rt = getParentOfType<RuntimeImpl>();
-  nxs_int kid = rt->runAPIFunction<NF_nxsGetKernel>(getId(), kernelName.c_str());
+  nxs_int kid =
+      rt->runAPIFunction<NF_nxsGetKernel>(getId(), kernelName.c_str());
   Kernel kern(Impl(this, kid), kernelName);
   kernels.add(kern);
   return kern;
@@ -42,13 +42,9 @@ Kernel LibraryImpl::getKernel(const std::string &kernelName) {
 ///////////////////////////////////////////////////////////////////////////////
 Library::Library(Impl owner) : Object(owner) {}
 
-void Library::release() const {
-  get()->release();
-}
+void Library::release() const { get()->release(); }
 
-nxs_int Library::getId() const {
-  return get()->getId();
-}
+nxs_int Library::getId() const { return get()->getId(); }
 
 std::optional<Property> Library::getProperty(nxs_int prop) const {
   return get()->getProperty(prop);

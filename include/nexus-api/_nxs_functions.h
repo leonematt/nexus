@@ -1,6 +1,8 @@
 /*
  */
 
+/* clang-format off */
+
 #if defined(NEXUS_API_GENERATE_FUNC_DECL)
 /************************************************************************
  * Generate the Function declarations
@@ -236,6 +238,7 @@ nxs_function nxsGetFuncEnum(const char *funcName);
 
 #endif
 
+/* clang-format on */
 
 #undef NEXUS_API_GENERATE_FUNC_DECL
 #undef NEXUS_API_GENERATE_FUNC_ENUM

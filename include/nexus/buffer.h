@@ -1,43 +1,45 @@
 #ifndef NEXUS_BUFFER_H
 #define NEXUS_BUFFER_H
 
-#include <nexus/object.h>
 #include <nexus-api.h>
+#include <nexus/object.h>
 
 #include <list>
 
 namespace nexus {
-    class Device;
-    
-    namespace detail {
-        class SystemImpl;
-        class BufferImpl;
-    }
+class Device;
 
-    // System class
-    class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
-        friend OwnerTy;
-    public:
-        Buffer(detail::Impl base, size_t _sz, void *_hostData = nullptr);
-        Buffer(detail::Impl base, nxs_int devId, size_t _sz, void *_hostData = nullptr);
-        using Object::Object;
+namespace detail {
+class SystemImpl;
+class BufferImpl;
+}  // namespace detail
 
-        void release() const;
-        
-        nxs_int getId() const override;
-        nxs_int getDeviceId() const;
+// System class
+class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
+  friend OwnerTy;
 
-        std::optional<Property> getProperty(nxs_int prop) const override;
+ public:
+  Buffer(detail::Impl base, size_t _sz, void *_hostData = nullptr);
+  Buffer(detail::Impl base, nxs_int devId, size_t _sz,
+         void *_hostData = nullptr);
+  using Object::Object;
 
-        size_t getSize() const;
-        void *getHostData() const;
+  void release() const;
 
-        Buffer getLocal() const;
+  nxs_int getId() const override;
+  nxs_int getDeviceId() const;
 
-        nxs_status copy(void *_hostBuf);
-    };
+  std::optional<Property> getProperty(nxs_int prop) const override;
 
-    typedef Objects<Buffer> Buffers;
-}
+  size_t getSize() const;
+  void *getHostData() const;
 
-#endif // NEXUS_BUFFER_H
+  Buffer getLocal() const;
+
+  nxs_status copy(void *_hostBuf);
+};
+
+typedef Objects<Buffer> Buffers;
+}  // namespace nexus
+
+#endif  // NEXUS_BUFFER_H

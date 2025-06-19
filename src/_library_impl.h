@@ -1,31 +1,31 @@
 #ifndef _NEXUS_LIBRARY_IMPL_H
 #define _NEXUS_LIBRARY_IMPL_H
 
-#include <nexus/library.h>
 #include <nexus/kernel.h>
+#include <nexus/library.h>
 
 #include "_device_impl.h"
 
 namespace nexus {
 namespace detail {
 
-  class LibraryImpl : public Impl {
-  public:
-    /// @brief Construct a Platform for the current system
-    LibraryImpl(Impl owner);
+class LibraryImpl : public Impl {
+ public:
+  /// @brief Construct a Platform for the current system
+  LibraryImpl(Impl owner);
 
-    ~LibraryImpl();
+  ~LibraryImpl();
 
-    void release();
+  void release();
 
-    std::optional<Property> getProperty(nxs_int prop) const;
+  std::optional<Property> getProperty(nxs_int prop) const;
 
-    Kernel getKernel(const std::string &kernelName);
+  Kernel getKernel(const std::string &kernelName);
 
-  private:
-    Objects<Kernel> kernels;
+ private:
+  Objects<Kernel> kernels;
 };
-}
-}
+}  // namespace detail
+}  // namespace nexus
 
-#endif // _NEXUS_LIBRARY_IMPL_H
+#endif  // _NEXUS_LIBRARY_IMPL_H

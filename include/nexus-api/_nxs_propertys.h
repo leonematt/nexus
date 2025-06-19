@@ -1,6 +1,7 @@
 /*
  */
 
+/* clang-format off */
 
 #if defined(NEXUS_API_GENERATE_PROP_ENUM)
 /************************************************************************
@@ -82,10 +83,11 @@ typedef void * _prop_str_vec;
 #endif
 #endif
 
-
 /************************************************************************
- * Define API Functions
+ * Define API Properties
  ***********************************************************************/
+
+/* THIS SHOULD BE GENERATED FROM THE SCHEMA */
 
 /************************************************************************
  * @def Name
@@ -118,9 +120,6 @@ NEXUS_API_PROP(ClockModes,      _prop_str_vec,    "Clock Modes")
 NEXUS_API_PROP(BaseClock,       _prop_int,        "Max Power")
 NEXUS_API_PROP(PowerModes,      _prop_str_vec,    "Power Modes")
 NEXUS_API_PROP(MaxPower,        _prop_flt,        "Max Power")
-
-/* THIS SHOULD BE GENERATED FROM THE SCHEMA */
-
 
 /************************************************************************
  * Cleanup
@@ -156,6 +155,8 @@ nxs_status nxsGetStatusEnum(const char *statusName);
 
 #endif
 #endif
+
+/* clang-format off */
 
 #undef NEXUS_API_GENERATE_PROP_ENUM
 #undef NEXUS_API_GENERATE_PROP_MAP

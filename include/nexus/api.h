@@ -1,19 +1,16 @@
 #ifndef _NEXUS_API_H
 #define _NEXUS_API_H
 
-
 namespace nexus {
 
-    enum NXS_Type {
-        NT_Buffer,
-        NT_Command,
-        NT_Device,
+enum NXS_Type {
+  NT_Buffer,
+  NT_Command,
+  NT_Device,
 
+};
 
-    };
+typedef enum NXS_Type nxs_type;
+}  // namespace nexus
 
-    typedef enum NXS_Type nxs_type;
-}
-
-
-#endif // _NEXUS_API_H
+#endif  // _NEXUS_API_H

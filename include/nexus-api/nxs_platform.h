@@ -19,6 +19,8 @@
 
 #include <nexus-api/nxs_version.h>
 
+/* clang-format off */
+
 #if defined(_WIN32)
     #if !defined(NXS_API_ENTRY)
         #define NXS_API_ENTRY

@@ -10,59 +10,54 @@ using namespace nexus;
 
 namespace nexus {
 namespace detail {
-  class CommandImpl : public Impl {
-  public:
-    /// @brief Construct a Platform for the current system
-    CommandImpl(Impl owner, Kernel kern)
-      : Impl(owner) {
-        NEXUS_LOG(NEXUS_STATUS_NOTE, "    Command: " << getId());
+class CommandImpl : public Impl {
+ public:
+  /// @brief Construct a Platform for the current system
+  CommandImpl(Impl owner, Kernel kern) : Impl(owner) {
+    NEXUS_LOG(NEXUS_STATUS_NOTE, "    Command: " << getId());
 
-        //TODO: gather kernel argument details
-      }
+    // TODO: gather kernel argument details
+  }
 
-    ~CommandImpl() {
-      NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Command: " << getId());
-      release();
-    }
+  ~CommandImpl() {
+    NEXUS_LOG(NEXUS_STATUS_NOTE, "    ~Command: " << getId());
+    release();
+  }
 
-    void release() {
-      //getOwner()->releaseCommand(getId());
-    }
+  void release() {
+    // getOwner()->releaseCommand(getId());
+  }
 
-    std::optional<Property> getProperty(nxs_int prop) const {
-      return std::nullopt;
-    }
+  std::optional<Property> getProperty(nxs_int prop) const {
+    return std::nullopt;
+  }
 
-    nxs_status setArgument(nxs_uint index, Buffer buffer) {
-      //arguments[index] = buffer;
-      auto *rt = getParentOfType<RuntimeImpl>();
-      return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandArgument>(getId(), index, buffer.getId());
-    }
+  nxs_status setArgument(nxs_uint index, Buffer buffer) {
+    // arguments[index] = buffer;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandArgument>(
+        getId(), index, buffer.getId());
+  }
 
-    nxs_status finalize(nxs_int groupSize, nxs_int gridSize) {
-      //arguments[index] = buffer;
-      auto *rt = getParentOfType<RuntimeImpl>();
-      return (nxs_status)rt->runAPIFunction<NF_nxsFinalizeCommand>(getId(), groupSize, gridSize);
-    }
+  nxs_status finalize(nxs_int groupSize, nxs_int gridSize) {
+    // arguments[index] = buffer;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    return (nxs_status)rt->runAPIFunction<NF_nxsFinalizeCommand>(
+        getId(), groupSize, gridSize);
+  }
 
-  private:
-    std::vector<Buffer> arguments;
-  };
-}
-}
-
+ private:
+  std::vector<Buffer> arguments;
+};
+}  // namespace detail
+}  // namespace nexus
 
 ///////////////////////////////////////////////////////////////////////////////
-Command::Command(detail::Impl owner, Kernel kern)
-  : Object(owner, kern) {}
+Command::Command(detail::Impl owner, Kernel kern) : Object(owner, kern) {}
 
-void Command::release() const {
-  get()->release();
-}
+void Command::release() const { get()->release(); }
 
-nxs_int Command::getId() const {
-  return get()->getId();
-}
+nxs_int Command::getId() const { return get()->getId(); }
 
 std::optional<Property> Command::getProperty(nxs_int prop) const {
   return get()->getProperty(prop);

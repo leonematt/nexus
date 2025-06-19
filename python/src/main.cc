@@ -8,7 +8,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(libnexus, m) {
-    m.doc() = R"pbdoc(
+  m.doc() = R"pbdoc(
         Nexus - Python API
         -----------------------
 
@@ -21,14 +21,12 @@ PYBIND11_MODULE(libnexus, m) {
            devices
     )pbdoc";
 
-    // remove extra 'system' module (its redundant)
-    pynexus::init_system_bindings(m);
-
-    m.def_submodule("devices");
+  // remove extra 'system' module (its redundant)
+  pynexus::init_system_bindings(m);
 
 #ifdef VERSION_INFO
-    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+  m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else
-    m.attr("__version__") = "dev";
+  m.attr("__version__") = "dev";
 #endif
 }

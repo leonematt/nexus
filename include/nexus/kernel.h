@@ -1,33 +1,34 @@
 #ifndef NEXUS_KERNEL_H
 #define NEXUS_KERNEL_H
 
-#include <nexus/object.h>
 #include <nexus-api.h>
+#include <nexus/object.h>
 
 #include <list>
 
 namespace nexus {
-    
-    namespace detail {
-        class LibraryImpl; // owner
-        class KernelImpl;
-    }
 
-    // System class
-    class Kernel : public Object<detail::KernelImpl, detail::LibraryImpl> {
-        friend OwnerTy;
-    public:
-        Kernel(detail::Impl owner, const std::string &kernelName);
-        using Object::Object;
+namespace detail {
+class LibraryImpl;  // owner
+class KernelImpl;
+}  // namespace detail
 
-        void release() const;
-        nxs_int getId() const override;
+// System class
+class Kernel : public Object<detail::KernelImpl, detail::LibraryImpl> {
+  friend OwnerTy;
 
-        std::optional<Property> getProperty(nxs_int prop) const override;
-    };
+ public:
+  Kernel(detail::Impl owner, const std::string &kernelName);
+  using Object::Object;
 
-    typedef Objects<Kernel> Kernels;
+  void release() const;
+  nxs_int getId() const override;
 
-}
+  std::optional<Property> getProperty(nxs_int prop) const override;
+};
 
-#endif // NEXUS_KERNEL_H
+typedef Objects<Kernel> Kernels;
+
+}  // namespace nexus
+
+#endif  // NEXUS_KERNEL_H
