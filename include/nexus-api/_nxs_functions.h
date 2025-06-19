@@ -67,30 +67,12 @@ NEXUS_API_FUNC(nxs_status, GetRuntimeProperty,
 )
 
 /************************************************************************
- * @def GetRuntimeProperty
- * @brief Lookup 
- ***********************************************************************/
-NEXUS_API_FUNC(nxs_int, GetDeviceCount)
-
-/************************************************************************
  * @def GetDeviceProperty
  * @brief Lookup 
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, GetDeviceProperty,
     nxs_int device_id,
     nxs_uint property_id,
-    void *property_value,
-    size_t* property_value_size
-)
-
-/************************************************************************
- * @def GetDevicePropertyFromPath
- * @brief Lookup 
- ***********************************************************************/
-NEXUS_API_FUNC(nxs_status, GetDevicePropertyFromPath,
-    nxs_int device_id,
-    nxs_uint property_path_count,
-    nxs_uint *property_path_ids,
     void *property_value,
     size_t* property_value_size
 )
@@ -242,7 +224,9 @@ NEXUS_API_FUNC(nxs_status, FinalizeCommand,
 
 #ifdef NEXUS_API_GENERATE_FUNC_ENUM
     NXS_FUNCTION_CNT,
-    NXS_FUNCTION_PREFIX_LEN = 3
+    NXS_FUNCTION_PREFIX_LEN = 3,
+    
+    NXS_FUNCTION_INVALID = -1
 }; /* close _nxs_function */
 
 typedef enum _nxs_function nxs_function;

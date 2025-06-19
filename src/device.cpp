@@ -28,8 +28,8 @@ detail::DeviceImpl::DeviceImpl(detail::Impl base)
   if (!vendor || !type || !arch)
     return;
 
-  auto devTag = getPropertyValue<NP_Vendor>(*vendor) + "-" + getPropertyValue<NP_Type>(*type)
-    + "-" + getPropertyValue<NP_Architecture>(*arch);
+  auto devTag = vendor->getValue<NP_Vendor>() + "-" + type->getValue<NP_Type>()
+    + "-" + arch->getValue<NP_Architecture>();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
   if (auto props = nexus::lookupDevice(devTag))
     deviceProps = props;

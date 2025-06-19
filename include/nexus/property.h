@@ -11,20 +11,31 @@
 namespace nexus {
 
   using Prop = std::variant<nxs_long, nxs_double, std::string>;
+  using PropIntVec = std::vector<nxs_long>;
+  using PropFltVec = std::vector<nxs_double>;
+  using PropStrVec = std::vector<std::string>;
 
-  using PropVec = std::vector<Prop>;
+  using PropVariant = std::variant<Prop, PropStrVec, PropIntVec, PropFltVec>;
 
-  using Property = std::variant<Prop, PropVec>;
+  class Property : public PropVariant {
+  public:
+    using PropVariant::PropVariant;
 
-  template <nxs_property Tnp>
-  typename nxsPropertyType<Tnp>::type getPropertyValue(Property p) {
-    return std::get<typename nxsPropertyType<Tnp>::type>(std::get<Prop>(p));
-  }
+    template <nxs_property Tnp>
+    typename nxsPropertyType<Tnp>::type getValue() const {
+      return std::get<typename nxsPropertyType<Tnp>::type>(std::get<Prop>(*this));
+    }
 
-  template <typename T>
-  T getPropertyValue(Property p) {
-    return std::get<T>(std::get<Prop>(p));
-  }
+    template <typename T>
+    T getValue() const {
+      return std::get<T>(std::get<Prop>(*this));
+    }
+
+    template <typename T>
+    std::vector<T> getValueVec() const {
+      return std::get<std::vector<T>>(*this);
+    }
+  };
 
 }
 

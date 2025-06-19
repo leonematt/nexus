@@ -52,7 +52,7 @@
   },
   "MemorySubsystem": {
     "SupportedMemoryTypes": ["LPDDR5"],
-    "MemoryTypes": [
+    "SubUnits": [
       {
         "Type": "Vector Register File",
         "Size": 256,

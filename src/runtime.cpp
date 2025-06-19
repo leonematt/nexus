@@ -95,7 +95,6 @@ void RuntimeImpl::loadPlugin() {
   };
 
   loadFn(NF_nxsGetRuntimeProperty);
-  loadFn(NF_nxsGetDeviceCount);
   loadFn(NF_nxsGetDeviceProperty);
 
   loadFn(NF_nxsCreateBuffer);
@@ -117,18 +116,13 @@ void RuntimeImpl::loadPlugin() {
   loadFn(NF_nxsSetCommandArgument);
   loadFn(NF_nxsFinalizeCommand);
 
-  if (!runtimeFns[NF_nxsGetRuntimeProperty] || !runtimeFns[NF_nxsGetDeviceCount] ||
-      !runtimeFns[NF_nxsGetDeviceProperty])
+  if (!runtimeFns[NF_nxsGetRuntimeProperty] || !runtimeFns[NF_nxsGetDeviceProperty])
       return;
 
   // Load device properties
-
-  // Lazy load Device properties
-  auto fn = (nxsGetDeviceCount_fn)runtimeFns[NF_nxsGetDeviceCount];
-  nxs_int count = (*fn)();
-  NEXUS_LOG(NEXUS_STATUS_NOTE, "  DeviceCount - " << count);
-  for (int i = 0; i < count; ++i) {
-    devices.add(Impl(this, i));
+  if (auto deviceCount = getProperty(NP_Size)) {
+    for (int i = 0; i < deviceCount->getValue<nxs_long>(); ++i)
+      devices.add(Impl(this, i));
   }
 }
 

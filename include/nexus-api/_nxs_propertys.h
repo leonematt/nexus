@@ -127,7 +127,9 @@ NEXUS_API_PROP(MaxPower,        _prop_flt,        "Max Power")
  ***********************************************************************/
 #ifdef NEXUS_API_GENERATE_PROP_ENUM
     NXS_PROPERTY_CNT,
-    NXS_PROPERTY_PREFIX_LEN        = 3
+    NXS_PROPERTY_PREFIX_LEN        = 3,
+
+    NXS_PROPERTY_INVALID = -1
 }; /* close _nxs_property */
 
 typedef enum _nxs_property nxs_property;

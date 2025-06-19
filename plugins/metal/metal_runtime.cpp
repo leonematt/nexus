@@ -105,6 +105,17 @@ nxsGetRuntimeProperty(
       }
       break;
     }
+    case NP_Size: {
+      nxs_long size = getRuntime()->getDeviceCount();
+      auto sz = sizeof(size);
+      if (property_value != NULL) {
+        if (property_value_size != NULL && *property_value_size != sz)
+          return NXS_InvalidProperty; // PropertySize
+        memcpy(property_value, &size, sz);
+      } else if (property_value_size != NULL)
+        *property_value_size = sz;
+      break;
+    }
     default:
       return NXS_InvalidProperty;
   }

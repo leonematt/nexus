@@ -29,20 +29,28 @@ namespace detail {
 
   private:
 
-    json getNode(const std::vector<std::string> &path) {
+    nxs_int getIndex(const std::string &name) const {
+      try {
+        size_t num = 0;
+        return std::stoi(name, &num);
+      } catch (...) {}
+      return nxsGetPropEnum(name.c_str());
+    }
+
+    json getNode(const std::vector<std::string> &path) const {
       json node = props;
       auto end = path.end()-1;
       for (auto ii = path.begin(); ii != end; ++ii) {
         auto &key = *ii;
         if (node.is_array())
-          node = node[std::stoi(key)];
+          node = node[getIndex(key)];
         else
           node = node.at(key);
       }
       return node;
     }
 
-    nxs_property_type getNodeType(json node) {
+    nxs_property_type getNodeType(json node) const {
       if (node.is_array())
         return (nxs_property_type)(NPT_INT_VEC + getNodeType(node[0]));
       else if (node.is_string())
@@ -56,7 +64,7 @@ namespace detail {
       return NPT_UNK;
     }
 
-    std::optional<Property> getValue(json node, nxs_int propTypeId) {
+    std::optional<Property> getValue(json node, nxs_int propTypeId) const {
       nxs_property_type propType = NPT_UNK;
       if (nxs_success(propTypeId)) {
         propType = nxs_property_type_map[propTypeId];
@@ -78,18 +86,17 @@ namespace detail {
       return std::nullopt;
     }
 
-    std::optional<Property> getKeys(json node) {
+    std::optional<Property> getKeys(json node) const {
       if (node.is_object()) {
-        std::vector<Prop> keys;
-        for (auto &elem : node.items()) {
+        std::vector<std::string> keys;
+        for (auto &elem : node.items())
           keys.push_back(elem.key());
-        }
         return Property(keys);
       }
       return std::nullopt;
     }
 
-    std::optional<Property> getProp(const std::vector<std::string> &path) {
+    std::optional<Property> getProp(const std::vector<std::string> &path) const {
       if (!path.empty()) {
         try {
           auto tail = path.back();
@@ -103,7 +110,7 @@ namespace detail {
             if (tail == "Size")
               return Property((nxs_long)node.size());
             // get elem
-            return getValue(node[std::stoi(tail)], typeId);
+            return getValue(node[getIndex(tail)], typeId);
           }
           return getValue(node.at(tail), typeId);
         } catch (...) {

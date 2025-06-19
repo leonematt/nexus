@@ -28,19 +28,6 @@ namespace nexus {
             template <nxs_function Tfn, typename Tfnp = typename nxsFunctionType<Tfn>::type>
             Tfnp getFunction() const { return (Tfnp)runtimeFns[Tfn]; }
 
-            // Get Runtime Property Value
-            template <typename T>
-            const T getProperty(nxs_property pn) const {
-                size_t size = sizeof(T);
-                T val = 0;
-                //assert(typeid(T), typeid(pm_t)); // how to lookup at runtime
-                if (auto fn = getFunction<NF_nxsGetRuntimeProperty>())
-                    (*fn)(pn, &val, &size);
-                return val;
-            }
-
-            const std::string getProperty(nxs_property pn) const;
-
             template <nxs_function Tfn, typename... Args>
             nxs_int runAPIFunction(Args... args) {
                 nxs_int apiResult = NXS_InvalidDevice; // invalid runtime

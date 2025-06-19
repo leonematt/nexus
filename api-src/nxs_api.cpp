@@ -29,7 +29,9 @@ const char *nxsGetFuncName(nxs_int funcEnum) {
 
 nxs_function nxsGetFuncEnum(const char *funcName) {
     std::string fname = std::string("NF_") + funcName;
-    return *magic_enum::enum_cast<nxs_function>(fname);
+    if (auto val = magic_enum::enum_cast<nxs_function>(fname))
+        return *val;
+    return NXS_FUNCTION_INVALID;
 }
 
 
@@ -42,7 +44,9 @@ const char *nxsGetPropName(nxs_int propEnum) {
 
 nxs_property nxsGetPropEnum(const char *propName) {
     std::string pname = std::string("NP_") + propName;
-    return *magic_enum::enum_cast<nxs_property>(pname);
+    if (auto val = magic_enum::enum_cast<nxs_property>(pname))
+        return *val;
+    return NXS_PROPERTY_INVALID;
 }
 
 const char *nxsGetStatusName(nxs_int statusEnum) {

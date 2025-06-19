@@ -63,8 +63,10 @@ void pynexus::init_system_bindings(py::module &m) {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
 
+    //////////////////////////////////////////////////////////////////////////
+    // Generate python enum for nxs_status
+    // - added to `status` submodule for scoping
     auto mstatus = m.def_submodule("status");
-
     auto statusEnum = py::enum_<nxs_status>(mstatus, "nxs_status", py::module_local());
     for (nxs_int i = NXS_STATUS_MIN; i <= NXS_STATUS_MAX; ++i) {
         nxs_status status = (nxs_status)i;
@@ -74,6 +76,9 @@ void pynexus::init_system_bindings(py::module &m) {
     }
     statusEnum.export_values();
 
+    //////////////////////////////////////////////////////////////////////////
+    // Generate python enum for nxs_property
+    // - added to `property` submodule for scoping
     auto mprop = m.def_submodule("property");
     auto propEnum = py::enum_<nxs_property>(mprop, "nxs_property", py::module_local());
     for (nxs_int i = 0; i <= NXS_PROPERTY_CNT; ++i) {
@@ -84,56 +89,71 @@ void pynexus::init_system_bindings(py::module &m) {
     }
     propEnum.export_values();
 
-    // generate enums for Nexus properties and status
+    //////////////////////////////////////////////////////////////////////////
+    // Add Nexus Object types and methods
+    //////////////////////////////////////////////////////////////////////////
 
+    // Properties Object
     py::class_<Properties>(m, "_properties", py::module_local())
         .def("__bool__", 
             [](Properties &self) {
                 return (bool)self;
             })
-        .def("get_property_str", 
+        .def("get_str", 
             [](Properties &self, const std::string &name) {
                 if (auto pval = self.getProperty(name))
-                    return nexus::getPropertyValue<std::string>(*pval);
+                    return pval->getValue<std::string>();
                 return std::string();
             })
-        .def("get_property_str", 
+        .def("get_str", 
             [](Properties &self, nxs_property prop) {
                 return self.getProp<std::string>(prop);
             })
-        .def("get_property_int",
+        .def("get_int",
             [](Properties &self, const std::string &name) {
                 if (auto pval = self.getProperty(name))
-                    return nexus::getPropertyValue<nxs_long>(*pval);
+                    return pval->getValue<nxs_long>();
                 return (nxs_long)NXS_InvalidDevice;
             })
-        .def("get_property_int",
+        .def("get_int",
             [](Properties &self, nxs_property prop) {
                 return self.getProp<nxs_long>(prop);
             })
-        .def("get_property_str", 
+        .def("get_str", 
             [](Properties &self, const std::vector<std::string> &path) {
                 if (auto pval = self.getProperty(path))
-                    return nexus::getPropertyValue<std::string>(*pval);
+                    return pval->getValue<std::string>();
                 return std::string();
             })
-        .def("get_property_str", 
+        .def("get_str", 
             [](Properties &self, const std::vector<nxs_int> &path) {
                 if (auto pval = self.getProperty(path))
-                    return nexus::getPropertyValue<std::string>(*pval);
+                    return pval->getValue<std::string>();
                 return std::string();
             })
-        .def("get_property_int", 
+        .def("get_int", 
             [](Properties &self, const std::vector<std::string> &path) {
                 if (auto pval = self.getProperty(path))
-                    return nexus::getPropertyValue<nxs_long>(*pval);
+                    return pval->getValue<nxs_long>();
                 return (nxs_long)NXS_InvalidDevice;
             })
-        .def("get_property_int", 
+        .def("get_int", 
             [](Properties &self, const std::vector<nxs_int> &path) {
                 if (auto pval = self.getProperty(path))
-                    return nexus::getPropertyValue<nxs_long>(*pval);
+                    return pval->getValue<nxs_long>();
                 return (nxs_long)NXS_InvalidDevice;
+            })
+        .def("get_str_vec", 
+            [](Properties &self, const std::vector<std::string> &path) {
+                if (auto pval = self.getProperty(path))
+                    return pval->getValueVec<std::string>();
+                return std::vector<std::string>();
+            })
+        .def("get_str_vec", 
+            [](Properties &self, const std::vector<nxs_int> &path) {
+                if (auto pval = self.getProperty(path))
+                    return pval->getValueVec<std::string>();
+                return std::vector<std::string>();
             });
     
     py::class_<Buffer>(m, "_buffer", py::module_local())

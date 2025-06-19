@@ -77,7 +77,7 @@ namespace nexus {
         template <typename T>
         const T getProp(nxs_int prop) const {
             if (auto val = getProperty(prop))
-                return getPropertyValue<T>(*val);
+                return val->template getValue<T>();
             return T();
         }
 
