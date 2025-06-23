@@ -95,6 +95,7 @@ typedef void * _prop_str_vec;
  ***********************************************************************/
 NEXUS_API_PROP(Name,            _prop_str,        "Unit Name")
 NEXUS_API_PROP(Type,            _prop_str,        "Unit Type")
+NEXUS_API_PROP(Value,           _prop_str,        "Unit Value")
 NEXUS_API_PROP(Description,     _prop_str,        "Unit Description")
 
 /* Property Hierarchy */

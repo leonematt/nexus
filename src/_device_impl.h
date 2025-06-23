@@ -14,7 +14,7 @@ namespace detail {
 
 /// @class DesignImpl
 class DeviceImpl : public Impl {
-  Properties deviceProps;
+  Properties deviceInfo;
   Buffers buffers;
   Librarys libraries;
   Schedules schedules;
@@ -30,7 +30,7 @@ class DeviceImpl : public Impl {
   // Get Runtime Property Value
   std::optional<Property> getProperty(nxs_int prop) const;
 
-  Properties getProperties() const { return deviceProps; }
+  Properties getInfo() const { return deviceInfo; }
 
   // Runtime functions
   Librarys getLibraries() const { return libraries; }
@@ -40,7 +40,7 @@ class DeviceImpl : public Impl {
   Library createLibrary(void *libraryData, size_t size);
   Schedule createSchedule();
 
-  Buffer createBuffer(size_t size, void *data = nullptr);
+  Buffer createBuffer(size_t size, const char *data = nullptr);
   Buffer copyBuffer(Buffer buf);
 };
 

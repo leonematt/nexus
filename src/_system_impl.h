@@ -16,7 +16,7 @@ class SystemImpl : public detail::Impl {
   std::optional<Property> getProperty(nxs_int prop) const;
 
   Runtime getRuntime(int idx) const { return runtimes.get(idx); }
-  Buffer createBuffer(size_t sz, void *hostData = nullptr);
+  Buffer createBuffer(size_t sz, const void *hostData = nullptr);
   Buffer copyBuffer(Buffer buf, Device dev);
 
   Runtimes getRuntimes() const { return runtimes; }

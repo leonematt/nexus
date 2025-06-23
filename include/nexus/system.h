@@ -27,7 +27,7 @@ class System : Object<detail::SystemImpl> {
   Buffers getBuffers() const;
 
   Runtime getRuntime(int idx) const;
-  Buffer createBuffer(size_t sz, void *hostData = nullptr);
+  Buffer createBuffer(size_t sz, const void *hostData = nullptr);
   Buffer copyBuffer(Buffer buf, Device dev);
 };
 

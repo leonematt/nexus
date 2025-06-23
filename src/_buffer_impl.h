@@ -7,10 +7,10 @@ namespace nexus {
 namespace detail {
 class BufferImpl : public Impl {
  public:
-  // BufferImpl(SystemImpl *_sys, size_t _size, void *_hostData = nullptr);
-  /// @brief Construct a Platform for the current system
-  BufferImpl(Impl base, size_t _sz, void *_hostData);
-  BufferImpl(Impl base, nxs_int _devId, size_t _sz, void *_hostData);
+  typedef std::shared_ptr<std::vector<char>> DataBuf;
+
+  BufferImpl(Impl base, size_t _sz, const char *_hostData);
+  BufferImpl(Impl base, nxs_int _devId, size_t _sz, const char *_hostData);
 
   ~BufferImpl();
 
@@ -20,17 +20,21 @@ class BufferImpl : public Impl {
 
   std::optional<Property> getProperty(nxs_int prop) const;
 
-  size_t getSize() const { return size; }
-  void *getHostData() const { return data; }
+  size_t getSize() const { return data ? data->size() : 0; }
+  const char *getData() const { return data ? data->data() : nullptr; }
+
+  void setData(size_t sz, const char *hostData);
+  void setData(DataBuf _data) { data = _data; }
 
   Buffer getLocal() const;
   nxs_status copyData(void *_hostBuf) const;
 
+  std::string print() const;
+
  private:
   // set of runtimes
   nxs_int deviceId;
-  size_t size;
-  void *data;
+  DataBuf data;
 };
 }  // namespace detail
 }  // namespace nexus

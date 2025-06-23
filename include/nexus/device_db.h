@@ -9,11 +9,11 @@
 
 namespace nexus {
 
-typedef std::unordered_map<std::string, Properties> DeviceMap;
+typedef std::unordered_map<std::string, Properties> DeviceInfoMap;
 
-const DeviceMap *getDeviceDB();
+const DeviceInfoMap *getDeviceInfoDB();
 
-Properties lookupDevice(const std::string &archName);
+Properties lookupDeviceInfo(const std::string &archName);
 
 }  // namespace nexus
 

@@ -19,9 +19,9 @@ class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
   friend OwnerTy;
 
  public:
-  Buffer(detail::Impl base, size_t _sz, void *_hostData = nullptr);
+  Buffer(detail::Impl base, size_t _sz, const void *_hostData = nullptr);
   Buffer(detail::Impl base, nxs_int devId, size_t _sz,
-         void *_hostData = nullptr);
+         const void *_hostData = nullptr);
   using Object::Object;
 
   void release() const;
@@ -32,7 +32,7 @@ class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
   std::optional<Property> getProperty(nxs_int prop) const override;
 
   size_t getSize() const;
-  void *getHostData() const;
+  const char *getData() const;
 
   Buffer getLocal() const;
 

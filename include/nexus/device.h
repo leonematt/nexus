@@ -32,7 +32,7 @@ class Device : public Object<detail::DeviceImpl, detail::RuntimeImpl> {
   // Get Device Property Value
   std::optional<Property> getProperty(nxs_int prop) const override;
 
-  Properties getProperties() const;
+  Properties getInfo() const;
 
   // Runtime functions
   Librarys getLibraries() const;
@@ -43,7 +43,7 @@ class Device : public Object<detail::DeviceImpl, detail::RuntimeImpl> {
   Library createLibrary(void *libraryData, size_t librarySize);
   Library createLibrary(const std::string &libraryPath);
 
-  Buffer createBuffer(size_t _sz, void *_hostData = nullptr);
+  Buffer createBuffer(size_t _sz, const void *_hostData = nullptr);
   Buffer copyBuffer(Buffer buf);
 };
 

@@ -11,7 +11,7 @@ namespace py = pybind11;
 using namespace nexus;
 
 struct DevPtr {
-  void *ptr;
+  char *ptr;
   size_t size;
 };
 
@@ -33,7 +33,7 @@ static DevPtr getPointer(PyObject *obj) {
           "data_ptr method of Pointer object must return 64-bit int");
       return result;
     }
-    result.ptr = (void *)PyLong_AsUnsignedLongLong(data_ret);
+    result.ptr = (char *)PyLong_AsUnsignedLongLong(data_ret);
     result.size = PyLong_AsUnsignedLongLong(nbytes_ret);
   }
   return result;
@@ -165,7 +165,7 @@ void pynexus::init_system_bindings(py::module &m) {
       .def("copy", [](Buffer &self, py::object tensor) {
         auto local = self.getLocal();
         auto devp = getPointer(tensor.ptr());
-        if (devp.ptr != nullptr && local.getHostData() != nullptr &&
+        if (devp.ptr != nullptr && local.getData() != nullptr &&
             devp.size == self.getSize()) {
           return local.copy(devp.ptr);
         }
@@ -229,7 +229,7 @@ void pynexus::init_system_bindings(py::module &m) {
              auto prop = nxsGetPropEnum(name.c_str());
              return self.getProp<std::string>(prop);
            })
-      .def("get_device_info", [](Device &self) { return self.getProperties(); })
+      .def("get_info", [](Device &self) { return self.getInfo(); })
       .def("create_buffer",
            [](Device &self, py::object tensor) {
              auto devp = getPointer(tensor.ptr());
@@ -300,7 +300,7 @@ void pynexus::init_system_bindings(py::module &m) {
     return nexus::getSystem().createBuffer(devp.size, devp.ptr);
   });
 
-  m.def("get_chip_info", []() { return *nexus::getDeviceDB(); });
-  m.def("lookup_chip_info",
-        [](const std::string &name) { return nexus::lookupDevice(name); });
+  m.def("get_device_info", []() { return *nexus::getDeviceInfoDB(); });
+  m.def("lookup_device_info",
+        [](const std::string &name) { return nexus::lookupDeviceInfo(name); });
 }

@@ -32,7 +32,7 @@ std::optional<Property> SystemImpl::getProperty(nxs_int prop) const {
   return std::nullopt;
 }
 
-Buffer SystemImpl::createBuffer(size_t sz, void *hostData) {
+Buffer SystemImpl::createBuffer(size_t sz, const void *hostData) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "createBuffer " << sz);
   nxs_uint id = buffers.size();
   Buffer buf(detail::Impl(this, id), sz, hostData);
@@ -60,7 +60,7 @@ Runtimes System::getRuntimes() const { return get()->getRuntimes(); }
 
 Runtime System::getRuntime(int idx) const { return get()->getRuntime(idx); }
 
-Buffer System::createBuffer(size_t sz, void *hostData) {
+Buffer System::createBuffer(size_t sz, const void *hostData) {
   return get()->createBuffer(sz, hostData);
 }
 

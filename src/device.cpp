@@ -30,8 +30,8 @@ detail::DeviceImpl::DeviceImpl(detail::Impl base) : detail::Impl(base) {
                 type->getValue<NP_Type>() + "-" +
                 arch->getValue<NP_Architecture>();
   NEXUS_LOG(NEXUS_STATUS_NOTE, "    DeviceTag: " << devTag);
-  if (auto props = nexus::lookupDevice(devTag))
-    deviceProps = props;
+  if (auto props = nexus::lookupDeviceInfo(devTag))
+    deviceInfo = props;
   else  // load defaults
     NEXUS_LOG(NEXUS_STATUS_ERR, "    Device Properties not found");
 }
@@ -103,18 +103,18 @@ Schedule detail::DeviceImpl::createSchedule() {
   return sched;
 }
 
-Buffer detail::DeviceImpl::createBuffer(size_t size, void *data) {
+Buffer detail::DeviceImpl::createBuffer(size_t size, const char *data) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  createBuffer");
-  APICALL(nxsCreateBuffer, getId(), size, 0, data);
-  Buffer nbuf(Impl(this, apiResult), getId(), size, data);
+  APICALL(nxsCreateBuffer, getId(), size, 0, (void *)data);
+  Buffer nbuf(Impl(this, apiResult), getId(), size);
   buffers.add(nbuf);
   return nbuf;
 }
 
 Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
   NEXUS_LOG(NEXUS_STATUS_NOTE, "  copyBuffer");
-  APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, buf.getHostData());
-  Buffer nbuf(Impl(this, apiResult), buf.getSize());
+  APICALL(nxsCreateBuffer, getId(), buf.getSize(), 0, (void *)buf.getData());
+  Buffer nbuf(Impl(this, apiResult), getId(), buf.getSize());
   buffers.add(nbuf);
   return nbuf;
 }
@@ -133,7 +133,7 @@ std::optional<Property> Device::getProperty(nxs_int prop) const {
   return get()->getProperty(prop);
 }
 
-Properties Device::getProperties() const { return get()->getProperties(); }
+Properties Device::getInfo() const { return get()->getInfo(); }
 
 // Runtime functions
 Librarys Device::getLibraries() const { return get()->getLibraries(); }
@@ -142,8 +142,8 @@ Schedules Device::getSchedules() const { return get()->getSchedules(); }
 
 Schedule Device::createSchedule() { return get()->createSchedule(); }
 
-Buffer Device::createBuffer(size_t size, void *data) {
-  return get()->createBuffer(size, data);
+Buffer Device::createBuffer(size_t size, const void *data) {
+  return get()->createBuffer(size, (const char *)data);
 }
 
 Buffer Device::copyBuffer(Buffer buf) { return get()->copyBuffer(buf); }

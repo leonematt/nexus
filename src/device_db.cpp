@@ -9,7 +9,7 @@
 
 using namespace nexus;
 
-#define NEXUS_LOG_MODULE "device_db"
+#define NEXUS_LOG_MODULE "device_info"
 
 std::vector<std::string> splitPaths(const std::string &paths, char delimiter) {
   std::vector<std::string> result;
@@ -21,7 +21,7 @@ std::vector<std::string> splitPaths(const std::string &paths, char delimiter) {
   return result;
 }
 
-static bool initDevices(DeviceMap &devs) {
+static bool initDeviceInfoDB(DeviceInfoMap &devs) {
   iterateEnvPaths("NEXUS_DEVICE_PATH", "../device_lib",
                   [&](const std::string &path, const std::string &name) {
                     NEXUS_LOG(NEXUS_STATUS_NOTE, "  File: " << name);
@@ -32,14 +32,14 @@ static bool initDevices(DeviceMap &devs) {
   return true;
 }
 
-const DeviceMap *nexus::getDeviceDB() {
-  static DeviceMap s_devices;
-  static bool init = initDevices(s_devices);
-  return &s_devices;
+const DeviceInfoMap *nexus::getDeviceInfoDB() {
+  static DeviceInfoMap s_device_info_map;
+  static bool init = initDeviceInfoDB(s_device_info_map);
+  return &s_device_info_map;
 }
 
-Properties nexus::lookupDevice(const std::string &archName) {
-  const DeviceMap *devmap = getDeviceDB();
+Properties nexus::lookupDeviceInfo(const std::string &archName) {
+  const DeviceInfoMap *devmap = getDeviceInfoDB();
   auto ii = devmap->find(archName);
   if (ii != devmap->end()) return ii->second;
   return Properties();
