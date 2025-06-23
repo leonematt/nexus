@@ -24,8 +24,6 @@ class Buffer : public Object<detail::BufferImpl, detail::SystemImpl> {
          const void *_hostData = nullptr);
   using Object::Object;
 
-  void release() const;
-
   nxs_int getId() const override;
   nxs_int getDeviceId() const;
 

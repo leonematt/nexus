@@ -65,7 +65,7 @@ class Object {
   operator bool() const { return impl && nxs_valid_id(getId()); }
   bool operator==(const Object &that) const { return impl == that.impl; }
 
-  virtual void release() { impl = nullptr; }
+  void release() { impl.clear(); }
 
   virtual nxs_int getId() const = 0;
 

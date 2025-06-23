@@ -21,7 +21,9 @@ ScheduleImpl::~ScheduleImpl() {
 }
 
 void ScheduleImpl::release() {
-  // getOwner()->releaseSchedule(getId());
+  commands.clear();
+  auto *rt = getParentOfType<RuntimeImpl>();
+  nxs_int kid = rt->runAPIFunction<NF_nxsReleaseSchedule>(getId());
 }
 
 std::optional<Property> ScheduleImpl::getProperty(nxs_int prop) const {
@@ -43,10 +45,6 @@ nxs_status ScheduleImpl::run(nxs_bool blocking) {
 
 ///////////////////////////////////////////////////////////////////////////////
 Schedule::Schedule(detail::Impl owner) : Object(owner) {}
-
-// Schedule::Schedule() : Object() {}
-
-void Schedule::release() const { get()->release(); }
 
 nxs_int Schedule::getId() const { return get()->getId(); }
 

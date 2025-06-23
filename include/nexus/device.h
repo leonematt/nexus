@@ -25,8 +25,6 @@ class Device : public Object<detail::DeviceImpl, detail::RuntimeImpl> {
   Device(detail::Impl base);
   using Object::Object;
 
-  void release() const;
-
   nxs_int getId() const override;
 
   // Get Device Property Value

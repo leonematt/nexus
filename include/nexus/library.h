@@ -22,7 +22,6 @@ class Library : public Object<detail::LibraryImpl, detail::DeviceImpl> {
   Library(detail::Impl owner);
   using Object::Object;
 
-  void release() const;
   nxs_int getId() const override;
 
   std::optional<Property> getProperty(nxs_int prop) const override;

@@ -21,7 +21,6 @@ class Kernel : public Object<detail::KernelImpl, detail::LibraryImpl> {
   Kernel(detail::Impl owner, const std::string &kernelName);
   using Object::Object;
 
-  void release() const;
   nxs_int getId() const override;
 
   std::optional<Property> getProperty(nxs_int prop) const override;

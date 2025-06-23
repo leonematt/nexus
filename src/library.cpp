@@ -42,8 +42,6 @@ Kernel LibraryImpl::getKernel(const std::string &kernelName) {
 ///////////////////////////////////////////////////////////////////////////////
 Library::Library(Impl owner) : Object(owner) {}
 
-void Library::release() const { get()->release(); }
-
 nxs_int Library::getId() const { return get()->getId(); }
 
 std::optional<Property> Library::getProperty(nxs_int prop) const {

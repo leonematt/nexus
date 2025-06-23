@@ -22,7 +22,6 @@ class Schedule : public Object<detail::ScheduleImpl, detail::DeviceImpl> {
   Schedule(detail::Impl owner);
   using Object::Object;
 
-  void release() const;
   nxs_int getId() const override;
 
   std::optional<Property> getProperty(nxs_int prop) const override;

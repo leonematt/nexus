@@ -56,15 +56,15 @@ class MetalRuntime {
     return std::nullopt;
   }
   template <typename T>
-  std::optional<T *> dropObject(nxs_int id) {
-    if (id < 0 || id >= objects.size()) return std::nullopt;
+  bool dropObject(nxs_int id) {
+    if (id < 0 || id >= objects.size()) return false;
     auto *obj = static_cast<T *>(objects[id]);
     if (obj != nullptr) {  // @@@ check types
       obj->release();
       objects[id] = nullptr;
-      return obj;
+      return true;
     }
-    return std::nullopt;
+    return false;
   }
 };
 
@@ -98,7 +98,6 @@ nxsGetRuntimeProperty(nxs_uint runtime_property_id, void *property_value,
     }
     case NP_Size: {
       nxs_long size = getRuntime()->getDeviceCount();
-      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "Runtime Size " << size);
       auto sz = sizeof(size);
       if (property_value != NULL) {
         if (property_value_size != NULL && *property_value_size != sz)
@@ -218,10 +217,8 @@ extern "C" nxs_status NXS_API_CALL nxsCopyBuffer(nxs_int buffer_id,
  */
 extern "C" nxs_status NXS_API_CALL nxsReleaseBuffer(nxs_int buffer_id) {
   auto rt = getRuntime();
-  auto buf = rt->dropObject<MTL::Buffer>(buffer_id);
-  if (!buf) return NXS_InvalidBuildOptions;  // fix
-
-  (*buf)->release();
+  if (!rt->dropObject<MTL::Buffer>(buffer_id))
+    return NXS_InvalidBuildOptions;  // fix
   return NXS_Success;
 }
 
@@ -282,9 +279,8 @@ nxsCreateLibraryFromFile(nxs_int device_id, const char *library_path) {
  */
 extern "C" nxs_status NXS_API_CALL nxsReleaseLibrary(nxs_int library_id) {
   auto rt = getRuntime();
-  auto lib = rt->dropObject<MTL::Library>(library_id);
-  if (!lib) return NXS_InvalidProgram;
-  (*lib)->release();
+  if (!rt->dropObject<MTL::Library>(library_id))
+    return NXS_InvalidProgram;
   return NXS_Success;
 }
 
@@ -315,6 +311,15 @@ extern "C" nxs_int NXS_API_CALL nxsGetKernel(nxs_int library_id,
   }
  
   return rt->addObject(pipeState);
+}
+/*
+ * Release a buffer on the device.
+ */
+extern "C" nxs_status NXS_API_CALL nxsReleaseKernel(nxs_int kernel_id) {
+  auto rt = getRuntime();
+  if (!rt->dropObject<MTL::ComputePipelineState>(kernel_id))
+    return NXS_InvalidBuildOptions;  // fix
+  return NXS_Success;
 }
 
 /************************************************************************
@@ -364,10 +369,8 @@ extern "C" nxs_status nxsRunSchedule(nxs_int schedule_id, nxs_bool blocking) {
  */
 extern "C" nxs_status NXS_API_CALL nxsReleaseSchedule(nxs_int schedule_id) {
   auto rt = getRuntime();
-  auto cmdbuf = rt->dropObject<MTL::CommandBuffer>(schedule_id);
-  if (!cmdbuf) return NXS_InvalidBuildOptions;  // fix
-
-  (*cmdbuf)->release();
+  if (!rt->dropObject<MTL::CommandBuffer>(schedule_id))
+    return NXS_InvalidBuildOptions;  // fix
   return NXS_Success;
 }
 
@@ -447,3 +450,14 @@ extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
 
   return NXS_Success;
 }
+
+/*
+ * Release a buffer on the device.
+ */
+extern "C" nxs_status NXS_API_CALL nxsReleaseCommand(nxs_int command_id) {
+  auto rt = getRuntime();
+  if (!rt->dropObject<MTL::ComputeCommandEncoder>(command_id))
+    return NXS_InvalidBuildOptions;  // fix
+  return NXS_Success;
+}
+

@@ -25,7 +25,8 @@ class CommandImpl : public Impl {
   }
 
   void release() {
-    // getOwner()->releaseCommand(getId());
+    auto *rt = getParentOfType<RuntimeImpl>();
+    nxs_int kid = rt->runAPIFunction<NF_nxsReleaseCommand>(getId());
   }
 
   std::optional<Property> getProperty(nxs_int prop) const {
@@ -54,8 +55,6 @@ class CommandImpl : public Impl {
 
 ///////////////////////////////////////////////////////////////////////////////
 Command::Command(detail::Impl owner, Kernel kern) : Object(owner, kern) {}
-
-void Command::release() const { get()->release(); }
 
 nxs_int Command::getId() const { return get()->getId(); }
 

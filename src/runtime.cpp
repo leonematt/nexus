@@ -25,9 +25,7 @@ RuntimeImpl::~RuntimeImpl() {
 }
 
 void RuntimeImpl::release() {
-  for (auto dev : devices) {
-    dev.release();
-  }
+  devices.clear();
 }
 
 Device RuntimeImpl::getDevice(nxs_int deviceId) const {
@@ -90,27 +88,9 @@ void RuntimeImpl::loadPlugin() {
     }
   };
 
-  loadFn(NF_nxsGetRuntimeProperty);
-  loadFn(NF_nxsGetDeviceProperty);
-
-  loadFn(NF_nxsCreateBuffer);
-  loadFn(NF_nxsCopyBuffer);
-  loadFn(NF_nxsReleaseBuffer);
-
-  loadFn(NF_nxsCreateLibrary);
-  loadFn(NF_nxsCreateLibraryFromFile);
-  loadFn(NF_nxsReleaseLibrary);
-
-  loadFn(NF_nxsGetKernel);
-
-  loadFn(NF_nxsCreateSchedule);
-  loadFn(NF_nxsRunSchedule);
-  loadFn(NF_nxsReleaseSchedule);
-
-  loadFn(NF_nxsCreateCommand);
-  loadFn(NF_nxsReleaseCommand);
-  loadFn(NF_nxsSetCommandArgument);
-  loadFn(NF_nxsFinalizeCommand);
+  for (int fn = 0; fn < NXS_FUNCTION_CNT; ++fn) {
+    loadFn((nxs_function)fn);
+  }
 
   if (!runtimeFns[NF_nxsGetRuntimeProperty] ||
       !runtimeFns[NF_nxsGetDeviceProperty])
@@ -127,8 +107,6 @@ void RuntimeImpl::loadPlugin() {
 ///////////////////////////////////////////////////////////////////////////////
 Runtime::Runtime(detail::Impl owner, const std::string &libraryPath)
     : Object(owner, libraryPath) {}
-
-void Runtime::release() { return get()->release(); }
 
 nxs_int Runtime::getId() const { return get()->getId(); }
 

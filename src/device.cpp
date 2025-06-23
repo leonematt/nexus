@@ -124,8 +124,6 @@ Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
 ///////////////////////////////////////////////////////////////////////////////
 Device::Device(detail::Impl base) : Object(base) {}
 
-void Device::release() const { get()->release(); }
-
 nxs_int Device::getId() const { return get()->getId(); }
 
 // Get Device Property Value

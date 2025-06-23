@@ -25,7 +25,8 @@ class KernelImpl : public Impl {
   }
 
   void release() {
-    // getOwner()->releaseKernel(getId());
+    auto *rt = getParentOfType<RuntimeImpl>();
+    //nxs_int kid = rt->runAPIFunction<NF_nxsReleaseKernel>(getId());
   }
 
   std::optional<Property> getProperty(nxs_int prop) const {
@@ -41,8 +42,6 @@ class KernelImpl : public Impl {
 ///////////////////////////////////////////////////////////////////////////////
 Kernel::Kernel(detail::Impl owner, const std::string &kernelName)
     : Object(owner, kernelName) {}
-
-void Kernel::release() const { get()->release(); }
 
 nxs_int Kernel::getId() const { return get()->getId(); }
 

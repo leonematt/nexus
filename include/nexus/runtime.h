@@ -20,8 +20,6 @@ class Runtime : public Object<detail::RuntimeImpl, detail::SystemImpl> {
   Runtime(detail::Impl owner, const std::string& libraryPath);
   using Object::Object;
 
-  void release() override;
-
   nxs_int getId() const override;
 
   Devices getDevices() const;

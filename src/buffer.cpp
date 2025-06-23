@@ -78,8 +78,6 @@ Buffer::Buffer(detail::Impl base, size_t _sz, const void *_hostData)
 Buffer::Buffer(detail::Impl base, nxs_int _devId, size_t _sz, const void *_hostData)
     : Object(base, _devId, _sz, (const char *)_hostData) {}
 
-void Buffer::release() const { get()->release(); }
-
 nxs_int Buffer::getId() const { return get()->getId(); }
 
 nxs_int Buffer::getDeviceId() const { return get()->getDeviceId(); }

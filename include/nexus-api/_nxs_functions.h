@@ -60,7 +60,7 @@ struct nxsFunctionType { typedef void *type; };
 
 /************************************************************************
  * @def GetRuntimeProperty
- * @brief Lookup 
+ * @brief Return Runtime properties 
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, GetRuntimeProperty,
     nxs_uint runtime_property_id,
@@ -70,7 +70,7 @@ NEXUS_API_FUNC(nxs_status, GetRuntimeProperty,
 
 /************************************************************************
  * @def GetDeviceProperty
- * @brief Lookup 
+ * @brief Return Device properties
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, GetDeviceProperty,
     nxs_int device_id,
@@ -90,6 +90,16 @@ NEXUS_API_FUNC(nxs_int, CreateBuffer,
     size_t size,
     nxs_uint mem_flags,
     void* host_ptr
+)
+/************************************************************************
+ * @def GetBufferProperty
+ * @brief Return Buffer properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetBufferProperty,
+    nxs_int buffer_id,
+    nxs_uint buffer_property_id,
+    void *property_value,
+    size_t* property_value_size
 )
 /************************************************************************
  * @def CreateBuffer
@@ -133,6 +143,16 @@ NEXUS_API_FUNC(nxs_int, CreateLibraryFromFile,
     const char *library_data
 )
 /************************************************************************
+ * @def GetLibraryProperty
+ * @brief Return Library properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetLibraryProperty,
+    nxs_int library_id,
+    nxs_uint library_property_id,
+    void *property_value,
+    size_t* property_value_size
+)
+/************************************************************************
  * @def ReleaseLibrary
  * @brief Release the buffer on the device
   * @return Error status or Succes.
@@ -151,16 +171,36 @@ NEXUS_API_FUNC(nxs_int, GetKernel,
     nxs_int library_id,
     const char *kernel_name
 )
+/************************************************************************
+ * @def GetKernelProperty
+ * @brief Return Kernel properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetKernelProperty,
+    nxs_int kernel_id,
+    nxs_uint kernel_property_id,
+    void *property_value,
+    size_t* property_value_size
+)
 
 /************************************************************************
- * @def CreateCommandBuffer
- * @brief Create command buffer on the device
+ * @def CreateSchedule
+ * @brief Create schedule on the device
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_int, CreateSchedule,
     nxs_int device_id,
     nxs_uint sched_properties
+)
+/************************************************************************
+ * @def GetScheduleProperty
+ * @brief Return Schedule properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetScheduleProperty,
+    nxs_int schedule_id,
+    nxs_uint schedule_property_id,
+    void *property_value,
+    size_t* property_value_size
 )
 /************************************************************************
  * @def ReleaseCommandList
@@ -189,6 +229,16 @@ NEXUS_API_FUNC(nxs_status, ReleaseSchedule,
 NEXUS_API_FUNC(nxs_int, CreateCommand,
     nxs_int schedule_id,
     nxs_int kernel_id
+)
+/************************************************************************
+ * @def GetCommandProperty
+ * @brief Return Command properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetCommandProperty,
+    nxs_int command_id,
+    nxs_uint command_property_id,
+    void *property_value,
+    size_t* property_value_size
 )
 /************************************************************************
  * @def ReleaseCommandList
