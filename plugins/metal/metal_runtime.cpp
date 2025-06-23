@@ -58,7 +58,9 @@ class MetalRuntime {
   template <typename T>
   std::optional<T *> dropObject(nxs_int id) {
     if (id < 0 || id >= objects.size()) return std::nullopt;
-    if (auto *obj = static_cast<T *>(objects[id])) {  // @@@ check types
+    auto *obj = static_cast<T *>(objects[id]);
+    if (obj != nullptr) {  // @@@ check types
+      obj->release();
       objects[id] = nullptr;
       return obj;
     }
@@ -96,6 +98,7 @@ nxsGetRuntimeProperty(nxs_uint runtime_property_id, void *property_value,
     }
     case NP_Size: {
       nxs_long size = getRuntime()->getDeviceCount();
+      NXSAPI_LOG(NXSAPI_STATUS_NOTE, "Runtime Size " << size);
       auto sz = sizeof(size);
       if (property_value != NULL) {
         if (property_value_size != NULL && *property_value_size != sz)
@@ -109,10 +112,6 @@ nxsGetRuntimeProperty(nxs_uint runtime_property_id, void *property_value,
       return NXS_InvalidProperty;
   }
   return NXS_Success;
-}
-
-extern "C" nxs_int NXS_API_CALL nxsGetDeviceCount() {
-  return getRuntime()->getDeviceCount();
 }
 
 /*
@@ -208,7 +207,7 @@ extern "C" nxs_int NXS_API_CALL nxsCreateBuffer(nxs_int device_id, size_t size,
 extern "C" nxs_status NXS_API_CALL nxsCopyBuffer(nxs_int buffer_id,
                                                  void *host_ptr) {
   auto rt = getRuntime();
-  auto buf = rt->dropObject<MTL::Buffer>(buffer_id);
+  auto buf = rt->getObject<MTL::Buffer>(buffer_id);
   if (!buf) return NXS_InvalidBuildOptions;  // fix
   memcpy(host_ptr, (*buf)->contents(), (*buf)->length());
   return NXS_Success;
@@ -307,7 +306,15 @@ extern "C" nxs_int NXS_API_CALL nxsGetKernel(nxs_int library_id,
                "getKernel " << pError->localizedDescription()->utf8String());
     return NXS_InvalidKernel;
   }
-  return rt->addObject(func);
+  rt->addObject(func);
+  MTL::ComputePipelineState *pipeState = (*lib)->device()->newComputePipelineState(func, &pError);
+  if (!pipeState) {
+    NXSAPI_LOG(NXSAPI_STATUS_ERR,
+               "getKernel->ComputePipelineState " << pError->localizedDescription()->utf8String());
+    return NXS_InvalidKernel;
+  }
+ 
+  return rt->addObject(pipeState);
 }
 
 /************************************************************************
@@ -381,12 +388,9 @@ extern "C" nxs_int NXS_API_CALL nxsCreateCommand(nxs_int schedule_id,
   auto res = rt->addObject(command);
 
   // Add the kernel
-  if (kernel_id >= 0) {
-    NS::Error *pError = nullptr;
-    MTL::ComputePipelineState *pipeState = nullptr;
-    if (auto kern = rt->getObject<MTL::Function>(kernel_id)) {
-      pipeState = (*cmdbuf)->device()->newComputePipelineState(*kern, &pError);
-      command->setComputePipelineState(pipeState);
+  if (nxs_success(kernel_id)) {
+    if (auto pipeState = rt->getObject<MTL::ComputePipelineState>(kernel_id)) {
+      command->setComputePipelineState(*pipeState);
     } else {
       // test before creating Command
       return NXS_InvalidKernel;
