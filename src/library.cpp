@@ -42,12 +42,12 @@ Kernel LibraryImpl::getKernel(const std::string &kernelName) {
 ///////////////////////////////////////////////////////////////////////////////
 Library::Library(Impl owner) : Object(owner) {}
 
-nxs_int Library::getId() const { return get()->getId(); }
+nxs_int Library::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidLibrary, getId); }
 
 std::optional<Property> Library::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
 Kernel Library::getKernel(const std::string &kernelName) {
-  return get()->getKernel(kernelName);
+  NEXUS_OBJ_MCALL(Kernel(), getKernel, kernelName);
 }

@@ -108,15 +108,15 @@ void RuntimeImpl::loadPlugin() {
 Runtime::Runtime(detail::Impl owner, const std::string &libraryPath)
     : Object(owner, libraryPath) {}
 
-nxs_int Runtime::getId() const { return get()->getId(); }
+nxs_int Runtime::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidRuntime, getId); }
 
-Devices Runtime::getDevices() const { return get()->getDevices(); }
+Devices Runtime::getDevices() const { NEXUS_OBJ_MCALL(Devices(), getDevices); }
 
 Device Runtime::getDevice(nxs_uint deviceId) const {
-  return get()->getDevice(deviceId);
+  NEXUS_OBJ_MCALL(Device(), getDevice, deviceId);
 }
 
 // Get Runtime Property Value
 std::optional<Property> Runtime::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }

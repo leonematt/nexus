@@ -43,8 +43,6 @@ enum _nxs_status {
     NXS_KernelArgInfoNotAvailable            = -19,
     NXS_InvalidValue                         = -30,
     NXS_InvalidDeviceType                    = -31,
-    NXS_InvalidRuntime                       = -32,
-    NXS_InvalidDevice                        = -33,
     NXS_InvalidContext                       = -34,
     NXS_InvalidQueueProperties               = -35,
     NXS_InvalidCommandQueue                  = -36,
@@ -81,8 +79,16 @@ enum _nxs_status {
     NXS_InvalidDeviceQueue                   = -70,
     NXS_InvalidSpecId                        = -71,
     NXS_MaxSizeRestrictionExceeded           = -72,
+    NXS_InvalidObject                        = -80,
+    NXS_InvalidBuffer                        = -81,
+    NXS_InvalidCommand                       = -82,
+    NXS_InvalidDevice                        = -83,
+    NXS_InvalidLibrary                       = -84,
+    NXS_InvalidRuntime                       = -85,
+    NXS_InvalidSchedule                      = -86,
+    NXS_InvalidSystem                        = -87,
 
-    NXS_STATUS_MIN                           = -72,
+    NXS_STATUS_MIN                           = -87,
     NXS_STATUS_MAX                           = 0,
     NXS_STATUS_PREFIX_LEN                    = 4
 };

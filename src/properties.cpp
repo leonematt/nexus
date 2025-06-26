@@ -146,11 +146,11 @@ Properties::Properties(const std::string &filepath) : Object(filepath) {}
 // Get top level node
 std::optional<Property> Properties::getProperty(const std::string &name) const {
   std::vector<std::string> path{name};
-  return get()->getProperty(path);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, path);
 }
 
 // Get sub-node
 std::optional<Property> Properties::getProperty(
     const std::vector<std::string> &path) const {
-  return get()->getProperty(path);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, path);
 }

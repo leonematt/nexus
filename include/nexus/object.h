@@ -106,6 +106,12 @@ class Objects {
   typename ObjectVec::iterator end() const { return objects->end(); }
 };
 
+#define NEXUS_OBJ_MCALL(RET, FUNC, ...) \
+  if (auto obj = get()) { \
+    return obj->FUNC(__VA_ARGS__); \
+  } \
+  return RET
+
 }  // namespace nexus
 
 #endif  // NEXUS_OBJECT_H

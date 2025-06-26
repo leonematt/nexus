@@ -78,17 +78,17 @@ Buffer::Buffer(detail::Impl base, size_t _sz, const void *_hostData)
 Buffer::Buffer(detail::Impl base, nxs_int _devId, size_t _sz, const void *_hostData)
     : Object(base, _devId, _sz, (const char *)_hostData) {}
 
-nxs_int Buffer::getId() const { return get()->getId(); }
+nxs_int Buffer::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidBuffer, getId); }
 
-nxs_int Buffer::getDeviceId() const { return get()->getDeviceId(); }
+nxs_int Buffer::getDeviceId() const { NEXUS_OBJ_MCALL(NXS_InvalidBuffer, getDeviceId); }
 
 std::optional<Property> Buffer::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
-size_t Buffer::getSize() const { return get()->getSize(); }
-const char *Buffer::getData() const { return get()->getData(); }
+size_t Buffer::getSize() const { NEXUS_OBJ_MCALL(0, getSize); }
+const char *Buffer::getData() const { NEXUS_OBJ_MCALL(nullptr, getData); }
 
-Buffer Buffer::getLocal() const { return get()->getLocal(); }
+Buffer Buffer::getLocal() const { NEXUS_OBJ_MCALL(Buffer(), getLocal); }
 
-nxs_status Buffer::copy(void *_hostBuf) { return get()->copyData(_hostBuf); }
+nxs_status Buffer::copy(void *_hostBuf) { NEXUS_OBJ_MCALL(NXS_InvalidBuffer, copyData, _hostBuf); }

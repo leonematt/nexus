@@ -51,21 +51,21 @@ Buffer SystemImpl::copyBuffer(Buffer buf, Device dev) {
 System::System(int i) : Object(i) {}
 
 std::optional<Property> System::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
-Buffers System::getBuffers() const { return get()->getBuffers(); }
+Buffers System::getBuffers() const { NEXUS_OBJ_MCALL(Buffers(), getBuffers); }
 
-Runtimes System::getRuntimes() const { return get()->getRuntimes(); }
+Runtimes System::getRuntimes() const { NEXUS_OBJ_MCALL(Runtimes(), getRuntimes); }
 
-Runtime System::getRuntime(int idx) const { return get()->getRuntime(idx); }
+Runtime System::getRuntime(int idx) const { NEXUS_OBJ_MCALL(Runtime(), getRuntime, idx); }
 
 Buffer System::createBuffer(size_t sz, const void *hostData) {
-  return get()->createBuffer(sz, hostData);
+  NEXUS_OBJ_MCALL(Buffer(), createBuffer, sz, hostData);
 }
 
 Buffer System::copyBuffer(Buffer buf, Device dev) {
-  return get()->copyBuffer(buf, dev);
+  NEXUS_OBJ_MCALL(Buffer(), copyBuffer, buf, dev);
 }
 
 /// @brief Get the System Platform

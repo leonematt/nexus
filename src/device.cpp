@@ -14,10 +14,7 @@
 using namespace nexus;
 
 #define APICALL(FUNC, ...)                                                   \
-  nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__);   \
-  if (nxs_failed(apiResult))                                                 \
-  NEXUS_LOG(NEXUS_STATUS_ERR, " API: " << nxsGetFuncName(NF_##FUNC) << " - " \
-                                       << nxsGetStatusName(apiResult))
+  nxs_int apiResult = getParent()->runAPIFunction<NF_##FUNC>(__VA_ARGS__)
 
 detail::DeviceImpl::DeviceImpl(detail::Impl base) : detail::Impl(base) {
   auto id = getId();
@@ -124,32 +121,32 @@ Buffer detail::DeviceImpl::copyBuffer(Buffer buf) {
 ///////////////////////////////////////////////////////////////////////////////
 Device::Device(detail::Impl base) : Object(base) {}
 
-nxs_int Device::getId() const { return get()->getId(); }
+nxs_int Device::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidDevice, getId); }
 
 // Get Device Property Value
 std::optional<Property> Device::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
-Properties Device::getInfo() const { return get()->getInfo(); }
+Properties Device::getInfo() const { NEXUS_OBJ_MCALL(Properties(), getInfo); }
 
 // Runtime functions
-Librarys Device::getLibraries() const { return get()->getLibraries(); }
+Librarys Device::getLibraries() const { NEXUS_OBJ_MCALL(Librarys(), getLibraries); }
 
-Schedules Device::getSchedules() const { return get()->getSchedules(); }
+Schedules Device::getSchedules() const { NEXUS_OBJ_MCALL(Schedules(), getSchedules); }
 
-Schedule Device::createSchedule() { return get()->createSchedule(); }
+Schedule Device::createSchedule() { NEXUS_OBJ_MCALL(Schedule(), createSchedule); }
 
 Buffer Device::createBuffer(size_t size, const void *data) {
-  return get()->createBuffer(size, (const char *)data);
+  NEXUS_OBJ_MCALL(Buffer(), createBuffer, size, (const char *)data);
 }
 
-Buffer Device::copyBuffer(Buffer buf) { return get()->copyBuffer(buf); }
+Buffer Device::copyBuffer(Buffer buf) { NEXUS_OBJ_MCALL(Buffer(), copyBuffer, buf); }
 
 Library Device::createLibrary(void *libraryData, size_t librarySize) {
-  return get()->createLibrary(libraryData, librarySize);
+  NEXUS_OBJ_MCALL(Library(), createLibrary, libraryData, librarySize);
 }
 
 Library Device::createLibrary(const std::string &libraryPath) {
-  return get()->createLibrary(libraryPath);
+  NEXUS_OBJ_MCALL(Library(), createLibrary, libraryPath);
 }

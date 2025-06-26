@@ -43,8 +43,8 @@ class KernelImpl : public Impl {
 Kernel::Kernel(detail::Impl owner, const std::string &kernelName)
     : Object(owner, kernelName) {}
 
-nxs_int Kernel::getId() const { return get()->getId(); }
+nxs_int Kernel::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidKernel, getId); }
 
 std::optional<Property> Kernel::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }

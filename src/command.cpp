@@ -56,16 +56,16 @@ class CommandImpl : public Impl {
 ///////////////////////////////////////////////////////////////////////////////
 Command::Command(detail::Impl owner, Kernel kern) : Object(owner, kern) {}
 
-nxs_int Command::getId() const { return get()->getId(); }
+nxs_int Command::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidCommand, getId); }
 
 std::optional<Property> Command::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
 nxs_status Command::setArgument(nxs_uint index, Buffer buffer) const {
-  return get()->setArgument(index, buffer);
+  NEXUS_OBJ_MCALL(NXS_InvalidCommand, setArgument, index, buffer);
 }
 
 nxs_status Command::finalize(nxs_int groupSize, nxs_int gridSize) {
-  return get()->finalize(groupSize, gridSize);
+  NEXUS_OBJ_MCALL(NXS_InvalidCommand, finalize, groupSize, gridSize);
 }

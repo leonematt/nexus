@@ -46,12 +46,12 @@ nxs_status ScheduleImpl::run(nxs_bool blocking) {
 ///////////////////////////////////////////////////////////////////////////////
 Schedule::Schedule(detail::Impl owner) : Object(owner) {}
 
-nxs_int Schedule::getId() const { return get()->getId(); }
+nxs_int Schedule::getId() const { NEXUS_OBJ_MCALL(NXS_InvalidSchedule, getId); }
 
 std::optional<Property> Schedule::getProperty(nxs_int prop) const {
-  return get()->getProperty(prop);
+  NEXUS_OBJ_MCALL(std::nullopt, getProperty, prop);
 }
 
-Command Schedule::createCommand(Kernel kern) { return get()->getCommand(kern); }
+Command Schedule::createCommand(Kernel kern) { NEXUS_OBJ_MCALL(Command(), getCommand, kern); }
 
-nxs_status Schedule::run(nxs_bool blocking) { return get()->run(blocking); }
+nxs_status Schedule::run(nxs_bool blocking) { NEXUS_OBJ_MCALL(NXS_InvalidSchedule, run, blocking); }
