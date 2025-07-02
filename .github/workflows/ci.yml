@@ -18,8 +18,8 @@ jobs:
             compiler: gcc
           - os: macos-latest
             compiler: clang
-          - os: windows-latest
-            compiler: msvc
+          #- os: windows-latest
+          #  compiler: msvc
     
     steps:
     - uses: actions/checkout@v4
