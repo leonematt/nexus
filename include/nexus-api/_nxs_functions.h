@@ -183,6 +183,51 @@ NEXUS_API_FUNC(nxs_status, GetKernelProperty,
 )
 
 /************************************************************************
+ * @def CreateEvent
+ * @brief Create event on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateEvent,
+    nxs_int device_id,
+    nxs_event_type event_type
+)
+/************************************************************************
+ * @def GetEventProperty
+ * @brief Return Event properties 
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, GetEventProperty,
+    nxs_int event_id,
+    nxs_uint event_property_id,
+    void *property_value,
+    size_t* property_value_size
+)
+/************************************************************************
+ * @def SignalEvent
+ * @brief Signal the event on the device
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, SignalEvent,
+    nxs_int event_id,
+    nxs_int value
+)
+/************************************************************************
+ * @def WaitEvent
+ * @brief Wait for the event on the device
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_status, WaitEvent,
+    nxs_int event_id,
+    nxs_int value
+)
+/************************************************************************
+ * @def ReleaseEvent
+ * @brief Release the event on the device
+  * @return Error status or Succes.
+***********************************************************************/
+NEXUS_API_FUNC(nxs_status, ReleaseEvent,
+    nxs_int event_id
+)
+
+/************************************************************************
  * @def CreateStream
  * @brief Create stream on the device
  * @return Negative value is an error status.
@@ -252,13 +297,35 @@ NEXUS_API_FUNC(nxs_status, ReleaseSchedule,
 
 /************************************************************************
  * @def CreateCommand
- * @brief Create command buffer on the device
+ * @brief Create command to launch a kernel on the device
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_int, CreateCommand,
     nxs_int schedule_id,
     nxs_int kernel_id
+)
+/************************************************************************
+ * @def CreateSignalCommand
+ * @brief Create command to signal an event on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateSignalCommand,
+    nxs_int schedule_id,
+    nxs_int event_id,
+    nxs_int signal_value
+)
+/************************************************************************
+ * @def CreateWaitCommand
+ * @brief Create command to wait on an event on the device
+ * @return Negative value is an error status.
+ *         Non-negative is the bufferId.
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, CreateWaitCommand,
+    nxs_int schedule_id,
+    nxs_int event_id,
+    nxs_int wait_value
 )
 /************************************************************************
  * @def GetCommandProperty
