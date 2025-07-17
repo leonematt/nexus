@@ -59,8 +59,8 @@ public:
       cudaDeviceProp prop;
       cudaGetDeviceProperties(&prop, i);
 
-      CudaDevice *device = new CudaDevice(prop.name, prop.uuid.bytes, prop.pciBusID, i, this);
-      addObject(this, device);
+      CudaDevice *device = new CudaDevice(prop.name, prop.uuid.bytes, prop.pciBusID, i);
+      addObject(device);
     }
   }
 
@@ -209,7 +209,7 @@ extern "C" nxs_int NXS_API_CALL nxsCreateBuffer(nxs_int device_id, size_t size,
 
   CudaBuffer *buf = new CudaBuffer(*deviceObject, device_id, size, host_ptr, true);
 
-  return rt->addObject(*deviceObject, buf, true);
+  return rt->addObject(buf, true);
 }
 
 
@@ -271,7 +271,7 @@ nxsCreateLibrary(
     CHECK_CUDA(cudaSetDevice(device.deviceID));
 
     auto devLib = device.createLibrary(library_data, data_size);
-    return devLib;
+    return rt->addObject(devLib);
   }
 
   return NXS_InvalidLibrary;
@@ -306,7 +306,7 @@ nxsCreateLibraryFromFile(
   CHECK_CUDA(cudaSetDevice(device->deviceID));
 
   auto result = device->createLibrary((void *)s.c_str(), s.size());  
-  return result;
+  return rt->addObject(result);
 }
 
 /*
@@ -348,7 +348,7 @@ nxsGetKernel(nxs_int library_id, const char *kernel_name) {
 
   auto kernel = library->createKernel(kernel_name);
 
-  return rt->addObject(library, kernel, false);
+  return rt->addObject(kernel, false);
 }
 
 
@@ -370,8 +370,8 @@ extern "C" nxs_int nxsCreateSchedule(
   if (!dev)
    return NXS_InvalidDevice;
 
-  CudaSchedule *schedule = new CudaSchedule(dev);
-  return rt->addObject(dev, schedule, true);
+  CudaSchedule *schedule = new CudaSchedule(device_id);
+  return rt->addObject(schedule, true);
 }
 
 /************************************************************************
@@ -391,10 +391,11 @@ extern "C" nxs_status nxsRunSchedule(
   auto schedule = scheduleObject ? (*scheduleObject)->get<CudaSchedule>() : nullptr;
   if (!schedule)
     return NXS_InvalidSchedule;
-
-  auto device = (CudaDevice *)schedule->getParent();
-
-  CHECK_CUDA(cudaSetDevice(device->deviceID));
+  auto device = rt->get<CudaDevice>(schedule->device_id);
+  if (!device)
+    return NXS_InvalidDevice;
+  
+  CHECK_CUDA(cudaSetDevice(schedule->device_id));
 
   device->runSchedule(schedule);
 
@@ -424,7 +425,7 @@ nxsCreateCommand(nxs_int schedule_id, nxs_int kernel_id) {
   }
 
   CudaCommand *command = new CudaCommand(kernel);
-  auto ret = rt->addObject(schedule, command, true);
+  auto ret = rt->addObject(command, true);
   if (ret)
     schedule->insertCommand(command);
 

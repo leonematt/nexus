@@ -18,17 +18,12 @@ class Device : public Object {
   int deviceID = -1;
 
   Device(char* name, char* uuid, int busID, int deviceID, Object *runtime = nullptr) 
-    : Object(runtime), name(name), uuid(uuid), busID(busID), deviceID(deviceID) {}
+    : name(name), uuid(uuid), busID(busID), deviceID(deviceID) {}
   virtual ~Device() = default;
 
   static void delete_fn(void *obj) {
     delete static_cast<Device *>(obj);
   }
-
-  Object *getParent() {
-    return Object::getParent();
-  }
-
 };
 
 }  // namespace rt
