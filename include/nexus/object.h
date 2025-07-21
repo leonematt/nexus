@@ -59,6 +59,9 @@ class Object {
 
   // Empty CTor - assumes Impl doesn't have an empty CTOR
   Object() = default;
+
+  Object(const Object& other) : impl(other.impl) {}
+
   virtual ~Object() {}
 
   operator bool() const { return impl && nxs_valid_id(getId()); }
