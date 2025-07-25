@@ -51,12 +51,18 @@ nxsGetRuntimeProperty(nxs_uint runtime_property_id, void *property_value,
   /* return value size */
   /* return value */
   switch (runtime_property_id) {
+    case NP_Keys: {
+      nxs_long keys[] = {NP_Name,    NP_Type,         NP_Vendor,
+                         NP_Version, NP_MajorVersion, NP_MinorVersion,
+                         NP_Size};
+      return rt::getPropertyVec(property_value, property_value_size, keys, 7);
+    }
     case NP_Name:
       return rt::getPropertyStr(property_value, property_value_size, "cuda");
     case NP_Type:
       return rt::getPropertyStr(property_value, property_value_size, "gpu");
     case NP_Vendor:
-      return rt::getPropertyStr(property_value, property_value_size, "nvidia");
+      return rt::getPropertyStr(property_value, property_value_size, "NVIDIA");
     case NP_Version: {
       char version[128];
       snprintf(version, 128, "%d.%d.%d", major_version, minor_version,
@@ -79,56 +85,71 @@ nxsGetRuntimeProperty(nxs_uint runtime_property_id, void *property_value,
   return NXS_Success;
 }
 
-extern "C" nxs_int NXS_API_CALL
-nxsGetDeviceCount()
-{
-  return getRuntime()->getDeviceCount();
-}
-
 extern "C" nxs_status NXS_API_CALL
-nxsGetDeviceProperty(
-  nxs_int device_id,
-  nxs_uint property_id,
-  void *property_value,
-  size_t* property_value_size
-)
-{/*
-  auto dev = getRuntime()->getObject<MTL::Device>(device_id);
-  if (!dev)
-    return NXS_InvalidDevice;
-  auto device = *dev;
+nxsGetDeviceProperty(nxs_int device_id, nxs_uint property_id,
+                     void *property_value, size_t *property_value_size) {
+  auto *rt = getRuntime();
+  auto *device = rt->getDevice(device_id);
+  if (!device) return NXS_InvalidDevice;
 
-  auto getStr = [&](const char *name, size_t len) {
-    if (property_value != NULL) {
-      if (property_value_size == NULL)
-        return NXS_InvalidArgSize;
-      else if (*property_value_size < len)
-        return NXS_InvalidArgValue;
-      strncpy((char*)property_value, name, len);
-    } else if (property_value_size != NULL) {
-      *property_value_size = len;
-    }
-    return NXS_Success;
-  };
+  cudaDeviceProp &props = device->props;
 
   switch (property_id) {
-    case NP_Name: {
-      std::string name = device->name()->cString(NS::StringEncoding::ASCIIStringEncoding);
-      return getStr(name.c_str(), name.size()+1);
+    case NP_Keys: {
+      nxs_long keys[] = {NP_Name,
+                         NP_Type,
+                         NP_Architecture,
+                         NP_MajorVersion,
+                         NP_MinorVersion,
+                         NP_Size,
+                         NP_GlobalMemorySize,
+                         NP_CoreMemorySize,
+                         NP_CoreRegisterSize,
+                         NP_SIMDSize};
+      return rt::getPropertyVec(property_value, property_value_size, keys, 10);
     }
-    case NP_Vendor:
-      return getStr("apple", 6);
+    case NP_Name:
+      return rt::getPropertyStr(property_value, property_value_size, props.name);
     case NP_Type:
-      return getStr("gpu", 4);
+      return rt::getPropertyStr(property_value, property_value_size, "gpu");
     case NP_Architecture: {
-      auto arch = device->architecture();
-      std::string name = arch->name()->cString(NS::StringEncoding::ASCIIStringEncoding);
-      return getStr(name.c_str(), name.size()+1);
+      std::string name = "sm_" + std::to_string(props.major * 10);
+      return rt::getPropertyStr(property_value, property_value_size, name);
     }
+    case NP_MajorVersion:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.major);
+    case NP_MinorVersion:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.minor);
+    case NP_Size:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.multiProcessorCount);
+    case NP_GlobalMemorySize:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.totalGlobalMem);
+    case NP_CoreMemorySize:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.sharedMemPerBlock);
+    case NP_CoreRegisterSize:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.regsPerBlock);
+    case NP_SIMDSize:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.warpSize);
+    case NP_CoreClockRate:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.clockRate);
+    case NP_MemoryClockRate:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.memoryClockRate);
+    case NP_MemoryBusWidth:
+      return rt::getPropertyInt(property_value, property_value_size,
+                                props.memoryBusWidth);
 
     default:
       return NXS_InvalidProperty;
-  }*/
+  }
   return NXS_Success;
 }
 
@@ -228,17 +249,11 @@ nxsCreateLibrary(
 {
   auto rt = getRuntime();
 
-  auto deviceObject = rt->getObject(device_id);
-  if (deviceObject) {
-    CudaDevice& device = *static_cast<CudaDevice*>(*deviceObject);
+  auto device = rt->getDevice(device_id);
+  if (!device) return NXS_InvalidDevice;
 
-    CHECK_CUDA(cudaSetDevice(device.deviceID));
-
-    auto devLib = device.createLibrary(library_data, data_size);
-    return rt->addObject(devLib);
-  }
-
-  return NXS_InvalidLibrary;
+  auto devLib = device->createLibrary(library_data, data_size);
+  return rt->addObject(devLib);
 }
 
 /*
@@ -251,26 +266,43 @@ nxsCreateLibraryFromFile(
 )
 {
   auto rt = getRuntime();
-
-  std::ifstream file(library_path);
-  if (!file.is_open()) {
-   std::cout << "Failed to open file\n";
-   return NXS_InvalidLibrary;
-  }
-  
-  std::ostringstream ss;
-  ss << file.rdbuf();
-  std::string s = ss.str();
-
-  auto deviceObject = rt->getObject(device_id);
-  auto device = deviceObject ? (*deviceObject)->get<CudaDevice>() : nullptr;
+  auto device = rt->getDevice(device_id);
   if (!device)
    return NXS_InvalidDevice;
 
-  CHECK_CUDA(cudaSetDevice(device->deviceID));
-
-  auto result = device->createLibrary((void *)s.c_str(), s.size());  
+  auto result = device->createLibraryFromFile(library_path);
   return rt->addObject(result);
+}
+
+/************************************************************************
+ * @def GetKernelProperty
+ * @brief Return Kernel properties
+ ***********************************************************************/
+ extern "C" nxs_status NXS_API_CALL nxsGetLibraryProperty(nxs_int library_id,
+  nxs_uint library_property_id,
+  void *property_value,
+  size_t *property_value_size) {
+  
+  auto rt = getRuntime();
+  auto library = rt->getPtr<CUmodule>(library_id);
+  if (!library) return NXS_InvalidLibrary;
+
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "getLibraryProperty " << library_property_id);
+
+  switch (library_property_id) {
+    case NP_Keys: {
+      nxs_long keys[] = {NP_Value};
+      return rt::getPropertyVec(property_value, property_value_size, keys, 1);
+    }
+    case NP_Value: {
+      return rt::getPropertyInt(property_value, property_value_size,
+            (nxs_long)library);
+    }
+    default:
+      return NXS_InvalidProperty;
+  }
+
+  return NXS_Success;
 }
 
 /*
@@ -298,21 +330,72 @@ extern "C" nxs_int NXS_API_CALL
 nxsGetKernel(nxs_int library_id, const char *kernel_name) {
   auto rt = getRuntime();
 
-  auto libObj = rt->getObject(library_id);
-  if (!libObj.has_value()) {
-    std::cout << "Library object not found\n";
+  auto library = rt->get<CudaLibrary>(library_id);
+  if (!library) return NXS_InvalidKernel;
+
+  CUfunction kernel = nullptr;
+  CUresult result = cuModuleGetFunction(&kernel, library->module, kernel_name);
+  if (result != CUDA_SUCCESS) {
+    const char *error_string;
+    cuGetErrorString(result, &error_string);
+    NXSAPI_LOG(NXSAPI_STATUS_ERR,
+               "GetKernel " << kernel_name << " " << error_string);
     return NXS_InvalidKernel;
   }
-
-  auto library = libObj.value()->get<CudaLibrary>();
-  if (!library) {
-    std::cout << "Cast to CudaLibrary failed or obj field is null\n";
-    return NXS_InvalidKernel;
-  }
-
-  auto kernel = library->createKernel(kernel_name);
 
   return rt->addObject(kernel, false);
+}
+
+/************************************************************************
+ * @def GetKernelProperty
+ * @brief Return Kernel properties
+ ***********************************************************************/
+extern "C" nxs_status NXS_API_CALL nxsGetKernelProperty(nxs_int kernel_id,
+                                           nxs_uint kernel_property_id,
+                                           void *property_value,
+                                           size_t *property_value_size) {
+  auto rt = getRuntime();
+  auto kernel = rt->getPtr<CUfunction>(kernel_id);
+  if (!kernel) return NXS_InvalidKernel;
+
+  switch (kernel_property_id) {
+    case NP_Keys: {
+      nxs_long keys[] = {NP_Value, NP_CoreRegisterSize, NP_SIMDSize,
+                         NP_CoreMemorySize, NP_MaxThreadsPerBlock};
+      return rt::getPropertyVec(property_value, property_value_size, keys, 5);
+    }
+    case NP_Value: {
+      return rt::getPropertyInt(property_value, property_value_size,
+                                (nxs_long)kernel);
+    }
+    case NP_CoreRegisterSize: {
+      int n_regs = 0;
+      CHECK_CU(cuFuncGetAttribute(&n_regs, CU_FUNC_ATTRIBUTE_NUM_REGS, kernel));
+      return rt::getPropertyInt(property_value, property_value_size, n_regs);
+    }
+    case NP_SIMDSize: {
+      int simd_size = 0;
+      CHECK_CU(cuFuncGetAttribute(
+          &simd_size, CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK, kernel));
+      return rt::getPropertyInt(property_value, property_value_size, simd_size);
+    }
+    case NP_CoreMemorySize: {
+      int shared_size = 0;
+      CHECK_CU(cuFuncGetAttribute(&shared_size,
+                                  CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES, kernel));
+      return rt::getPropertyInt(property_value, property_value_size,
+                                shared_size);
+    }
+    case NP_MaxThreadsPerBlock: {
+      int max_threads = 0;
+      CHECK_CU(cuFuncGetAttribute(&max_threads, CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK, kernel));
+      return rt::getPropertyInt(property_value, property_value_size, max_threads);
+    }
+    default:
+      return NXS_InvalidProperty;
+  }
+
+  return NXS_Success;
 }
 
 /************************************************************************
@@ -400,7 +483,7 @@ extern "C" nxs_int NXS_API_CALL nxsCreateStream(nxs_int device_id,
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
-extern "C" nxs_int nxsCreateSchedule(
+extern "C" nxs_int NXS_API_CALL nxsCreateSchedule(
   nxs_int device_id,
   nxs_uint sched_properties
 )
@@ -422,7 +505,7 @@ extern "C" nxs_int nxsCreateSchedule(
 * @brief Release the buffer on the device
 * @return Error status or Succes.
 ***********************************************************************/
-extern "C" nxs_status nxsRunSchedule(
+extern "C" nxs_status NXS_API_CALL nxsRunSchedule(
   nxs_int schedule_id,
   nxs_int stream_id,
   nxs_bool blocking
@@ -437,10 +520,8 @@ extern "C" nxs_status nxsRunSchedule(
   auto scheduleObject = rt->getObject(schedule_id);
   auto schedule = scheduleObject ? (*scheduleObject)->get<CudaSchedule>() : nullptr;
   if (!schedule) return NXS_InvalidSchedule;
-  auto device = rt->get<CudaDevice>(schedule->device_id);
+  auto device = rt->getDevice(schedule->device_id);
   if (!device) return NXS_InvalidDevice;
-
-  CHECK_CUDA(cudaSetDevice(schedule->device_id));
 
   auto stream = rt->getPtr<cudaStream_t>(stream_id);
   auto status = schedule->run(stream);
@@ -462,6 +543,7 @@ extern "C" nxs_status nxsRunSchedule(
 extern "C" nxs_status NXS_API_CALL
 nxsGetStreamProperty(nxs_int stream_id, nxs_uint stream_property_id,
                      void *property_value, size_t *property_value_size) {
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "getStreamProperty " << stream_property_id);
   return NXS_Success;
 }
 
@@ -471,6 +553,7 @@ nxsGetStreamProperty(nxs_int stream_id, nxs_uint stream_property_id,
  * @return Error status or Succes.
  ***********************************************************************/
 extern "C" nxs_status NXS_API_CALL nxsReleaseStream(nxs_int stream_id) {
+  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "releaseStream " << stream_id);
   auto rt = getRuntime();
   if (!rt->dropObject(stream_id)) return NXS_InvalidStream;
   return NXS_Success;
@@ -486,24 +569,15 @@ extern "C" nxs_int NXS_API_CALL
 nxsCreateCommand(nxs_int schedule_id, nxs_int kernel_id) {
   auto rt = getRuntime();
 
-  auto scheduleObject = rt->getObject(schedule_id);
-  auto schedule = scheduleObject ? (*scheduleObject)->get<CudaSchedule>() : nullptr;
-  if (!schedule)
-      return NXS_InvalidSchedule;
+  auto schedule = rt->get<CudaSchedule>(schedule_id);
+  if (!schedule) return NXS_InvalidSchedule;
 
-  auto kernelObject = rt->getObject(kernel_id);
-  auto kernel = kernelObject ? (*kernelObject)->get<CudaKernel>() : nullptr;
-  if (!kernel) {
-    std::cout << "Failed to get kernel object with ID: " << kernel_id << std::endl;
-    return NXS_InvalidKernel;
-  }
+  auto kernel = rt->getPtr<CUfunction>(kernel_id);
+  if (!kernel) return NXS_InvalidKernel;
 
-  CudaCommand *command = new CudaCommand(kernel);
-  auto ret = rt->addObject(command, true);
-  if (ret)
-    schedule->addCommand(command);
-
-  return ret;
+  auto command = rt->getCommand(kernel);
+  schedule->addCommand(command);
+  return rt->addObject(command);
 }
 
 /************************************************************************
@@ -528,9 +602,8 @@ extern "C" nxs_int NXS_API_CALL nxsCreateSignalCommand(nxs_int schedule_id,
   }
 
   auto *cmd = rt->getCommand(event, NXS_CommandType_Signal, signal_value);
-  auto res = rt->addObject(cmd);
   sched->addCommand(cmd);
-  return res;
+  return rt->addObject(cmd);
 }
 
 /************************************************************************
@@ -553,9 +626,8 @@ extern "C" nxs_int NXS_API_CALL nxsCreateWaitCommand(nxs_int schedule_id,
 
   //NXSAPI_LOG(NXSAPI_STATUS_NOTE, "EventQuery: " << hipEventQuery(event));
   auto *cmd = rt->getCommand(event, NXS_CommandType_Wait, wait_value);
-  auto res = rt->addObject(cmd);
   sched->addCommand(cmd);
-  return res;
+  return rt->addObject(cmd);
 }
 
 /************************************************************************
@@ -569,21 +641,17 @@ extern "C" nxs_status NXS_API_CALL nxsSetCommandArgument(nxs_int command_id,
                                                          nxs_int buffer_id) {
   auto rt = getRuntime();
 
-  auto commandObject = rt->getObject(command_id);
-  auto command = commandObject ? (*commandObject)->get<CudaCommand>() : nullptr;
-  if (!command)
-    return NXS_InvalidCommand;
+  auto command = rt->get<CudaCommand>(command_id);
+  if (!command) return NXS_InvalidCommand;
 
-  auto bufferObject = rt->getObject(buffer_id);
-  auto buffer = bufferObject ? (*bufferObject)->get<CudaBuffer>() : nullptr;
-  if (!buffer)
-    return NXS_InvalidArgIndex;
+  auto buffer = rt->get<CudaBuffer>(buffer_id);
+  if (!buffer) return NXS_InvalidBuffer;
 
   return command->setArgument(argument_index, buffer);
 }
 /************************************************************************
- * @def CreateCommand
- * @brief Create command buffer on the device
+ * @def FinalizeCommand
+ * @brief Finalize command buffer on the device
  * @return Negative value is an error status.
  *         Non-negative is the bufferId.
  ***********************************************************************/
@@ -597,10 +665,8 @@ nxsFinalizeCommand(
 {
   auto rt = getRuntime();
 
-  auto commandObject = rt->getObject(command_id);
-  auto command = commandObject ? (*commandObject)->get<CudaCommand>() : nullptr;
-  if (!command)
-    return NXS_InvalidCommand;
+  auto command = rt->get<CudaCommand>(command_id);
+  if (!command) return NXS_InvalidCommand;
 
   return command->finalize(grid_size, group_size);
 }
