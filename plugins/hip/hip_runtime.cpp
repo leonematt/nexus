@@ -164,26 +164,11 @@ using namespace nxs;
 ////////////////////////////////////////////////////////////////////////////
 // HIP CHECK and Print value
 ////////////////////////////////////////////////////////////////////////////
-template <typename T>
-std::string print_value(T value) {
-  std::stringstream ss;
-  ss << " - 0x" << std::hex << (int64_t)value;
-  return ss.str();
-}
-
-std::string print_value() { return ""; }
-
-template <typename T, typename... Args>
-std::string print_value(T value, Args... args) {
-  std::stringstream ss;
-  ss << " - 0x" << std::hex << (int64_t)value;
-  return ss.str() + print_value(args...);
-}
 
 #define HIP_CHECK(err_code, hip_cmd, ...)                                     \
   do {                                                                        \
     NXSAPI_LOG(NXSAPI_STATUS_NOTE,                                            \
-               "HIP_CHECK " << #hip_cmd << print_value(__VA_ARGS__));         \
+               "HIP_CHECK " << #hip_cmd << nxs::rt::print_value(__VA_ARGS__));         \
     hipError_t err = hip_cmd(__VA_ARGS__);                                    \
     if (err != hipSuccess) {                                                  \
       NXSAPI_LOG(NXSAPI_STATUS_ERR, "HIP error: " << hipGetErrorString(err)); \
@@ -252,9 +237,9 @@ class HipCommand {
         return NXS_InvalidCommand;
     }
   }
-  void setDimensions(nxs_int block_size, nxs_int grid_size) {
-    this->block_size = block_size;
+  void setDimensions(nxs_int grid_size, nxs_int block_size) {
     this->grid_size = grid_size;
+    this->block_size = block_size;
   }
   void release() {
   }
@@ -752,8 +737,8 @@ extern "C" nxs_int NXS_API_CALL nxsCreateSchedule(nxs_int device_id,
 }
 
 /************************************************************************
- * @def ReleaseCommandList
- * @brief Release the buffer on the device
+ * @def RunSchedule
+ * @brief Run the schedule on the device
  * @return Error status or Succes.
  ***********************************************************************/
 extern "C" nxs_status NXS_API_CALL nxsRunSchedule(nxs_int schedule_id,
@@ -897,27 +882,16 @@ extern "C" nxs_status NXS_API_CALL nxsSetCommandArgument(nxs_int command_id,
  *         Non-negative is the bufferId.
  ***********************************************************************/
 extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
-                                                      nxs_int group_size,
-                                                      nxs_int grid_size) {
+                                                      nxs_int grid_size,
+                                                      nxs_int group_size) {
   NXSAPI_LOG(NXSAPI_STATUS_NOTE, "finalizeCommand " << command_id << " - "
-                                                    << group_size << " - "
-                                                    << grid_size);
+                                                    << grid_size << " - "
+                                                    << group_size);
   auto rt = getRuntime();
   auto cmd = rt->get<HipCommand>(command_id);
   if (!cmd) return NXS_InvalidCommand;
 
-  cmd->setDimensions(group_size, grid_size);
+  cmd->setDimensions(grid_size, group_size);
 
-  return NXS_Success;
-}
-
-/************************************************************************
- * @def ReleaseCommand
- * @brief Release the command on the device
- * @return Error status or Succes.
- ***********************************************************************/
-extern "C" nxs_status NXS_API_CALL nxsReleaseCommand(nxs_int command_id) {
-  NXSAPI_LOG(NXSAPI_STATUS_NOTE, "releaseCommand " << command_id);
-  auto rt = getRuntime();
   return NXS_Success;
 }
