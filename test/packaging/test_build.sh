@@ -4,9 +4,9 @@ set -e
 
 detect_os() {
   case "$(uname -s)" in
-    Darwin*)  echo "macos" ;;
-    Linux*)   echo "linux" ;;
-    *)        echo "unknown" ;;
+    Darwin*)  printf "macos" ;;
+    Linux*)   printf "linux" ;;
+    *)        printf "unknown" ;;
   esac
 }
 
@@ -21,13 +21,14 @@ main() {
   make -j$(nproc)
 
   if [[ "$os_type" == "macos" ]]; then
-    echo "Running macOS build"
+    printf "Running macOS test"
+    #./test/cpp/gpu/nexus_gpu_integration_test metal metal_kernels/kernel.metallib add_vectors
+
   elif [[ "$os_type" == "linux" ]]; then
-    echo "Running Linux build"
-    ./test/cpp/gpu/nexus-test-linux
-    ./test/cpp/gpu/test_multi_stream_sync cuda cuda_kernels/add_vectors.ptx add_vectors
+    printf "Running Linux test"
+    ./test/cpp/gpu/nexus_gpu_integration_test cuda cuda_kernels/add_vectors.ptx add_vectors
   else
-    echo "Unsupported OS: $os_type"
+    printf "Unsupported OS: $os_type"
     exit 1
   fi
 
