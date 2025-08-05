@@ -8,6 +8,8 @@
 #include <cuda_utils.h>
 #include <rt_runtime.h>
 
+#include <nvml.h>
+
 class CudaRuntime : public rt::Runtime {
 
 public:
@@ -28,6 +30,9 @@ public:
 
   nxs_status setupCudaDevices() {
     CU_CHECK(NXS_InvalidDevice, cuInit, 0);
+    nvmlReturn_t result = nvmlInit();
+    if (result != NVML_SUCCESS)
+      return NXS_InvalidDevice;
 
     CUDA_CHECK(NXS_InvalidDevice, cudaGetDeviceCount, &numDevices);
 
