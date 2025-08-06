@@ -202,6 +202,11 @@ class CMakeBuild(build_ext):
 
             shutil.copytree(runtime_libs_build, runtime_libs_target)
 
+class BdistWheel(bdist_wheel):
+  def finalize_options(self):
+    bdist_wheel.finalize_options(self)
+    self.plat_name = "manylinux1_x86_64"
+
 def get_package_dirs():
     yield ("", "python")
 
@@ -237,9 +242,9 @@ CLASSIFIERS = BASE_CLASSIFIERS + PYTHON_CLASSIFIERS
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name=os.environ.get("NEXUS_WHEEL_NAME", "nexus"),
+    name=os.environ.get("NEXUS_WHEEL_NAME", "knexus"),
     version="0.0.1",
-    author="Simon Waters",
+    author="Simon Waters, Matthew Leon, Alex Baden",
     author_email="simon@kernelize.ai",
     description="",
     long_description="",
@@ -264,6 +269,7 @@ setup(
         "egg_info": egg_info,
         "install": install,
         "sdist": sdist,
+        "bdist_wheel": BdistWheel,
     },
     zip_safe=False,
     keywords=["Runtime", "Triton"],
