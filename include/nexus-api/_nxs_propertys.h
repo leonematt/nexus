@@ -153,6 +153,9 @@ NEXUS_API_PROP(BaseClock,             _prop_int,        "Base Clock (MHz)")
 NEXUS_API_PROP(PowerModes,            _prop_str_vec,    "Power Modes")
 NEXUS_API_PROP(MaxPower,              _prop_flt,        "Max Power")
 
+NEXUS_API_PROP(CoreUtilization,      _prop_int,          "Core Utilization")
+NEXUS_API_PROP(MemoryUtilization,    _prop_int,          "Memory Utilization")
+
 /************************************************************************
  * Cleanup
  ***********************************************************************/

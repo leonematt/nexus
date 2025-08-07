@@ -24,6 +24,11 @@ TEST_F(NexusIntegration, MULTI_STREAM_SYNC) {
   EXPECT_EQ(result, SUCCESS);
 }
 
+TEST_F(NexusIntegration, SMI) {
+  int result = test_smi(g_argc, g_argv);
+  EXPECT_EQ(result, SUCCESS);
+}
+
 int main(int argc, char** argv) {
   g_argc = argc;
   g_argv = argv;

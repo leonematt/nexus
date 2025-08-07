@@ -10,6 +10,8 @@
 #include <rt_utilities.h>
 #include <string.h>
 
+#include <nvml.h>
+
 using namespace nxs;
 
 CudaRuntime *getRuntime() {
@@ -78,7 +80,6 @@ nxsGetDeviceProperty(nxs_int device_id, nxs_uint property_id,
   if (!device) return NXS_InvalidDevice;
 
   cudaDeviceProp &props = device->props;
-
   switch (property_id) {
     case NP_Keys: {
       nxs_long keys[] = {NP_Name,
@@ -90,7 +91,9 @@ nxsGetDeviceProperty(nxs_int device_id, nxs_uint property_id,
                          NP_GlobalMemorySize,
                          NP_CoreMemorySize,
                          NP_CoreRegisterSize,
-                         NP_SIMDSize};
+                         NP_SIMDSize,
+                         NP_CoreUtilization,
+                         NP_MemoryUtilization};
       return rt::getPropertyVec(property_value, property_value_size, keys, 10);
     }
     case NP_Name:
@@ -131,6 +134,36 @@ nxsGetDeviceProperty(nxs_int device_id, nxs_uint property_id,
     case NP_MemoryBusWidth:
       return rt::getPropertyInt(property_value, property_value_size,
                                 props.memoryBusWidth);
+    case NP_CoreUtilization: {
+      nvmlDevice_t nvml_device;
+      nvmlUtilization_t utilization;
+      nxs_long value = -1;
+
+      if (nvmlDeviceGetHandleByIndex(device_id, &nvml_device) != NVML_SUCCESS)
+        return NXS_InvalidDevice;
+
+      if (nvmlDeviceGetUtilizationRates(nvml_device, &utilization) != NVML_SUCCESS)
+        return NXS_InvalidDevice;
+
+      value = utilization.gpu;
+
+      return rt::getPropertyInt(property_value, property_value_size, value);
+    }
+    case NP_MemoryUtilization: {
+      nvmlDevice_t nvml_device;
+      nvmlMemory_t memInfo;
+      nxs_long value = -1;
+
+      if (nvmlDeviceGetHandleByIndex(device_id, &nvml_device) != NVML_SUCCESS)
+        return NXS_InvalidDevice;
+
+      if (nvmlDeviceGetMemoryInfo(nvml_device, &memInfo) != NVML_SUCCESS)
+        return NXS_InvalidDevice;
+
+      value = (memInfo.used * 100) / memInfo.total;  // Memory usage percentage
+
+      return rt::getPropertyInt(property_value, property_value_size, value);
+    }
     default:
       return NXS_InvalidProperty;
   }
