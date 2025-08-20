@@ -208,7 +208,7 @@ schedule = device.create_schedule()
 # Add kernel command
 cmd = schedule.create_command(kernel)
 cmd.set_buffer(0, input_buffer)
-cmd.finalize(256, 1024)
+cmd.finalize([256], [1024])
 
 # Add signal command
 signal_cmd = schedule.create_signal_command(event, 1)
@@ -271,7 +271,7 @@ kernel = lib.get_kernel("add_vectors")
 schedule = device.create_schedule()
 command = schedule.create_command(kernel)
 command.set_buffer(0, buf)
-command.finalize(32, 1024)
+command.finalize([32], [1024])
 
 # Run the schedule
 schedule.run()
