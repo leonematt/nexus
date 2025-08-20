@@ -69,6 +69,14 @@ NEXUS_API_FUNC(nxs_status, GetRuntimeProperty,
 )
 
 /************************************************************************
+ * @def SetDevice
+ * @brief Set the Device to use
+ ***********************************************************************/
+NEXUS_API_FUNC(nxs_int, SetDevice,
+    nxs_int device_id
+)
+
+/************************************************************************
  * @def GetDeviceProperty
  * @brief Return Device properties
  ***********************************************************************/
@@ -374,8 +382,8 @@ NEXUS_API_FUNC(nxs_status, GetCommandProperty,
  ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, FinalizeCommand,
     nxs_int command_id,
-    nxs_int grid_size,
-    nxs_int group_size
+    nxs_dim3 grid_size,
+    nxs_dim3 block_size
 )
 
 
