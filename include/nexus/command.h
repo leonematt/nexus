@@ -36,7 +36,7 @@ class Command : public Object<detail::CommandImpl> {
   nxs_status setArgument(nxs_uint index, nxs_float value);
   nxs_status setArgument(nxs_uint index, nxs_double value);
 
-  nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
+  nxs_status finalize(nxs_dim3 gridSize, nxs_dim3 groupSize);
 };
 
 typedef Objects<Command> Commands;

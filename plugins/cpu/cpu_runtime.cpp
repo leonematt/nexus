@@ -488,15 +488,15 @@ extern "C" nxs_status NXS_API_CALL nxsSetCommandArgument(nxs_int command_id,
  *         Non-negative is the bufferId.
  ***********************************************************************/
 extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
-                                                      nxs_int grid_size,
-                                                      nxs_int group_size) {
+                                                      nxs_dim3 grid_size,
+                                                      nxs_dim3 group_size) {
   auto rt = getRuntime();
   auto cmd = rt->getObject(command_id);
   if (!cmd) return NXS_InvalidCommand;
 
-  int64_t global_size[3] = {grid_size, 1, 1};
+  int64_t global_size[3] = {grid_size.x, 1, 1};
   auto global_buf = new rt::Buffer(sizeof(global_size), global_size, true);
-  int64_t local_size[3] = {group_size, 1, 1};
+  int64_t local_size[3] = {group_size.x, 1, 1};
   auto local_buf = new rt::Buffer(sizeof(local_size), local_size, true);
   (*cmd)->addChild(rt->addObject(global_buf, true));
   (*cmd)->addChild(rt->addObject(local_buf, true));

@@ -79,7 +79,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
                         self.assertGreaterEqual(result3, 0)
                         
                         # Finalize and run
-                        finalize_result = command.finalize(32, size)
+                        finalize_result = command.finalize([32], [size])
                         self.assertGreaterEqual(finalize_result, 0)
                         
                         run_result = schedule.run(blocking=True)
@@ -132,7 +132,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
                             command = schedule.create_command(kernel)
                             if command is not None:
                                 command.set_buffer(0, buf2)
-                                command.finalize(32, 256)
+                                command.finalize([32], [256])
                                 result = schedule.run(blocking=True)
                                 self.assertGreaterEqual(result, 0)
                 except (FileNotFoundError, RuntimeError, AttributeError):
@@ -166,7 +166,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
                             command = schedule.create_command(kernel)
                             if command is not None:
                                 command.set_buffer(0, buffer)
-                                command.finalize(32, buffer.get_size() // 4)  # Assuming float32
+                                command.finalize([32], [buffer.get_size() // 4])  # Assuming float32
                         
                         # Run schedule
                         result = schedule.run(blocking=True)
@@ -248,7 +248,7 @@ class TestErrorHandling(unittest.TestCase):
                                 command = schedule.create_command(kernel)
                                 if command is not None:
                                     command.set_buffer(0, buffers[0])
-                                    command.finalize(32, 256)
+                                    command.finalize([32], [256])
                                     result = schedule.run(blocking=True)
                                     self.assertGreaterEqual(result, 0)
                     except (FileNotFoundError, RuntimeError, AttributeError):
@@ -336,7 +336,7 @@ class TestPerformance(unittest.TestCase):
                                     command = schedule.create_command(kernel)
                                     if command is not None:
                                         command.set_buffer(0, buffer)
-                                        command.finalize(32, 16)
+                                        command.finalize([32], [16])
                                         result = schedule.run(blocking=True)
                                         self.assertGreaterEqual(result, 0)
                     except (FileNotFoundError, RuntimeError, AttributeError):

@@ -395,33 +395,39 @@ void pynexus::init_system_bindings(py::module &m) {
                return self.setArgument(index, make_buffer(value));
              }
            })
-      .def("finalize", [](Command &self, int gridSize, int groupSize) {
-        return self.finalize(gridSize, groupSize);
+      .def("finalize", [](Command& self, py::list grid, py::list block) {
+         auto list_to_dim3 = [](const py::list& l) -> nxs_dim3 {
+             nxs_int x = l.size() > 0 ? l[0].cast<nxs_int>() : 1;
+             nxs_int y = l.size() > 1 ? l[1].cast<nxs_int>() : 1;
+             nxs_int z = l.size() > 2 ? l[2].cast<nxs_int>() : 1;
+             return nxs_dim3{ x, y, z };
+         };
+        return self.finalize(list_to_dim3(grid), list_to_dim3(block));
       });
 
   make_object_class<Schedule>(m, "_schedule")
       .def(
           "create_command",
           [](Schedule &self, Kernel kernel, std::vector<Buffer> buffers,
-             std::vector<int> dims) {
+             std::vector<nxs_dim3> dims) {
             auto cmd = self.createCommand(kernel);
             if (cmd) {
               int idx = 0;
               for (auto &buf : buffers) {
                 cmd.setArgument(idx++, buf);
               }
-              if (dims.size() == 2 && dims[0] > 0 && dims[1] > 0) {
+              if (dims.size() == 2 && dims[0].x > 0 && dims[1].x > 0) {
                 cmd.finalize(dims[0], dims[1]);
               }
             }
             return cmd;
           },
           py::arg("kernel"), py::arg("buffers") = std::vector<Buffer>(),
-          py::arg("dims") = std::vector<int>())
+          py::arg("dims") = std::vector<nxs_dim3>())
       .def(
           "create_command",
           [](Schedule &self, Kernel kernel, std::vector<py::object> buffers,
-             std::vector<int> dims) {
+             std::vector<nxs_dim3> dims) {
             auto cmd = self.createCommand(kernel);
             if (cmd) {
               int idx = 0;
@@ -440,7 +446,7 @@ void pynexus::init_system_bindings(py::module &m) {
                   cmd.setArgument(idx++, buf_obj);
                 }
               }
-              if (dims.size() == 2 && dims[0] > 0 && dims[1] > 0) {
+              if (dims.size() == 2 && dims[0].x > 0 && dims[1].x > 0) {
                 cmd.finalize(dims[0], dims[1]);
               }
             }

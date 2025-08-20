@@ -141,7 +141,7 @@ class TestKernelExecution(unittest.TestCase):
                         self.assertGreaterEqual(result1, 0)
                         self.assertGreaterEqual(result2, 0)
                         self.assertGreaterEqual(result3, 0)
-                        finalize_result = command.finalize(32, 256)
+                        finalize_result = command.finalize([32], [256])
                         self.assertGreaterEqual(finalize_result, 0)
                         run_result = schedule.run(blocking=True)
                         self.assertGreaterEqual(run_result, 0)
