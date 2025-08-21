@@ -257,7 +257,7 @@ typedef float           nxs_float;
 typedef double          nxs_double;
 
 struct nxs_dim3 {
-    nxs_int x = 0, y = 1, z = 1;
+    nxs_uint x,y,z;
 };
 
 /* Macro names and corresponding values defined by OpenCL */

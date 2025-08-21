@@ -32,7 +32,7 @@ cmd.set_arg(0, nb0)
 cmd.set_arg(0, nb0)
 cmd.set_arg(1, nb1)
 cmd.set_arg(2, nb2)
-cmd.finalize([32], [32])
+cmd.finalize([32,1,1], [32,1,1])
 
 sched.run()
 

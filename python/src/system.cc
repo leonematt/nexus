@@ -397,12 +397,15 @@ void pynexus::init_system_bindings(py::module &m) {
            })
       .def("finalize", [](Command& self, py::list grid, py::list block) {
          auto list_to_dim3 = [](const py::list& l) -> nxs_dim3 {
-             nxs_int x = l.size() > 0 ? l[0].cast<nxs_int>() : 1;
-             nxs_int y = l.size() > 1 ? l[1].cast<nxs_int>() : 1;
-             nxs_int z = l.size() > 2 ? l[2].cast<nxs_int>() : 1;
+             nxs_uint x = l.size() > 0 ? l[0].cast<nxs_uint>() : 1;
+             nxs_uint y = l.size() > 1 ? l[1].cast<nxs_uint>() : 1;
+             nxs_uint z = l.size() > 2 ? l[2].cast<nxs_uint>() : 1;
              return nxs_dim3{ x, y, z };
          };
         return self.finalize(list_to_dim3(grid), list_to_dim3(block));
+      })
+      .def("finalize", [](Command& self, nxs_uint grid, nxs_uint block) {
+        return self.finalize({grid,1,1}, {block,1,1});
       });
 
   make_object_class<Schedule>(m, "_schedule")

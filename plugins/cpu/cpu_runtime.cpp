@@ -494,9 +494,9 @@ extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
   auto cmd = rt->getObject(command_id);
   if (!cmd) return NXS_InvalidCommand;
 
-  int64_t global_size[3] = {grid_size.x, 1, 1};
+  int64_t global_size[3] = {grid_size.x, grid_size.y, grid_size.z};
   auto global_buf = new rt::Buffer(sizeof(global_size), global_size, true);
-  int64_t local_size[3] = {group_size.x, 1, 1};
+  int64_t local_size[3] = {group_size.x, group_size.y, group_size.z};
   auto local_buf = new rt::Buffer(sizeof(local_size), local_size, true);
   (*cmd)->addChild(rt->addObject(global_buf, true));
   (*cmd)->addChild(rt->addObject(local_buf, true));
