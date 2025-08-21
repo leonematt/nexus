@@ -357,44 +357,36 @@ void pynexus::init_system_bindings(py::module &m) {
       .def("signal", [](Event &self, int signal_value) { return self.signal(signal_value); }, py::arg("signal_value") = 1)
       .def("wait", [](Event &self, int wait_value) { return self.wait(wait_value); }, py::arg("wait_value") = 1);
 
-  make_object_class<Command>(m, "_command")
-      .def("get_event", [](Command &self) { return self.getEvent(); })
-      .def("get_kernel", [](Command &self) { return self.getKernel(); })
-      .def("set_arg", [](Command &self, int index,
-                         Buffer buf) { return self.setArgument(index, buf); })
-      .def("set_arg",
-           [](Command &self, int index, nxs_int value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, nxs_uint value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, nxs_long value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, nxs_ulong value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, nxs_float value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, nxs_double value) {
-             return self.setArgument(index, value);
-           })
-      .def("set_arg",
-           [](Command &self, int index, py::object value) {
-             if (value.is_none()) {
-               auto none_buf = nexus::getSystem().createBuffer(0, nullptr, NXS_BufferSettings_OnDevice);
-               return self.setArgument(index, none_buf);
-             } else {
-               return self.setArgument(index, make_buffer(value));
-             }
-           })
+make_object_class<Command>(m, "_command")
+  .def("get_event",  [](Command &self) { return self.getEvent(); })
+  .def("get_kernel", [](Command &self) { return self.getKernel(); })
+
+  // Buffer arg
+  .def("set_arg", [](Command &self, int index, Buffer buf) {
+      return self.setArgument(index, buf);
+  })
+
+  // Width-specific scalar setters — use these from Python:
+  .def("set_arg_i32", [](Command &self, int index, std::int32_t v) {
+      return self.setArgument(index, (nxs_int)v);
+  })
+  .def("set_arg_u32", [](Command &self, int index, std::uint32_t v) {
+      return self.setArgument(index, (nxs_uint)v);
+  })
+  .def("set_arg_i64", [](Command &self, int index, std::int64_t v) {
+      return self.setArgument(index, (nxs_long)v);
+  })
+  .def("set_arg_u64", [](Command &self, int index, std::uint64_t v) {
+      return self.setArgument(index, (nxs_ulong)v);
+  })
+
+  // (Optional) keep float/double if you really need them
+  .def("set_arg_f32", [](Command &self, int index, float v) {
+      return self.setArgument(index, (nxs_float)v);
+  })
+  .def("set_arg_f64", [](Command &self, int index, double v) {
+      return self.setArgument(index, (nxs_double)v);
+  })
       .def("finalize", [](Command &self, int gridSize, int groupSize) {
         return self.finalize(gridSize, groupSize);
       });

@@ -1,110 +1,261 @@
-import numpy as np
-import nexus
+#!/usr/bin/env python3
+import argparse
 import math
 import sys
+import numpy as np
+import torch
 
-# Helper: build cos/sin cache like vLLM
-def create_cos_sin_cache(max_position, rot_dim):
-    cos_sin_cache = np.zeros((max_position, rot_dim), dtype=np.float32)
+import nexus
+
+# -----------------------------
+# CPU reference implementation
+# -----------------------------
+def rope_cpu_ref(query_in, positions, rot_dim, num_heads, head_size,
+                 cache, is_neox=False):
+    """
+    Recompute rotary embeddings (float32) on CPU.
+
+    query_in:  (N*H*S,) float32
+    positions: (N,) int64
+    cache:     (max_pos*rot_dim,) float32 laid out per pos: [cos[0:rot_dim/2], sin[0:rot_dim/2]]
+    """
+    assert rot_dim % 2 == 0
+    num_tokens = positions.shape[0]
+    embed_dim = rot_dim // 2
+
+    q = query_in.reshape(num_tokens, num_heads, head_size).copy()
+    for t in range(num_tokens):
+        pos = int(positions[t])
+        base = pos * rot_dim
+        cos = cache[base:base+embed_dim]
+        sin = cache[base+embed_dim:base+2*embed_dim]
+
+        for h in range(num_heads):
+            arr = q[t, h]  # shape [head_size]
+            if is_neox:
+                # NeoX pairs: (i, i+embed_dim)
+                x = arr[0:embed_dim]
+                y = arr[embed_dim:2*embed_dim]
+                xo = x * cos - y * sin
+                yo = y * cos + x * sin
+                arr[0:embed_dim] = xo
+                arr[embed_dim:2*embed_dim] = yo
+            else:
+                # GPT-J pairs: (2*i, 2*i+1)
+                x = arr[0:2*embed_dim:2]
+                y = arr[1:2*embed_dim:2]
+                xo = x * cos - y * sin
+                yo = y * cos + x * sin
+                arr[0:2*embed_dim:2] = xo
+                arr[1:2*embed_dim:2] = yo
+
+    return q.reshape(-1)
+
+
+def validate_rope(query_orig, query_gpu, positions, rot_dim, num_heads, head_size,
+                  cache, is_neox=False, atol=5e-6, rtol=5e-6):
+    cpu = rope_cpu_ref(query_orig, positions, rot_dim, num_heads, head_size, cache, is_neox)
+    diff = np.abs(cpu - query_gpu)
+    max_err  = float(diff.max())
+    mean_err = float(diff.mean())
+    p99      = float(np.percentile(diff, 99))
+    ok = np.allclose(cpu, query_gpu, atol=atol, rtol=rtol)
+
+    # Norm preservation check on token 1 pairs (like your C++ prints)
+    max_len_err = 0.0
+    if positions.shape[0] >= 2:
+        base = num_heads * head_size  # token index 1 offset
+        if not is_neox:
+            for i in range(0, rot_dim, 2):
+                xa, ya = query_orig[base+i],   query_orig[base+i+1]
+                xb, yb = query_gpu [base+i],   query_gpu [base+i+1]
+                max_len_err = max(max_len_err, abs((xa*xa+ya*ya) - (xb*xb+yb*yb)))
+        else:
+            half = rot_dim // 2
+            for i in range(half):
+                xa, ya = query_orig[base+i],   query_orig[base+half+i]
+                xb, yb = query_gpu [base+i],   query_gpu [base+half+i]
+                max_len_err = max(max_len_err, abs((xa*xa+ya*ya) - (xb*xb+yb*yb)))
+
+    return ok, max_err, max_len_err, cpu
+
+# -----------------------------
+# Helpers to set scalar widths
+# -----------------------------
+def set_i32(cmd, idx, val):
+    if hasattr(cmd, "set_arg_i32"):
+        return cmd.set_arg_i32(idx, int(val))
+    # fallback to generic (pybind picks an integer overload); to be safer, clamp to 32-bit range
+    return cmd.set_arg(idx, int(val) & 0xFFFFFFFF)
+
+def set_i64(cmd, idx, val):
+    if hasattr(cmd, "set_arg_i64"):
+        return cmd.set_arg_i64(idx, int(val))
+    # fallback to generic; Python int is unbounded; pybind usually picks 64-bit on large values
+    return cmd.set_arg(idx, int(val))
+
+# -----------------------------
+# Main
+# -----------------------------
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("runtime", help="runtime name (e.g., cuda)")
+    ap.add_argument("ptx_path", help="path to PTX (e.g., build.local/cuda_kernels/pos_encoding_kernels.ptx)")
+    ap.add_argument("kernel", help="kernel symbol (e.g., mangled rotary kernel)")
+    ap.add_argument("--num_tokens", type=int, default=4)
+    ap.add_argument("--num_heads",  type=int, default=8)
+    ap.add_argument("--num_kv_heads", type=int, default=8)
+    ap.add_argument("--head_size",  type=int, default=64)
+    ap.add_argument("--max_position", type=int, default=100)
+    ap.add_argument("--rot_dim", type=int, default=64, help="rotary dimension (pairs*2)")
+    ap.add_argument("--neox", type=int, default=0, help="1 for NeoX pairing, 0 for GPT-J pairing")
+    args = ap.parse_args()
+
+    runtime_name   = args.runtime
+    kernel_file    = args.ptx_path
+    kernel_name    = args.kernel
+    num_tokens     = args.num_tokens
+    num_heads      = args.num_heads
+    num_kv_heads   = args.num_kv_heads
+    head_size      = args.head_size
+    max_position   = args.max_position
+    rot_dim        = args.rot_dim
+    is_neox        = (args.neox != 0)
+
+    # -----------------------------
+    # Build inputs on CPU (torch) so nexus can memcpy to device
+    # -----------------------------
+    torch.manual_seed(17)
+    positions_t = torch.arange(num_tokens, dtype=torch.long)  # int64 [0..num_tokens-1]
+
+    q_sz = num_tokens * num_heads * head_size
+    k_sz = num_tokens * num_kv_heads * head_size
+    c_sz = max_position * rot_dim
+
+    query_in_t = torch.empty(q_sz, dtype=torch.float32)
+    key_in_t   = torch.empty(k_sz, dtype=torch.float32)
+    torch.nn.init.uniform_(query_in_t, a=-1.0, b=1.0)
+    torch.nn.init.uniform_(key_in_t,   a=-1.0, b=1.0)
+
+    # cos/sin cache layout: per position: [cos[0:embed_dim], sin[0:embed_dim]]
+    embed_dim = rot_dim // 2
+    cos_sin_cache_t = torch.empty(c_sz, dtype=torch.float32)
     for pos in range(max_position):
-        for dim in range(rot_dim // 2):
-            angle = pos / math.pow(10000.0, 2.0 * dim / rot_dim)
-            cos_sin_cache[pos, dim] = math.cos(angle)                     # cos
-            cos_sin_cache[pos, rot_dim // 2 + dim] = math.sin(angle)      # sin
-    return cos_sin_cache.flatten()
+        for dim in range(embed_dim):
+            angle = pos / (10000.0 ** (2.0 * dim / rot_dim))
+            cos_sin_cache_t[pos*rot_dim + dim]           = math.cos(angle)
+            cos_sin_cache_t[pos*rot_dim + embed_dim+dim] = math.sin(angle)
 
-def test_rotary_embedding_kernel(runtime_name, kernel_file, kernel_name):
-    sys_ = nexus.getSystem()
-    runtime = sys_.getRuntime(runtime_name)
-    if not runtime:
+    # Keep host copies for CPU reference
+    positions = positions_t.numpy().astype(np.int64)
+    query_in  = query_in_t.numpy().astype(np.float32).copy()
+    key_in    = key_in_t.numpy().astype(np.float32).copy()
+    cache     = cos_sin_cache_t.numpy().astype(np.float32)
+
+    # -----------------------------
+    # Nexus: pick GPU device, load kernel, set args
+    # -----------------------------
+    rt = nexus.get_runtime(runtime_name)
+    if not rt:
         print("No runtimes found")
         return 1
 
-    devices = runtime.getDevices()
-    if not devices:
-        print("No devices found")
+    dev = None
+    for d in rt.get_devices():
+        if d.get_property_str(nexus.property.Type) == "gpu":
+            dev = d
+            break
+    if dev is None:
+        print("No GPU device found")
         return 1
 
-    dev0 = runtime.getDevice(0)
+    # Device buffers: (host tensors → device copies)
+    b_pos   = dev.create_buffer(positions_t)
+    b_query = dev.create_buffer(query_in_t)
+    b_key   = dev.create_buffer(key_in_t)
+    b_cache = dev.create_buffer(cos_sin_cache_t)
 
-    # Parameters
-    num_tokens = 4
-    head_size = 64
-    num_heads = 8
-    num_kv_heads = 8
-    max_position = 100
-    rot_dim = head_size
-    positions = np.arange(num_tokens, dtype=np.int64)
-
-    # Input tensors
-    query = np.random.uniform(-1, 1, size=(num_tokens * num_heads * head_size)).astype(np.float32)
-    key   = np.random.uniform(-1, 1, size=(num_tokens * num_kv_heads * head_size)).astype(np.float32)
-
-    cos_sin_cache = create_cos_sin_cache(max_position, rot_dim).astype(np.float32)
-
-    # Buffers
-    buf_positions = dev0.createBuffer(positions.nbytes, positions)
-    buf_query = dev0.createBuffer(query.nbytes, query)
-    buf_key = dev0.createBuffer(key.nbytes, key)
-    buf_cache = dev0.createBuffer(cos_sin_cache.nbytes, cos_sin_cache)
-
-    # Kernel
-    nlib = dev0.createLibrary(kernel_file)
-    kern = nlib.getKernel(kernel_name)
+    lib  = dev.load_library_file(kernel_file)
+    kern = lib.get_kernel(kernel_name)
     if not kern:
-        print(f"Failed to get kernel: {kernel_name}")
+        print("Failed to get kernel:", kernel_name)
         return 1
 
-    stream0 = dev0.createStream()
-    sched = dev0.createSchedule()
-    cmd = sched.createCommand(kern)
+    sched = dev.create_schedule()
+    cmd   = sched.create_command(kern)
 
-    # Kernel args (like vLLM signature)
-    cmd.setArgument(0, buf_positions)        # positions
-    cmd.setArgument(1, buf_query)            # query
-    cmd.setArgument(2, buf_key)              # key
-    cmd.setArgument(3, buf_cache)            # cos/sin cache
-    cmd.setArgument(4, rot_dim)              # rot_dim
-
+    # Strides for flat layout (like C++ test)
     query_stride = num_heads * head_size
     key_stride   = num_kv_heads * head_size
     head_stride  = head_size
 
-    cmd.setArgument(5, query_stride)
-    cmd.setArgument(6, key_stride)
-    cmd.setArgument(7, head_stride)
-    cmd.setArgument(8, num_heads)
-    cmd.setArgument(9, num_kv_heads)
-    cmd.setArgument(10, head_size)
+    # Set kernel args (match widths!)
+    cmd.set_arg(0, b_pos)                 # positions
+    cmd.set_arg(1, b_query)               # query
+    cmd.set_arg(2, b_key)                 # key
+    cmd.set_arg(3, b_cache)               # cos_sin_cache
 
-    # vLLM kernel uses grid=(num_tokens, num_heads, 1), block=(rot_dim/2, 1, 1)
-    grid_size = (num_tokens, num_heads, 1)
-    block_size = (min(rot_dim // 2, 512), 1, 1)
+    set_i32(cmd, 4,  rot_dim)             # rot_dim (int)
+    set_i64(cmd, 5,  query_stride)        # query_stride (int64_t)
+    set_i64(cmd, 6,  key_stride)          # key_stride (int64_t)
+    set_i64(cmd, 7,  head_stride)         # head_stride (int64_t)
+    set_i32(cmd, 8,  num_heads)           # num_heads (int)
+    set_i32(cmd, 9,  num_kv_heads)        # num_kv_heads (int)
+    set_i32(cmd, 10, head_size)           # head_size (int)
 
-    cmd.finalize(grid_size, block_size)
+    grid  = int(num_tokens)
+    block = int(min(num_heads * (rot_dim // 2), 512))
+    cmd.finalize(grid, block)
 
-    # Run
-    sched.run(stream0)
+    stream = dev.create_stream()
+    sched.run(stream, False)
 
-    # Copy back
-    result_query = np.zeros_like(query)
-    result_key   = np.zeros_like(key)
-    buf_query.copy(result_query)
-    buf_key.copy(result_key)
+    # Copy result back
+    query_out_t = torch.empty_like(query_in_t)
+    key_out_t   = torch.empty_like(key_in_t)
+    b_query.copy(query_out_t)
+    b_key.copy(key_out_t)
 
+    query_out = query_out_t.numpy().astype(np.float32)
+
+    # -----------------------------
+    # Print like your C++ test
+    # -----------------------------
     print("Rotary embedding kernel completed successfully!")
-    print("First few query values after rotation:", result_query[:5])
+    print("First few query values after rotation:", *query_out[:5])
+    if num_tokens >= 2:
+        base = num_heads * head_size
+        print("Position[1]:", positions[1])
+        print(f"Original query[{base}]: {query_in[base]:.6f}")
+        print(f"Result query[{base}]: {query_out[base]:.6f}")
+    print(f"Cache[{rot_dim}]: {cache[rot_dim]:.6f}")  # pos=1, first cos
 
-    # Validation
-    if np.allclose(query, result_query, atol=1e-6):
-        print("FAIL: Query values did not change")
+    # -----------------------------
+    # Validate vs CPU math
+    # -----------------------------
+    ok, max_err, max_len_err, cpu_ref = validate_rope(
+        query_in, query_out, positions, rot_dim,
+        num_heads, head_size, cache, is_neox=is_neox
+    )
+
+    # Pairwise-change notice like C++
+    # (Find one changed index just to echo 'Changed at index ...')
+    changed_idx = None
+    for i in range(query_out.shape[0]):
+        if abs(query_out[i] - query_in[i]) > 1e-6:
+            changed_idx = i
+            break
+    if changed_idx is not None:
+        print(f"Changed at index {changed_idx}: {query_in[changed_idx]} -> {query_out[changed_idx]}")
+
+    print(f"pair_ok={int(ok)} max_len_err={max_len_err:.9g}")
+    if not ok:
+        print(f"FAIL: CPU/GPU mismatch, max|diff|={max_err:.9g}")
         return 1
-    else:
-        print("PASS: Query values changed")
-        return 0
+
+    print("\nTest PASSED")
+    return 0
+
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("Usage: python rope_test.py <runtime_name> <kernel_file> <kernel_name>")
-        sys.exit(1)
-    sys.exit(test_rotary_embedding_kernel(sys.argv[1], sys.argv[2], sys.argv[3]))
+    sys.exit(main())

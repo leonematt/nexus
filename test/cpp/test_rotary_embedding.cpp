@@ -151,6 +151,33 @@ std::cout << "Result query[" << num_heads * head_size << "]: " << result_query[n
 std::cout << "Cache[" << rot_dim << "]: " << cos_sin_cache[rot_dim] << std::endl;  // position 1 cache
    // Basic validation - check that values changed from input
 // Check if ANY values changed (not just first 10)
+
+// Check first pair of token 1 (flat index 512/513)
+int idx0 = 512, idx1 = 513;
+float x = query[idx0], y = query[idx1];
+float xo = result_query[idx0], yo = result_query[idx1];
+float cos1 = std::cos(1.0f), sin1 = std::sin(1.0f);
+
+// numeric checks
+bool pair_ok =
+    std::abs(xo - (x*cos1 - y*sin1)) < 1e-4f &&
+    std::abs(yo - (y*cos1 + x*sin1)) < 1e-4f;
+
+// length preservation across ALL pairs for token 1:
+float max_len_err = 0.f;
+for (int i = 0; i < head_size * num_heads; i += 2) {
+  float xa = query[num_heads*head_size + i];
+  float ya = query[num_heads*head_size + i + 1];
+  float xb = result_query[num_heads*head_size + i];
+  float yb = result_query[num_heads*head_size + i + 1];
+  max_len_err = std::max(max_len_err,
+      std::abs((xa*xa + ya*ya) - (xb*xb + yb*yb)));
+}
+std::cout << "pair_ok=" << pair_ok
+          << " max_len_err=" << max_len_err << std::endl;
+
+
+
 bool changed = false;
 for (int i = 0; i < result_query.size(); i++) {
     if (std::abs(result_query[i] - query[i]) > 1e-6) {

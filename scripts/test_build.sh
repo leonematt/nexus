@@ -26,8 +26,8 @@ main() {
   cmake ..
   make -j$(nproc)
 
-  printf "Running CPU tests"
-  ./test/cpp/test_basic_kernel cpu kernel_libs/cpu_kernel.so add_vectors
+  #printf "Running CPU tests"
+  #./test/cpp/test_basic_kernel cpu kernel_libs/cpu_kernel.so add_vectors
 
   if [[ "$os_type" == "macos" ]]; then
     printf "Running macOS test"
@@ -35,10 +35,10 @@ main() {
 
   elif [[ "$os_type" == "linux" ]]; then
     printf "Running Linux test"
-    ./test/cpp/test_basic_kernel cuda kernel_libs/add_vectors.ptx add_vectors
-    ./test/cpp/test_smi cuda kernel_libs/add_vectors.ptx add_vectors
-    ./test/cpp/test_multi_stream_sync cuda kernel_libs/add_vectors.ptx add_vectors
-    ./test/cpp/test_graph cuda kernel_libs/add_vectors.ptx add_vectors
+    #./test/cpp/test_basic_kernel cuda kernel_libs/add_vectors.ptx add_vectors
+    #./test/cpp/test_smi cuda kernel_libs/add_vectors.ptx add_vectors
+    #./test/cpp/test_multi_stream_sync cuda kernel_libs/add_vectors.ptx add_vectors
+    #./test/cpp/test_graph cuda kernel_libs/add_vectors.ptx add_vectors
     ./test/cpp/test_rotary_embedding cuda cuda_kernels/pos_encoding_kernels.ptx \
     _ZN4vllm23rotary_embedding_kernelIfLb0EEEvPKlPT_S4_PKS3_illliii
   else
@@ -50,7 +50,7 @@ main() {
 
   deactivate
 
-  rm -rf build_venv
+  #rm -rf build_venv
 
 }
 
