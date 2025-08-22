@@ -256,6 +256,10 @@ typedef uint16_t        nxs_half;
 typedef float           nxs_float;
 typedef double          nxs_double;
 
+struct nxs_dim3 {
+    nxs_uint x,y,z;
+};
+
 /* Macro names and corresponding values defined by OpenCL */
 #define NXS_CHAR_BIT         8
 #define NXS_SCHAR_MAX        127

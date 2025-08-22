@@ -760,11 +760,13 @@ extern "C" nxs_status NXS_API_CALL nxsSetCommandScalar(nxs_int command_id,
  ***********************************************************************/
 
 extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
-                                                      nxs_int grid_size,
-                                                      nxs_int group_size) {
+                                                      nxs_dim3 grid_size,
+                                                      nxs_dim3 group_size) {
+
   NXSAPI_LOG(NXSAPI_STATUS_NOTE, "finalizeCommand " << command_id << " - "
-                                                    << grid_size << " - "
-                                                    << group_size);
+    << "{ " << grid_size.x <<", " << grid_size.y << ", " << grid_size.z << " }" << " - "
+    << "{ " << group_size.x <<", " << group_size.y << ", " << group_size.z << " }");
+
   auto rt = getRuntime();
 
   auto command = rt->get<CudaCommand>(command_id);

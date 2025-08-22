@@ -24,7 +24,7 @@ cmd = sched.create_command(kern)
 cmd.set_buffer(0, nb0)
 cmd.set_buffer(1, nb1)
 cmd.set_buffer(2, nb2)
-cmd.finalize(32, 1024)
+cmd.finalize([32,1,1], [1024,1,1])
 
 sched.run()
 

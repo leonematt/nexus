@@ -930,13 +930,13 @@ extern "C" nxs_status NXS_API_CALL nxsSetCommandArgument(nxs_int command_id,
  *         Non-negative is the bufferId.
  ***********************************************************************/
 extern "C" nxs_status NXS_API_CALL nxsFinalizeCommand(nxs_int command_id,
-                                                      nxs_int grid_size,
-                                                      nxs_int group_size) {
+                                                      nxs_dim3 grid_size,
+                                                      nxs_dim3 group_size) {
   auto rt = getRuntime();
   auto cmd = rt->get<MetalCommand>(command_id);
   if (!cmd) return NXS_InvalidCommand;
 
-  cmd->setDimensions(grid_size, group_size);
+  cmd->setDimensions(grid_size.x, group_size.x);
 
   return NXS_Success;
 }
