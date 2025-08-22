@@ -77,7 +77,7 @@ int test_basic_kernel(int argc, char** argv) {
   cmd.setArgument(1, buf1);
   cmd.setArgument(2, buf2);
 
-  cmd.finalize(32, 32);
+  cmd.finalize({32,1,1}, {32,1,1});
 
   sched.run(stream0);
 

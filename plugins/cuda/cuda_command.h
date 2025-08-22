@@ -27,8 +27,8 @@ class CudaCommand : public nxs::rt::Command<CUfunction, CUevent, CUstream> {
         }
 
         int flags = 0;
-        CU_CHECK(NXS_InvalidCommand, cuLaunchKernel, kernel, grid_size, 1, 1,
-                 block_size, 1, 1, 0, stream, args_ref.data(), nullptr);
+        CU_CHECK(NXS_InvalidCommand, cuLaunchKernel, kernel, grid_size.x, grid_size.y, grid_size.z,
+                 block_size.x, block_size.y, block_size.z, 0, stream, args_ref.data(), nullptr);
         // cuLaunchCooperativeKernel - for inter-block coordination
         // cuLaunchKernelMultiDevice - for multi-device kernels
         // cuLaunchKernelPDL - cluster level launch

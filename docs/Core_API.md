@@ -312,7 +312,7 @@ namespace nexus {
         Event getEvent() const;
 
         nxs_status setArgument(nxs_uint index, Buffer buffer) const;
-        nxs_status finalize(nxs_int gridSize, nxs_int groupSize);
+        nxs_status finalize(nxs_dim3 gridSize, nxs_dim3 groupSize);
     };
 
     typedef Objects<Command> Commands;
@@ -323,7 +323,7 @@ namespace nexus {
 - `getKernel()`: Get the associated kernel (for kernel commands)
 - `getEvent()`: Get the associated event (for signal/wait commands)
 - `setArgument(nxs_uint index, Buffer buffer)`: Set kernel argument
-- `finalize(nxs_int gridSize, nxs_int groupSize)`: Finalize command with execution parameters
+- `finalize(nxs_dim3 gridSize, nxs_dim3 groupSize)`: Finalize command with execution parameters
 
 ### Property System
 

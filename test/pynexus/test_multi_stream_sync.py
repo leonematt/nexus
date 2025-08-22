@@ -34,7 +34,7 @@ cmd = sched0.create_command(kern)
 cmd.set_arg(0, nb0)
 cmd.set_arg(1, nb1)
 cmd.set_arg(2, nb2)
-cmd.finalize(32, 1024)
+cmd.finalize([32,1,1], [1024,1,1])
 
 ev0 = sched0.create_signal()
 
@@ -47,7 +47,7 @@ cmd1 = sched1.create_command(kern)
 cmd1.set_arg(0, nb0)
 cmd1.set_arg(1, nb2)
 cmd1.set_arg(2, nb3)
-cmd1.finalize(32, 1024)
+cmd1.finalize([32,1,1], [1024,1,1])
 
 sched1.create_signal(evf)
 
