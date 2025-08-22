@@ -80,21 +80,6 @@ def validate_rope(query_orig, query_gpu, positions, rot_dim, num_heads, head_siz
     return ok, max_err, max_len_err, cpu
 
 # -----------------------------
-# Helpers to set scalar widths
-# -----------------------------
-def set_i32(cmd, idx, val):
-    if hasattr(cmd, "set_arg"):
-        return cmd.set_arg(idx, np.int32(val))
-    # fallback to generic (pybind picks an integer overload); to be safer, clamp to 32-bit range
-    return cmd.set_arg(idx, int(val) & 0xFFFFFFFF)
-
-def set_i64(cmd, idx, val):
-    if hasattr(cmd, "set_arg"):
-        return cmd.set_arg(idx, np.int64(val))
-    # fallback to generic; Python int is unbounded; pybind usually picks 64-bit on large values
-    return cmd.set_arg(idx, int(val))
-
-# -----------------------------
 # Main
 # -----------------------------
 def main():
@@ -195,13 +180,13 @@ def main():
     cmd.set_arg(2, b_key)                 # key
     cmd.set_arg(3, b_cache)               # cos_sin_cache
 
-    set_i32(cmd, 4,  rot_dim)             # rot_dim (int)
-    set_i64(cmd, 5,  query_stride)        # query_stride (int64_t)
-    set_i64(cmd, 6,  key_stride)          # key_stride (int64_t)
-    set_i64(cmd, 7,  head_stride)         # head_stride (int64_t)
-    set_i32(cmd, 8,  num_heads)           # num_heads (int)
-    set_i32(cmd, 9,  num_kv_heads)        # num_kv_heads (int)
-    set_i32(cmd, 10, head_size)           # head_size (int)
+    cmd.set_arg(4,  rot_dim)             # rot_dim (int)
+    cmd.set_arg(5,  query_stride, True)        # query_stride (int64_t)
+    cmd.set_arg(6,  key_stride, True)          # key_stride (int64_t)
+    cmd.set_arg(7,  head_stride, True)         # head_stride (int64_t)
+    cmd.set_arg(8,  num_heads)           # num_heads (int)
+    cmd.set_arg(9,  num_kv_heads)        # num_kv_heads (int)
+    cmd.set_arg(10, head_size)           # head_size (int)
 
     grid  = int(num_tokens)
     block = int(min(num_heads * (rot_dim // 2), 512))
@@ -218,9 +203,6 @@ def main():
 
     query_out = query_out_t.numpy().astype(np.float32)
 
-    # -----------------------------
-    # Print like your C++ test
-    # -----------------------------
     print("Rotary embedding kernel completed successfully!")
     print("First few query values after rotation:", *query_out[:5])
     if num_tokens >= 2:
@@ -230,16 +212,12 @@ def main():
         print(f"Result query[{base}]: {query_out[base]:.6f}")
     print(f"Cache[{rot_dim}]: {cache[rot_dim]:.6f}")  # pos=1, first cos
 
-    # -----------------------------
-    # Validate vs CPU math
-    # -----------------------------
+
     ok, max_err, max_len_err, cpu_ref = validate_rope(
         query_in, query_out, positions, rot_dim,
         num_heads, head_size, cache, is_neox=is_neox
     )
 
-    # Pairwise-change notice like C++
-    # (Find one changed index just to echo 'Changed at index ...')
     changed_idx = None
     for i in range(query_out.shape[0]):
         if abs(query_out[i] - query_in[i]) > 1e-6:
