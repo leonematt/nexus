@@ -123,10 +123,10 @@ int test_rotary_embedding_kernel(int argc, char** argv) {
    cmd.setArgument(10, (int)head_size);   // head_size
 
    // Grid and block configuration (matching vLLM's configuration)
-   int grid_size = num_tokens;
-   int block_size = std::min(static_cast<int64_t>(num_heads * rot_dim / 2), 512L);
+   nxs_uint grid_size = num_tokens;
+   nxs_uint block_size = std::min(static_cast<int64_t>(num_heads * rot_dim / 2), 512L);
    
-   cmd.finalize(grid_size, block_size);
+   cmd.finalize({grid_size,1,1}, {block_size,1,1});
 
    // Execute kernel
    sched.run(stream0);

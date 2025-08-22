@@ -41,6 +41,11 @@ main() {
     #./test/cpp/test_graph cuda kernel_libs/add_vectors.ptx add_vectors
     ./test/cpp/test_rotary_embedding cuda cuda_kernels/pos_encoding_kernels.ptx \
     _ZN4vllm23rotary_embedding_kernelIfLb0EEEvPKlPT_S4_PKS3_illliii
+
+    #pip install -e ..
+
+    #python3 ../rope_test.py cuda cuda_kernels/pos_encoding_kernels.ptx \
+    #_ZN4vllm23rotary_embedding_kernelIfLb0EEEvPKlPT_S4_PKS3_illliii
   else
     printf "Unsupported OS: $os_type"
     exit 1
@@ -48,7 +53,7 @@ main() {
 
   cd "$original_dir"
 
-  deactivate
+  #deactivate
 
   #rm -rf build_venv
 
