@@ -57,6 +57,7 @@ jobs:
     - name: Install dependencies
       run: |
         brew update
+        brew uninstall cmake || true
         brew install cmake python@3.11 pybind11
 
     - name: Install Python dependencies
