@@ -312,13 +312,20 @@ void pynexus::init_system_bindings(py::module &m) {
         }
         return NXS_InvalidDevice;
       });
+  make_objects_class<Buffer>(m, "_buffers");
 
-  make_object_class<Kernel>(m, "_kernel");
+  make_object_class<Kernel>(m, "_kernel").def("get_info", [](Kernel &self) {
+    return self.getInfo();
+  });
+  make_objects_class<Kernel>(m, "_kernels");
 
   make_object_class<Library>(m, "_library")
-      .def("get_kernel", [](Library &self, const std::string &name) {
-        return self.getKernel(name);
-      });
+      .def("get_info", [](Library &self) { return self.getInfo(); })
+      .def("get_kernel",
+           [](Library &self, const std::string &name) {
+             return self.getKernel(name);
+           })
+      .def("get_kernels", [](Library &self) { return self.getKernels(); });
 
   make_object_class<Stream>(m, "_stream");
   make_object_class<Event>(m, "_event")
@@ -375,6 +382,8 @@ void pynexus::init_system_bindings(py::module &m) {
       .def("finalize", [](Command& self, nxs_uint grid, nxs_uint block) {
         return self.finalize({grid,1,1}, {block,1,1});
       });
+
+  make_objects_class<Command>(m, "_commands");
 
   make_object_class<Schedule>(m, "_schedule")
       .def(
@@ -437,6 +446,7 @@ void pynexus::init_system_bindings(py::module &m) {
             return self.createWaitCommand(event, wait_value);
           },
           py::arg("event"), py::arg("wait_value") = 1)
+      .def("get_commands", [](Schedule &self) { return self.getCommands(); })
       .def(
           "run",
           [](Schedule &self, Stream &stream, nxs_bool blocking) {
@@ -445,10 +455,7 @@ void pynexus::init_system_bindings(py::module &m) {
           py::arg("stream") = Stream(), py::arg("blocking") = true);
 
   // Object Containers
-  make_objects_class<Buffer>(m, "_buffers");
-  make_objects_class<Kernel>(m, "_kernels");
   make_objects_class<Library>(m, "_libraries");
-  make_objects_class<Command>(m, "_commands");
   make_objects_class<Schedule>(m, "_schedules");
   make_objects_class<Stream>(m, "_streams");
   make_objects_class<Event>(m, "_events");
@@ -478,7 +485,11 @@ void pynexus::init_system_bindings(py::module &m) {
            [](Device &self, const char *data, size_t size) {
              return self.createLibrary((void *)data, size);
            })
-      .def("load_library_file",
+      .def("load_library",
+           [](Device &self, Info catalog, const std::string &libraryName) {
+             return self.loadLibrary(catalog, libraryName);
+           })
+      .def("load_library",
            [](Device &self, const std::string &filepath) {
              return self.createLibrary(filepath);
            })
