@@ -41,6 +41,7 @@ option(NEXUS_BUILD_PYTHON_MODULE "Build Python Nexus bindings" ON)
 option(NEXUS_ENABLE_LOGGING "Enable Nexus Logging" ON)
 option(NEXUS_BUILD_PLUGINS "Build the runtime plugins" ON)
 option(NEXUS_BUILD_TESTS "Build the tests" ON)
+option(NEXUS_COMPILE_TRITON_KERNELS "Compile Triton kernels to PTX" ON)
 
 # Ensure Python3 vars are set correctly
 # used conditionally in this file and by lit tests
@@ -113,6 +114,42 @@ add_subdirectory(third_party/pybind11_json pybind11_json)
 add_subdirectory(src)
 
 # ------
+# Triton kernel compilation
+if(NEXUS_COMPILE_TRITON_KERNELS)
+  # Find Python3 for running the compilation script
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  
+  # Allow user to specify Python environment
+  set(NEXUS_PYTHON_ENV "" CACHE STRING "Python environment to use for Triton compilation (e.g., conda environment name or path to python)")
+  
+  # Determine which Python to use
+  if(NEXUS_PYTHON_ENV)
+    if(IS_ABSOLUTE ${NEXUS_PYTHON_ENV})
+      # Absolute path to Python executable
+      set(TRITON_PYTHON_CMD ${NEXUS_PYTHON_ENV})
+    else()
+      # Assume it's a conda environment name
+      set(TRITON_PYTHON_CMD conda run -n ${NEXUS_PYTHON_ENV} python)
+    endif()
+    message(STATUS "Using Python environment: ${NEXUS_PYTHON_ENV}")
+  else()
+    set(TRITON_PYTHON_CMD ${Python3_EXECUTABLE})
+    message(STATUS "Using system Python: ${Python3_EXECUTABLE}")
+    message(STATUS "Note: Make sure torch and triton are installed, or set NEXUS_PYTHON_ENV")
+  endif()
+  
+  # Custom target to compile Triton kernels
+  add_custom_target(compile_triton_kernels
+    COMMAND ${TRITON_PYTHON_CMD} ${CMAKE_SOURCE_DIR}/scripts/compile_triton.py ${CMAKE_SOURCE_DIR}/kernels
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Compiling Triton kernels to PTX..."
+    VERBATIM
+  )
+  
+  message(STATUS "Added target 'compile_triton_kernels'")
+endif()
+
+# ------
 if(NEXUS_BUILD_PYTHON_MODULE)
   message(STATUS "Adding Python module")
   set(PYTHON_SRC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python/src)
@@ -154,6 +191,12 @@ if(NEXUS_BUILD_PYTHON_MODULE)
   set_target_properties(nexus PROPERTIES PREFIX "lib" SUFFIX ".so")
   #install(TARGETS nexus DESTINATION nexus)
 
+  # Optional: Make the Python module depend on Triton kernel compilation
+  if(NEXUS_COMPILE_TRITON_KERNELS)
+    add_dependencies(nexus compile_triton_kernels)
+    message(STATUS "Python module will depend on Triton kernel compilation")
+  endif()
+
   if(WIN32)
     target_link_libraries(nexus PRIVATE ${CMAKE_DL_LIBS})
     set_target_properties(nexus PROPERTIES SUFFIX ".pyd")
@@ -181,4 +224,3 @@ if(NEXUS_BUILD_TESTS)
   add_subdirectory(third_party/googletest)
   add_subdirectory(test)
 endif()
-
