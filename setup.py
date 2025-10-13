@@ -219,7 +219,10 @@ class CMakeBuild(build_ext):
 class BdistWheel(bdist_wheel):
   def finalize_options(self):
     bdist_wheel.finalize_options(self)
-    self.plat_name = "manylinux1_x86_64"
+    # Let the platform name be auto-detected
+    # Only override for Linux x86_64 builds
+    if self.plat_name and 'linux' in self.plat_name and 'x86_64' in self.plat_name:
+      self.plat_name = "manylinux1_x86_64"
 
 def get_package_dirs():
     yield ("", "python")

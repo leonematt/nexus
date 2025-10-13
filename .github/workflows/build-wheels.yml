@@ -27,6 +27,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Ensure pip is installed
+        run: |
+          python -m ensurepip --upgrade || true
+          python -m pip install --upgrade pip setuptools wheel
+
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -41,8 +46,11 @@ jobs:
           brew uninstall cmake || true
           brew install cmake ninja python@3.11 pybind11 boost
 
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.21.3
+
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-*"
           CIBW_SKIP: "*-musllinux_* pp*"
