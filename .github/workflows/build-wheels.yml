@@ -37,7 +37,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake ninja-build python3 python3-dev python3-pip python3-pybind11 python-is-python3
-          sudo apt-get install -y libc++-dev libc++abi-dev git libboost-fiber-dev
+          sudo apt-get install -y libc++-dev libc++abi-dev git libboost-all-dev
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
@@ -62,7 +62,7 @@ jobs:
             pip install -r requirements.txt
           # Set environment variables for build
           CIBW_ENVIRONMENT: "MAX_JOBS=4"
-          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=10.15 MAX_JOBS=4"
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0 MAX_JOBS=4"
           # Test the wheel after building (optional - can be disabled if tests don't run well in isolation)
           CIBW_TEST_COMMAND: "python -c 'import nexus; print(nexus.__file__)'"
           CIBW_TEST_SKIP: "*"
