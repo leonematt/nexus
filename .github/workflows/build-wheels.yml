@@ -60,6 +60,9 @@ jobs:
           # Install build dependencies in the build environment
           CIBW_BEFORE_BUILD: |
             pip install -r requirements.txt
+          CIBW_BEFORE_BUILD_LINUX: |
+            yum install -y boost-devel || apt-get update && apt-get install -y libboost-all-dev
+            pip install -r requirements.txt
           # Set environment variables for build
           CIBW_ENVIRONMENT: "MAX_JOBS=4"
           CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0 MAX_JOBS=4"
