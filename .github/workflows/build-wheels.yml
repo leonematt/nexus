@@ -59,7 +59,7 @@ jobs:
           CIBW_ARCHS_LINUX: "x86_64"
           # Install build dependencies in the build environment
           CIBW_BEFORE_BUILD_LINUX: >
-            yum install -y boost-devel=1.83.0-12.fc42 &&
+            yum install -y boost-devel=1.83.0 &&
             pip install -r requirements.txt
           CIBW_BEFORE_BUILD_MACOS: pip install -r requirements.txt
           # Set environment variables for build
