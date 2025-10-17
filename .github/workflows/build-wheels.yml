@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [cuda-runner, macos-latest]
+        os: [nexus-cuda-runner, macos-latest]
         
     steps:
       - name: Checkout code
@@ -57,12 +57,16 @@ jobs:
           # CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_MACOS: "arm64"
           CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_34"
           # Install build dependencies in the build environment
           CIBW_BEFORE_BUILD_LINUX: >
-            yum update -y &&
-            yum install -y boost boost-devel &&
+            sudo apt-get update &&
+            sudo apt-get install -y libboost-all-dev &&
             pip install -r requirements.txt
-          CIBW_BEFORE_BUILD_MACOS: pip install -r requirements.txt
+          CIBW_BEFORE_BUILD_MACOS: >
+            brew update &&
+            brew install boost &&
+            pip install -r requirements.txt
           # Set environment variables for build
           CIBW_ENVIRONMENT: "MAX_JOBS=4"
           CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0 MAX_JOBS=4"
