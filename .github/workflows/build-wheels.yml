@@ -57,7 +57,7 @@ jobs:
           # CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_MACOS: "arm64"
           CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_34"
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_34_x86_64"
           # Install build dependencies in the build environment
           CIBW_BEFORE_BUILD_LINUX: >
             sudo apt-get update &&
