@@ -61,7 +61,7 @@ jobs:
           # Install build dependencies in the build environment
           CIBW_BEFORE_ALL_LINUX: >
             pip install -r requirements.txt &&
-            dnf install -y boost-devel
+            dnf install -y boost boost-devel
           CIBW_BEFORE_BUILD_MACOS: >
             brew update &&
             brew install boost &&
