@@ -61,9 +61,9 @@ jobs:
           # Install build dependencies in the build environment
           CIBW_BEFORE_ALL_LINUX: >
             env &&
+            pip install -r requirements.txt &&
             apt update &&
-            apt install -y libboost-all-dev &&
-            pip install -r requirements.txt
+            apt install -y libboost-all-dev
           CIBW_BEFORE_BUILD_MACOS: >
             brew update &&
             brew install boost &&
