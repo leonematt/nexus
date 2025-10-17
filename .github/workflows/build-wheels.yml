@@ -60,10 +60,10 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux_2_28_x86_64"
           # Install build dependencies in the build environment
           CIBW_BEFORE_ALL_LINUX: >
-            env &&
+            find / -name "apt-get" &&
             pip install -r requirements.txt &&
-            apt update &&
-            apt install -y libboost-all-dev
+            apt-get update &&
+            apt-get install -y libboost-all-dev
           CIBW_BEFORE_BUILD_MACOS: >
             brew update &&
             brew install boost &&
