@@ -5,7 +5,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/runtime_libs")
 # Find cpuinfo using the custom FindCPUINFO.cmake module
 find_package(CPUINFO REQUIRED)
 
-find_package(Boost CONFIG REQUIRED COMPONENTS fiber context) 
+# Try CONFIG mode first (for systems with BoostConfig.cmake)
+# If that fails, CMake will automatically try MODULE mode (FindBoost.cmake)
+find_package(Boost REQUIRED COMPONENTS fiber context)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(cpu_plugin SHARED
@@ -21,4 +23,3 @@ endif()
 if(WIN32)
  target_link_options(cpu_plugin PRIVATE "LINKER:--enable-auto-import,--enable-runtime-pseudo-reloc")
 endif()
-

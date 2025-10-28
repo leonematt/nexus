@@ -58,6 +58,8 @@ jobs:
           CIBW_ARCHS_MACOS: "arm64"
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux_2_28_x86_64"
+          CIBW_ENVIRONMENT_LINUX: "MAX_JOBS=4 CMAKE_PREFIX_PATH=/usr/lib64/cmake"
+
           # Install build dependencies in the build environment
           CIBW_BEFORE_ALL_LINUX: >
             pip install -r requirements.txt &&
@@ -74,6 +76,7 @@ jobs:
           CIBW_TEST_SKIP: "*"
           # Build in parallel
           CIBW_BUILD_VERBOSITY: 1
+          CMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4

@@ -204,6 +204,13 @@ class CMakeBuild(build_ext):
 
         env = os.environ.copy()
         cmake_dir = get_cmake_dir()
+        
+        # Add CMAKE_ARGS from environment if present (for cibuildwheel)
+        if "CMAKE_ARGS" in os.environ:
+            extra_args = os.environ["CMAKE_ARGS"].split()
+            print(f"Adding CMAKE_ARGS from environment: {extra_args}")
+            cmake_args.extend(extra_args)
+        
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=cmake_dir, env=env)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=cmake_dir)
 
