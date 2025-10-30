@@ -303,8 +303,7 @@ void pynexus::init_system_bindings(py::module &m) {
   make_object_class<Buffer>(m, "_buffer")
       .def("copy", [](Buffer &self, py::object tensor) {
         auto data_ptr = getPointer(tensor.ptr());
-        if (!data_ptr.runtime_name.empty() && data_ptr.device_id != -1) {
-          // return self.copy(data_ptr.device_id, data_ptr.size, data_ptr.ptr);
+        if (!data_ptr.runtime_name.empty() && data_ptr.runtime_name != "cpu") {
           assert(0);
         }
         auto local = self.getLocal();
