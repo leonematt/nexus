@@ -53,6 +53,7 @@ class Pool {
       available_indices_.pop_back();
       auto [chunk_index, chunk_offset] = getIndexPair(index);
       auto& chunk = getChunk(chunk_index);
+      chunk[chunk_offset].~T();  // Destroy before reconstructing
       new (&chunk[chunk_offset]) T(std::forward<Args>(args)...);
       return index;
     }
@@ -62,6 +63,7 @@ class Pool {
       object_storage_.push_back(Chunk());
     }
     auto& chunk = getChunk(chunk_index);
+    chunk[chunk_offset].~T();  // Destroy default-constructed object
     new (&chunk[chunk_offset]) T(std::forward<Args>(args)...);
     return tail_index_++;
   }
@@ -84,7 +86,7 @@ class Pool {
     for (auto& chunk : object_storage_) {
       auto chunk_offset = obj - &chunk[0];
       if (chunk_offset >= 0 && chunk_offset < chunk_size) {
-        // obj->~T();
+        // Don't call destructor - object stays constructed
         available_indices_.push_back(chunk_index * chunk_size + chunk_offset);
         return;
       }
@@ -98,8 +100,7 @@ class Pool {
    */
   void release(nxs_int index) {
     if (index < 0 || index >= tail_index_) return;
-    auto* obj = get(index);
-    // if (obj) obj->~T();
+    // Don't call destructor - object stays constructed
     available_indices_.push_back(index);
   }
 
