@@ -18,9 +18,9 @@ public:
 
   nxs_int numDevices;
   nxs_int current_device = -1;
-  rt::Pool<rt::Buffer, 256> buffer_pool;
+  rt::Pool<rt::Buffer, 4096> buffer_pool;
   rt::Pool<CudaCommand> command_pool;
-  rt::Pool<CudaSchedule, 256> schedule_pool;
+  rt::Pool<CudaSchedule, 2048> schedule_pool;
 
   CudaRuntime() : rt::Runtime() { setupCudaDevices(); }
   ~CudaRuntime() = default;

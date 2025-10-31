@@ -6,7 +6,6 @@
 #include <cassert>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <vector>
 
@@ -24,7 +23,6 @@ class Pool {
   typedef std::array<T, chunk_size> Chunk;
   std::vector<Chunk> object_storage_;       // Owns all objects
   std::vector<nxs_int> available_indices_;  // Indices of available objects
-  std::mutex pool_mutex_;
   nxs_int tail_index_;
 
   std::pair<nxs_int, nxs_int> getIndexPair(nxs_int index) {
@@ -49,8 +47,6 @@ class Pool {
    */
   template <typename... Args>
   nxs_int acquire(Args&&... args) {
-    std::lock_guard<std::mutex> lock(pool_mutex_);
-
     // First try to reuse an available object
     if (!available_indices_.empty()) {
       nxs_int index = available_indices_.back();
@@ -83,8 +79,6 @@ class Pool {
   void release(T* obj) {
     if (!obj) return;
 
-    std::lock_guard<std::mutex> lock(pool_mutex_);
-
     // Find the index of the object
     nxs_int chunk_index = 0;
     for (auto& chunk : object_storage_) {
@@ -104,7 +98,6 @@ class Pool {
    */
   void release(nxs_int index) {
     if (index < 0 || index >= tail_index_) return;
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     auto* obj = get(index);
     // if (obj) obj->~T();
     available_indices_.push_back(index);
@@ -122,7 +115,6 @@ class Pool {
    * @return Pair of (available objects, total objects)
    */
   std::pair<size_t, size_t> get_stats() {
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     return {available_indices_.size(), object_storage_.size()};
   }
 
@@ -130,7 +122,6 @@ class Pool {
    * Clear all objects from the pool
    */
   void clear() {
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     object_storage_.clear();
     available_indices_.clear();
   }
@@ -140,7 +131,6 @@ class Pool {
    * @param capacity New capacity to reserve
    */
   void reserve(size_t capacity) {
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     object_storage_.reserve(capacity);
   }
 
@@ -155,7 +145,6 @@ class Pool {
    * @return Number of objects in use
    */
   size_t get_in_use_count() {
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     return object_storage_.size() - available_indices_.size();
   }
 
@@ -166,7 +155,6 @@ class Pool {
    */
   bool owns_object(const T* obj) {
     if (!obj) return false;
-    std::lock_guard<std::mutex> lock(pool_mutex_);
     return obj >= &object_storage_[0] &&
            obj < &object_storage_[0] + object_storage_.size();
   }
