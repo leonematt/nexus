@@ -371,6 +371,10 @@ void pynexus::init_system_bindings(py::module &m) {
                return self.setArgument(index, make_buffer(value));
              }
            })
+      .def("set_scalar_arg",
+           [](Command &self, int index, float value) {
+             return self.setScalar(index, value);
+           })
       .def("finalize", [](Command& self, py::list grid, py::list block, size_t shared_memory_size) {
           auto list_to_dim3 = [](const py::list& l) -> nxs_dim3 {
               nxs_uint x = l.size() > 0 ? l[0].cast<nxs_uint>() : 1;

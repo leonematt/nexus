@@ -128,6 +128,10 @@ nxs_status Command::setArgument(nxs_uint index, nxs_double value) {
   NEXUS_OBJ_MCALL(NXS_InvalidCommand, setScalar, index, value);
 }
 
+nxs_status Command::setScalar(nxs_uint index, float value) {
+  NEXUS_OBJ_MCALL(NXS_InvalidCommand, setScalar, index, value);
+}
+
 nxs_status Command::finalize(nxs_dim3 gridSize, nxs_dim3 groupSize, nxs_uint sharedMemorySize) {
   NEXUS_OBJ_MCALL(NXS_InvalidCommand, finalize, gridSize, groupSize, sharedMemorySize);
 }
