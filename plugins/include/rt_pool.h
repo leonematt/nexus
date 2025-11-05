@@ -3,67 +3,67 @@
 
 #include <nexus-api.h>
 
-#include <cassert>
-#include <functional>
-#include <memory>
-#include <queue>
+#include <algorithm>
+#include <list>
 #include <vector>
+#include <iostream>
 
 namespace nxs {
 namespace rt {
 
 /**
- * Template class for object pooling
- * Provides efficient allocation and deallocation of objects by reusing them
- * Pool owns all objects and manages them in vector-based storage
+ * Simple object pool using std::vector
+ * Objects are constructed on-demand and can be reused
  */
-template <typename T, size_t chunk_size = 1024>
+template <typename T, size_t initial_capacity = 256>
 class Pool {
  private:
-  typedef std::array<T, chunk_size> Chunk;
-  std::vector<Chunk> object_storage_;       // Owns all objects
-  std::vector<nxs_int> available_indices_;  // Indices of available objects
-  nxs_int tail_index_;
-
-  std::pair<nxs_int, nxs_int> getIndexPair(nxs_int index) {
-    if (index < 0) return {-1, -1};
-    return {index / chunk_size, index % chunk_size};
+  std::vector<T> objects;
+  std::list<nxs_int> available_indices;
+  
+ public:
+  Pool() {
+    objects.reserve(initial_capacity);
+  }
+  
+  ~Pool() { 
+    std::cout << "Pool<" << typeid(T).name() << "> destroyed: "
+              << objects.size() << " objects, " 
+              << get_in_use_count() << " still in use" << std::endl;
+    clear(); 
   }
 
-  Chunk& getChunk(nxs_int index) { return object_storage_[index]; }
+  void print_stats(const std::string& label = "") const {
+    std::cout << label << " Pool: "
+              << get_in_use_count() << " in use, "
+              << available_indices.size() << " available, "
+              << objects.size() << " total" << std::endl;
+  }
 
- public:
-  /**
-   * Constructor
-   * @param initial_capacity Initial capacity for the pool
-   */
-  explicit Pool() : tail_index_(0) { object_storage_.push_back(Chunk()); }
-
-  ~Pool() { clear(); }
-
-  /**
-   * Get an object from the pool
-   * @return Raw pointer to an object (pool maintains ownership)
-   */
   template <typename... Args>
   nxs_int acquire(Args&&... args) {
-    // First try to reuse an available object
-    if (!available_indices_.empty()) {
-      nxs_int index = available_indices_.back();
-      available_indices_.pop_back();
-      auto [chunk_index, chunk_offset] = getIndexPair(index);
-      auto& chunk = getChunk(chunk_index);
-      new (&chunk[chunk_offset]) T(std::forward<Args>(args)...);
-      return index;
+    nxs_int index;
+    
+    if (!available_indices.empty()) {
+      // Reuse available slot
+      index = available_indices.front();
+      available_indices.pop_front();
+      // Reconstruct in place
+      objects[index].~T();
+      new (&objects[index]) T(std::forward<Args>(args)...);
+    } else {
+      // Create new object
+      index = static_cast<nxs_int>(objects.size());
+      objects.emplace_back(std::forward<Args>(args)...);
     }
-
-    auto [chunk_index, chunk_offset] = getIndexPair(tail_index_);
-    if (chunk_index >= object_storage_.size()) {
-      object_storage_.push_back(Chunk());
+    
+    // Debug: print stats every 100 allocations
+    static int count = 0;
+    if (++count % 100 == 0) {
+      print_stats("After " + std::to_string(count) + " acquires");
     }
-    auto& chunk = getChunk(chunk_index);
-    new (&chunk[chunk_offset]) T(std::forward<Args>(args)...);
-    return tail_index_++;
+    
+    return index;
   }
 
   template <typename... Args>
@@ -72,91 +72,56 @@ class Pool {
     return get(index);
   }
 
-  /**
-   * Return an object to the pool
-   * @param obj Pointer to object to release
-   */
   void release(T* obj) {
-    if (!obj) return;
-
-    // Find the index of the object
-    nxs_int chunk_index = 0;
-    for (auto& chunk : object_storage_) {
-      auto chunk_offset = obj - &chunk[0];
-      if (chunk_offset >= 0 && chunk_offset < chunk_size) {
-        // obj->~T();
-        available_indices_.push_back(chunk_index * chunk_size + chunk_offset);
-        return;
-      }
-      chunk_index++;
+    if (!obj || objects.empty()) return;
+    
+    if (obj >= &objects[0] && obj < &objects[0] + objects.size()) {
+      nxs_int index = static_cast<nxs_int>(obj - &objects[0]);
+      release(index);
+    }
+  }
+  
+  void release(nxs_int index) {
+    if (index < 0 || index >= static_cast<nxs_int>(objects.size())) return;
+    
+    // Add to available list if not already there
+    if (std::find(available_indices.begin(), available_indices.end(), index) 
+        == available_indices.end()) {
+      available_indices.push_back(index);
     }
   }
 
-  /**
-   * Return an object to the pool
-   * @param index Index of object to release
-   */
-  void release(nxs_int index) {
-    if (index < 0 || index >= tail_index_) return;
-    auto* obj = get(index);
-    // if (obj) obj->~T();
-    available_indices_.push_back(index);
-  }
-
   T* get(nxs_int index) {
-    if (index < 0 || index >= tail_index_) return nullptr;
-    auto [chunk_index, chunk_offset] = getIndexPair(index);
-    auto& chunk = getChunk(chunk_index);
-    return &chunk[chunk_offset];
+    if (index < 0 || index >= static_cast<nxs_int>(objects.size())) {
+      return nullptr;
+    }
+    return &objects[index];
   }
 
-  /**
-   * Get current pool statistics
-   * @return Pair of (available objects, total objects)
-   */
-  std::pair<size_t, size_t> get_stats() {
-    return {available_indices_.size(), object_storage_.size()};
+  std::pair<size_t, size_t> get_stats() const {
+    return {available_indices.size(), objects.size()};
   }
 
-  /**
-   * Clear all objects from the pool
-   */
   void clear() {
-    object_storage_.clear();
-    available_indices_.clear();
+    objects.clear();
+    available_indices.clear();
   }
 
-  /**
-   * Reserve capacity for the pool
-   * @param capacity New capacity to reserve
-   */
   void reserve(size_t capacity) {
-    object_storage_.reserve(capacity);
+    objects.reserve(capacity);
   }
 
-  /**
-   * Get current capacity of the pool
-   * @return Current capacity
-   */
-  size_t capacity() const { return tail_index_; }
-
-  /**
-   * Get total number of objects currently in use
-   * @return Number of objects in use
-   */
-  size_t get_in_use_count() {
-    return object_storage_.size() - available_indices_.size();
+  size_t capacity() const { 
+    return objects.size(); 
   }
 
-  /**
-   * Check if an object belongs to this pool
-   * @param obj Pointer to check
-   * @return True if object belongs to this pool
-   */
-  bool owns_object(const T* obj) {
-    if (!obj) return false;
-    return obj >= &object_storage_[0] &&
-           obj < &object_storage_[0] + object_storage_.size();
+  size_t get_in_use_count() const {
+    return objects.size() - available_indices.size();
+  }
+
+  bool owns_object(const T* obj) const {
+    if (!obj || objects.empty()) return false;
+    return obj >= &objects[0] && obj < &objects[0] + objects.size();
   }
 };
 
