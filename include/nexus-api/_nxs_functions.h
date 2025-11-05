@@ -118,8 +118,7 @@ NEXUS_API_FUNC(nxs_status, CopyBuffer,
   * @return Error status or Succes.
 ***********************************************************************/
 NEXUS_API_FUNC(nxs_status, ReleaseBuffer,
-    nxs_int buffer_id,
-    nxs_int device_id
+    nxs_int buffer_id
 )
 
 

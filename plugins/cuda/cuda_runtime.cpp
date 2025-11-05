@@ -245,9 +245,9 @@ extern "C" nxs_status NXS_API_CALL nxsCopyBuffer(nxs_int buffer_id,
 /*
  * Release a buffer on the device.
  */
-extern "C" nxs_status NXS_API_CALL nxsReleaseBuffer(nxs_int buffer_id, 
-                                                  nxs_int device_id) {
+extern "C" nxs_status NXS_API_CALL nxsReleaseBuffer(nxs_int buffer_id) {
   auto rt = getRuntime();
+  auto bufferObject = rt->get<rt::Buffer>(buffer_id);
   auto deviceObject = rt->get<CudaDevice>(device_id);
   if (!deviceObject) return NXS_InvalidDevice;
 
