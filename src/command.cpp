@@ -11,16 +11,9 @@ using namespace nexus;
 namespace nexus {
 namespace detail {
 class CommandImpl : public Impl {
-  typedef std::variant<Buffer, nxs_int, nxs_uint, nxs_long, nxs_ulong,
-                       nxs_float, nxs_double>
-      Arg;
-
  public:
-  /// @brief Construct a Platform for the current system
   CommandImpl(Impl owner, Kernel kern) : Impl(owner), kernel(kern) {
     NEXUS_LOG(NXS_LOG_NOTE, "    Command: ", getId());
-    arguments.reserve(32);  // TODO: get from kernel
-    // TODO: gather kernel argument details
   }
 
   CommandImpl(Impl owner, Event event) : Impl(owner), event(event) {
@@ -29,10 +22,9 @@ class CommandImpl : public Impl {
 
   ~CommandImpl() {
     NEXUS_LOG(NXS_LOG_NOTE, "    ~Command: ", getId());
-    release();
   }
 
-  void release() { arguments.clear(); }
+  void release() {}
 
   std::optional<Property> getProperty(nxs_int prop) const {
     auto *rt = getParentOfType<RuntimeImpl>();
@@ -42,23 +34,70 @@ class CommandImpl : public Impl {
   Kernel getKernel() const { return kernel; }
   Event getEvent() const { return event; }
 
-  template <typename T>
-  nxs_status setScalar(nxs_uint index, T value) {
-    if (event) return NXS_InvalidArgIndex;
-    void *val_ptr = putArgument(index, value);
-    auto *rt = getParentOfType<RuntimeImpl>();
-    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
-        getId(), index, val_ptr);
-  }
+  // template <typename T>
+  // nxs_status setScalar(nxs_uint index, T value) {
+  //   if (event) return NXS_InvalidArgIndex;
+  //   auto *rt = getParentOfType<RuntimeImpl>();
+  //   return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+  //       getId(), index, static_cast<void*>(&value));
+  // }
 
   nxs_status setArgument(nxs_uint index, Buffer buffer) {
     if (event) return NXS_InvalidArgIndex;
-    putArgument(index, buffer);
     auto *rt = getParentOfType<RuntimeImpl>();
     return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandArgument>(
         getId(), index, buffer.getId());
   }
 
+  nxs_status setScalar(nxs_uint index, nxs_bool value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new bool(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+  
+  nxs_status setScalar(nxs_uint index, nxs_int value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new int(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+
+  nxs_status setScalar(nxs_uint index, nxs_long value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new nxs_long(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+
+  nxs_status setScalar(nxs_uint index, nxs_ulong value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new nxs_ulong(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+
+  nxs_status setScalar(nxs_uint index, nxs_double value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new nxs_double(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+
+  nxs_status setScalar(nxs_uint index, nxs_float value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new float(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+  
+  
   nxs_status finalize(nxs_dim3 gridSize, nxs_dim3 groupSize, nxs_uint sharedMemorySize) {
     if (event) return NXS_InvalidArgIndex;
     auto *rt = getParentOfType<RuntimeImpl>();
@@ -69,16 +108,6 @@ class CommandImpl : public Impl {
  private:
   Kernel kernel;
   Event event;
-
-  template <typename T>
-  T *putArgument(nxs_uint index, T value) {
-    if (index >= arguments.size())
-      arguments.resize(index + 1);
-    arguments[index] = value;
-    return &std::get<T>(arguments[index]);
-  }
-
-  std::vector<Arg> arguments;
 };
 }  // namespace detail
 }  // namespace nexus
@@ -125,10 +154,6 @@ nxs_status Command::setArgument(nxs_uint index, nxs_float value) {
 }
 
 nxs_status Command::setArgument(nxs_uint index, nxs_double value) {
-  NEXUS_OBJ_MCALL(NXS_InvalidCommand, setScalar, index, value);
-}
-
-nxs_status Command::setScalar(nxs_uint index, float value) {
   NEXUS_OBJ_MCALL(NXS_InvalidCommand, setScalar, index, value);
 }
 

@@ -63,6 +63,8 @@ class Command {
   }
 
   nxs_status setScalar(nxs_int argument_index, void *value) {
+    
+    std::cout << "Set scalar arg index " << argument_index << " value ptr " << value << std::endl;
     if (argument_index >= RT_COMMAND_MAX_ARGS) return NXS_InvalidArgIndex;
     args_count = std::max(args_count, argument_index + 1);
 

@@ -35,7 +35,7 @@ cmd.finalize([32,1,1], [32,1,1], 2048)
 
 sched.run()
 
-cmd.set_scalar_arg(3, 1024.0)
+cmd.set_arg(3, 1024.0)
 
 #res = nr2.get()
 
