@@ -49,7 +49,7 @@ class CommandImpl : public Impl {
         getId(), index, buffer.getId());
   }
 
-  nxs_status setScalar(nxs_uint index, nxs_bool value) {
+  nxs_status setScalar(nxs_uint index, bool value) {
     if (event) return NXS_InvalidArgIndex;
     auto *rt = getParentOfType<RuntimeImpl>();
     void *value_ptr = new bool(value);
@@ -61,6 +61,14 @@ class CommandImpl : public Impl {
     if (event) return NXS_InvalidArgIndex;
     auto *rt = getParentOfType<RuntimeImpl>();
     void *value_ptr = new int(value);
+    return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
+        getId(), index, value_ptr);
+  }
+
+  nxs_status setScalar(nxs_uint index, nxs_uint value) {
+    if (event) return NXS_InvalidArgIndex;
+    auto *rt = getParentOfType<RuntimeImpl>();
+    void *value_ptr = new uint(value);
     return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
         getId(), index, value_ptr);
   }

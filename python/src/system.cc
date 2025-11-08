@@ -384,7 +384,7 @@ void pynexus::init_system_bindings(py::module &m) {
         }
         // Test for bool (check before int, since bool is subclass of int in Python)
         else if (py::isinstance<py::bool_>(value)) {
-          nxs_bool val = value.cast<nxs_bool>();
+          bool val = value.cast<bool>();
           //nxs_bool* ptr = new nxs_bool(val);
           //std::cout << "Set bool arg index " << index << " value " << val << " ptr " << ptr << std::endl;
          // nxs_bool* ptr = new nxs_bool(value.cast<nxs_bool>());
