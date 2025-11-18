@@ -11,6 +11,9 @@ using namespace nexus;
 namespace nexus {
 namespace detail {
 class CommandImpl : public Impl {
+  typedef std::variant<Buffer, nxs_int, nxs_uint, nxs_long, nxs_ulong,
+                      nxs_float, nxs_double>
+    Arg;
  public:
   CommandImpl(Impl owner, Kernel kern) : Impl(owner), kernel(kern) {
     NEXUS_LOG(NXS_LOG_NOTE, "    Command: ", getId());
@@ -38,7 +41,8 @@ class CommandImpl : public Impl {
   nxs_status setScalar(nxs_uint index, T value) {
     if (event) return NXS_InvalidArgIndex;
     auto *rt = getParentOfType<RuntimeImpl>();
-    void *value_ptr = new T(value);
+    args[index] = value;
+    T *value_ptr = std::get_if<T>(&args[index]);
     return (nxs_status)rt->runAPIFunction<NF_nxsSetCommandScalar>(
         getId(), index, value_ptr);
   }
@@ -60,6 +64,7 @@ class CommandImpl : public Impl {
  private:
   Kernel kernel;
   Event event;
+  std::array<Arg, 24> args{};
 };
 }  // namespace detail
 }  // namespace nexus

@@ -337,6 +337,9 @@ void pynexus::init_system_bindings(py::module &m) {
       .def("get_event", [](Command &self) { return self.getEvent(); })
       .def("get_kernel", [](Command &self) { return self.getKernel(); })
       .def("set_arg", [](Command &self, int index, py::object value) -> nxs_status {
+        if (value.is_none())
+          return NXS_InvalidValue;
+
         if (py::isinstance<Buffer>(value)) {
           auto buf = value.cast<Buffer>();
           return self.setArgument(index, buf);
@@ -356,7 +359,7 @@ void pynexus::init_system_bindings(py::module &m) {
           nxs_float val = value.cast<nxs_float>();
           return self.setArgument(index, val);
         }
-        return NXS_Success;
+        return NXS_InvalidValue;
       })
       .def("finalize", [](Command& self, py::list grid, py::list block, size_t shared_memory_size) {
           auto list_to_dim3 = [](const py::list& l) -> nxs_dim3 {

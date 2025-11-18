@@ -36,7 +36,6 @@ class Command : public Object<detail::CommandImpl> {
   nxs_status setArgument(nxs_uint index, nxs_float value);
   nxs_status setArgument(nxs_uint index, nxs_double value);
   
-  nxs_status setScalar(nxs_uint index, void *value);
   nxs_status setScalar(nxs_uint index, nxs_bool value);
   nxs_status setScalar(nxs_uint index, nxs_int value);
   nxs_status setScalar(nxs_uint index, nxs_float value);
