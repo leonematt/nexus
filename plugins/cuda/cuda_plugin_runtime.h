@@ -67,13 +67,13 @@ public:
   }
 
   rt::Buffer *getBuffer(size_t size, void *data_ptr = nullptr,
-                        bool copy_data = false) {
-    return buffer_pool.get_new(size, data_ptr, copy_data);
+                        nxs_uint settings = 0) {
+    return buffer_pool.get_new(size, data_ptr, settings);
   }
   void release(rt::Buffer *buffer) { buffer_pool.release(buffer); }
 
-  CudaSchedule *getSchedule(nxs_int device_id, nxs_uint settings = 0) {
-    return schedule_pool.get_new(device_id, settings);
+  CudaSchedule *getSchedule(CudaDevice *device, nxs_uint settings = 0) {
+    return schedule_pool.get_new(device, settings);
   }
 
   CudaCommand *getCommand(CUfunction kernel, nxs_uint settings = 0) {
