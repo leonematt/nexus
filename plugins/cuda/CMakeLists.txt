@@ -6,7 +6,7 @@ add_library(cuda_plugin SHARED cuda_runtime.cpp cuda_schedule.cpp)
 
 if(UNIX AND (NOT APPLE))
   find_package(CUDAToolkit REQUIRED)
-  target_link_libraries(cuda_plugin CUDA::cudart CUDA::cuda_driver CUDA::nvml)
+  target_link_libraries(cuda_plugin CUDA::cudart CUDA::cuda_driver CUDA::nvml nxs-api)
   target_compile_options(cuda_plugin PRIVATE -fvisibility=default)
   target_link_options(cuda_plugin PRIVATE "LINKER:--exclude-libs,ALL")
 endif()
