@@ -29,6 +29,22 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache cibuildwheel tools
+        if: runner.os == 'macOS'
+        id: cibw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/cibuildwheel
+          key: ${{ runner.os }}-cibuildwheel-v20.26.6
+
+      - name: Pre-load virtualenv tool
+        if: runner.os == 'macOS' && steps.cibw-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/Library/Caches/cibuildwheel
+          curl --retry 10 --retry-delay 5 --retry-all-errors -L \
+            "https://github.com/pypa/get-virtualenv/blob/20.26.6/public/virtualenv.pyz?raw=true" \
+            -o ~/Library/Caches/cibuildwheel/virtualenv-20.26.6.pyz
+
       - name: Ensure pip is installed
         run: |
           python -m ensurepip --upgrade || true
@@ -134,4 +150,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
-
