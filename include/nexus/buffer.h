@@ -4,7 +4,7 @@
 #include <nexus-api.h>
 #include <nexus/object.h>
 
-#include <list>
+#include <vector>
 
 namespace nexus {
 class Device;
@@ -13,53 +13,80 @@ namespace detail {
 class BufferImpl;
 }  // namespace detail
 
-/// @brief Shape of a buffer
-class Shape {
+/// @brief Layout of a buffer, including shape and data type.
+class Layout {
  public:
-  Shape(nxs_ulong _size=0) : shape{{_size}, (nxs_uint)(_size == 0 ? 0 : 1)} {}
-  Shape(nxs_ulong * _dims, nxs_uint _dims_count);
+  /// Construct a 1D layout from element count (or rank-0 if size is 0).
+  Layout(nxs_ulong _size = 0, nxs_uint _data_type = NXS_DataType_Undefined)
+    : layout{_data_type, (nxs_uint)(_size == 0 ? 0 : 1), {_size}, {1}} {}
+
+  /// Construct a layout from explicit dimensions.
+  Layout(nxs_ulong *_dims, nxs_uint _dims_count,
+         nxs_uint _data_type = NXS_DataType_Undefined);
   
+  /// Construct from shape and optional strides (row-major strides are inferred).
   template <typename T>
-  Shape(const std::vector<T> &_dims) {
-    shape.rank = _dims.size();
-    for (nxs_uint i = 0; i < shape.rank; i++) {
-      shape.dims[i] = _dims[i];
+  Layout(const std::vector<T> &_dims, const std::vector<T> &_strides = {},
+         nxs_uint _data_type = NXS_DataType_Undefined)
+      : layout{} {
+    layout.data_type = (nxs_uint)_data_type;
+    layout.rank = _dims.size();
+    for (nxs_uint i = 0; i < layout.rank; i++) {
+      layout.dim[i] = _dims[i];
+      if (i < _strides.size()) {
+        layout.stride[i] = _strides[i];
+      } else if (i == 0) {
+        layout.stride[i] = 1;
+      } else {
+        layout.stride[i] = layout.dim[i-1] * layout.stride[i-1];
+      }
     }
   }
 
-  Shape(nxs_shape _shape) : shape(_shape) {}
+  Layout(const nxs_buffer_layout &_layout) : layout(_layout) {}
   
-  nxs_uint getRank() const { return shape.rank; }
-  nxs_ulong getNumElements() const { return nxsGetNumElements(shape); }
+  operator bool() const { return layout.rank != 0; }
+
+  nxs_uint getRank() const { return layout.rank; }
+  nxs_uint getElementSizeBits() const { return nxsGetDataTypeSizeBits(layout.data_type); }
+  nxs_ulong getNumElements() const { return nxsGetNumElements(layout); }
   nxs_ulong getDim(nxs_uint _idx) const {
-    if (_idx < shape.rank) return shape.dims[_idx];
+    if (_idx < layout.rank) return layout.dim[_idx];
     return 0;
   }
-  //nxs_ulong getStride(nxs_uint _idx) const;
-  nxs_shape get() const { return shape; }
+  nxs_data_type getDataType() const { return nxsGetDataType(layout.data_type); }
+  nxs_uint getDataTypeFlags() const { return nxsGetDataTypeFlags(layout.data_type); }
+  void setDataType(nxs_uint _data_type) { layout.data_type = _data_type; }
+  nxs_ulong getStride(nxs_uint _idx) const {
+    if (_idx < layout.rank) return layout.stride[_idx];
+    return 0;
+  }
+  const nxs_buffer_layout &get() const { return layout; }
  private:
-  nxs_shape shape;
+  nxs_buffer_layout layout;
 };
 
 // System class
 class Buffer : public Object<detail::BufferImpl> {
  public:
-  Buffer(detail::Impl base, const Shape &shape, const void *_hostData = nullptr);
+  Buffer(detail::Impl base, const Layout &layout, const void *_hostData = nullptr);
   using Object::Object;
 
   std::optional<Property> getProperty(nxs_int prop) const override;
 
+  /// Byte size of the underlying allocation.
   nxs_ulong getSizeBytes() const;
-  Shape getShape() const;
+  /// Shape/dtype metadata for this buffer.
+  const Layout &getLayout() const;
+  /// Raw pointer to the buffer's host-visible storage, if available.
   const char *getData() const;
-  nxs_data_type getDataType() const;
-  nxs_uint getDataTypeFlags() const;
-  nxs_ulong getNumElements() const;
-  nxs_uint getElementSizeBits() const;
 
+  /// Return a buffer alias that is local to the current device context.
   Buffer getLocal() const;
 
+  /// Copy buffer contents to/from host memory depending on direction.
   nxs_status copy(void *_hostBuf, nxs_uint direction = NXS_BufferDeviceToHost);
+  /// Fill the buffer with a scalar pattern described by `value` bytes.
   nxs_status fill(void *value, nxs_uint size_bytes);
 };
 
