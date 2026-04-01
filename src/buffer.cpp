@@ -1,3 +1,4 @@
+#define NEXUS_LOG_MODULE "buffer"
 
 #include <nexus/buffer.h>
 #include <nexus/log.h>
@@ -10,12 +11,11 @@
 #include "_runtime_impl.h"
 #include "_system_impl.h"
 
-#define NEXUS_LOG_MODULE "buffer"
-
 using namespace nexus;
 
 detail::BufferImpl::BufferImpl(detail::Impl base, const Layout &layout, const char *_hostData)
     : Impl(base), layout(layout), size_bytes(0), data(nullptr) {
+  NXSLOG_TRACE("CTOR: {} - {}", getId(), layout.getNumElements());
   nxs_ulong size_bytes = layout.getNumElements();
   if (auto element_size_bits = layout.getElementSizeBits()) {
     size_bytes *= element_size_bits;
@@ -24,7 +24,10 @@ detail::BufferImpl::BufferImpl(detail::Impl base, const Layout &layout, const ch
   setData(size_bytes, _hostData);
 }
 
-detail::BufferImpl::~BufferImpl() { release(); }
+detail::BufferImpl::~BufferImpl() {
+  NXSLOG_TRACE("DTOR: {}", getId());
+  release();
+}
 
 void detail::BufferImpl::release() {
   size_bytes = 0;
@@ -72,22 +75,23 @@ void detail::BufferImpl::setData(nxs_ulong sz, const char *hostData) {
 
 nxs_status detail::BufferImpl::copyData(void *_hostBuf, nxs_uint direction) const {
   if (getParentOfType<DeviceImpl>()) {
-    NEXUS_LOG(NXS_LOG_NOTE, "copyData: from device: ", getSizeBytes());
+    NXSLOG_INFO("copyData: from device: {}", getSizeBytes());
     auto *rt = getParentOfType<RuntimeImpl>();
     return (nxs_status)rt->runAPIFunction<NF_nxsCopyBuffer>(getId(), _hostBuf,
                                                             direction);
   }
+  NXSLOG_ERROR("copyData: not supported on host");
   return NXS_InvalidDevice;
 }
 
 nxs_status detail::BufferImpl::fillData(void *value, nxs_uint size_bytes) const {
-  nxs_status return_stat;
+  nxs_status return_stat = NXS_Success;
   if (getParentOfType<DeviceImpl>()) {
-    NEXUS_LOG(NXS_LOG_NOTE, "fillData: on device: ", getSizeBytes());
+    NXSLOG_INFO("fillData: on device: {}", getSizeBytes());
     auto *rt = getParentOfType<RuntimeImpl>();
     return_stat = (nxs_status)rt->runAPIFunction<NF_nxsFillBuffer>(getId(), value, size_bytes);
   }
-  NEXUS_LOG(NXS_LOG_NOTE, "fillData: on host: ", getSizeBytes());
+  NXSLOG_INFO("fillData: on host: {}", getSizeBytes());
   return return_stat;
 }
 
